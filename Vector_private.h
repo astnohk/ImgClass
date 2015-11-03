@@ -5,12 +5,12 @@
 template <class T>
 VECTOR_2D<T>::VECTOR_2D(void)
 {
-	x = T();
-	y = T();
+	x = 0;
+	y = 0;
 }
 
 template <class T>
-VECTOR_2D::VECTOR_2D(const T& init_x, const T& init_y)
+VECTOR_2D<T>::VECTOR_2D(const T& init_x, const T& init_y)
 {
 	x = init_x;
 	y = init_y;
@@ -18,15 +18,15 @@ VECTOR_2D::VECTOR_2D(const T& init_x, const T& init_y)
 
 template <class T>
 void
-VECTOR_2D::reset(void)
+VECTOR_2D<T>::reset(void)
 {
-	x = T();
-	y = T();
+	x = 0;
+	y = 0;
 }
 
 template <class T>
 void
-VECTOR_2D::reset(const T& init_x, const T& init_y)
+VECTOR_2D<T>::reset(const T& init_x, const T& init_y)
 {
 	x = init_x;
 	y = init_y;
@@ -35,7 +35,7 @@ VECTOR_2D::reset(const T& init_x, const T& init_y)
 
 template <class T>
 VECTOR_2D<T> &
-VECTOR_2D::operator+=(const VECTOR_2D<T>& vector)
+VECTOR_2D<T>::operator+=(const VECTOR_2D<T>& vector)
 {
 	if (this != &vector) {
 		this->x += vector.x;
@@ -46,7 +46,7 @@ VECTOR_2D::operator+=(const VECTOR_2D<T>& vector)
 
 template <class T>
 VECTOR_2D<T> &
-VECTOR_2D::operator-=(const VECTOR_2D& vector)
+VECTOR_2D<T>::operator-=(const VECTOR_2D& vector)
 {
 	if (this != &vector) {
 		this->x -= vector.x;
@@ -59,17 +59,15 @@ template <class T>
 VECTOR_2D<T> &
 VECTOR_2D<T>::operator*=(const T& value) // Scalar multiplication
 {
-	if (this != &vector) {
-		this->x *= value;
-		this->y *= value;
-	}
+	this->x *= value;
+	this->y *= value;
 	return *this;
 }
 
 
 template <class T>
 bool
-VECTOR_2D<T>::operator==(const T& vector)
+VECTOR_2D<T>::operator==(const VECTOR_2D<T>& vector)
 {
 	if (this->x == vector.x
 	    && this->y == vector.y) {
@@ -81,7 +79,7 @@ VECTOR_2D<T>::operator==(const T& vector)
 
 template <class T>
 bool
-VECTOR_2D<T>::operator!=(const T& vector)
+VECTOR_2D<T>::operator!=(const VECTOR_2D<T>& vector)
 {
 	if (this->x == vector.x
 	    && this->y == vector.y) {
@@ -123,7 +121,7 @@ operator+(const VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector)
 
 template <class Type>
 VECTOR_2D<Type> &
-operator-(const VECTOR_2D lvector, const VECTOR_2D &rvector)
+operator-(const VECTOR_2D<Type> lvector, const VECTOR_2D<Type> &rvector)
 {
 	lvector.x = lvector.x - rvector.x;
 	lvector.y = lvector.y - rvector.y;

@@ -24,16 +24,17 @@ struct VECTOR_2D
 		bool operator!=(const VECTOR_2D<T>& vector);
 
 		// Friend operators
-		friend template<class Type> VECTOR_2D<Type>& operator+(const VECTOR_2D<Type> vector);
-		friend template<class Type> VECTOR_2D<Type>& operator-(const VECTOR_2D<Type> vector);
-
-		friend template<class Type> VECTOR_2D<Type>& operator+(const VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
-		friend template<class Type> VECTOR_2D<Type>& operator-(const VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
-
-		friend template<class Type> Type& operator*(const VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
-		friend template<class Type> Type& operator*(const VECTOR_2D<Type> lvector, const Type& rvalue);
-		friend template<class Type> Type& operator*(const Type& lvalue, const VECTOR_2D<Type> rvector);
+		template<class Type> friend VECTOR_2D<Type>& operator+(const VECTOR_2D<Type> vector);
+		template<class Type> friend VECTOR_2D<Type>& operator-(const VECTOR_2D<Type> vector);
+                                            
+		template<class Type> friend VECTOR_2D<Type>& operator+(const VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
+		template<class Type> friend VECTOR_2D<Type>& operator-(const VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
+                                            
+		template<class Type> friend Type& operator*(const VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
+		template<class Type> friend Type& operator*(const VECTOR_2D<Type> lvector, const Type& rvalue);
+		template<class Type> friend Type& operator*(const Type& lvalue, const VECTOR_2D<Type> rvector);
 };
+
 
 // Global operator overloading
 template<class Type> VECTOR_2D<Type>& operator+(const VECTOR_2D<Type> vector);
@@ -45,6 +46,9 @@ template<class Type> VECTOR_2D<Type>& operator-(const VECTOR_2D<Type> lvector, c
 template<class Type> Type& operator*(const VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
 template<class Type> Type& operator*(const VECTOR_2D<Type> lvector, const Type& rvalue);
 template<class Type> Type& operator*(const Type& lvalue, const VECTOR_2D<Type> rvector);
+
+
+#include "Vector_private.h"
 
 #endif
 

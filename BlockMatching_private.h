@@ -3,8 +3,6 @@
 #include <new>
 #include <stdexcept>
 
-#include "BlockMatching.h"
-
 
 
 template <class T>
@@ -25,16 +23,16 @@ BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<
 	_block_size = 0;
 	_cells_width = 0;
 	_cells_height = 0;
-	if (img_prev.isNULL() || img_next.isNULL()) {
-		throw std::invalid_argument("img_prev, img_next");
-	} else if (img_prev.width() != img_next.width() || img_prev.height() != img_next.height()) {
-		throw std::invalid_argument("width or height of (img_prev, img_next)");
+	if (image_prev.isNULL() || image_next.isNULL()) {
+		throw std::invalid_argument("image_prev, image_next");
+	} else if (image_prev.width() != image_next.width() || image_prev.height() != image_next.height()) {
+		throw std::invalid_argument("width or height of (image_prev, image_next)");
 	} else if (BlockSize < 0) {
 		throw std::out_of_range("BlockSize");
 	}
 
-	_width = img_prev.width();
-	_height = img_prev.height();
+	_width = image_prev.width();
+	_height = image_prev.height();
 	_block_size = BlockSize;
 	_image_prev.copy(image_prev);
 	_image_next.copy(image_next);
@@ -42,6 +40,53 @@ BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<
 
 	_cells_width = (int)ceil(_width / BlockSize);
 	_cells_height = (int)ceil(_height / BlockSize);
+}
+
+template <class T>
+BlockMatching<T>::BlockMatching(const ImgVector<T>* image_prev, const ImgVector<T>* image_next, const int BlockSize)
+{
+	_width = 0;
+	_height = 0;
+	_block_size = 0;
+	_cells_width = 0;
+	_cells_height = 0;
+	if (image_prev == nullptr) {
+		throw std::invalid_argument("const ImgVector<T>* image_prev");
+	} else if (image_next == nullptr) {
+		throw std::invalid_argument("const ImgVector<T>* image_next");
+	} if (image_prev->isNULL()) {
+		throw std::invalid_argument("const ImgVector<T>* image_prev");
+	} if (image_next->isNULL()) {
+		throw std::invalid_argument("const ImgVector<T>* image_next");
+	} else if (image_prev.width() != image_next.width() || image_prev.height() != image_next.height()) {
+		throw std::invalid_argument("width or height of image_prev and image_next not match");
+	} else if (BlockSize < 0) {
+		throw std::out_of_range("BlockSize");
+	}
+
+	_width = image_prev.width();
+	_height = image_prev.height();
+	_block_size = BlockSize;
+	_image_prev.copy(image_prev);
+	_image_next.copy(image_next);
+	_motion_vector.reset(0, 0);
+
+	_cells_width = (int)ceil(_width / BlockSize);
+	_cells_height = (int)ceil(_height / BlockSize);
+}
+
+template <class T>
+BlockMatching<T>::BlockMatching(const BlockMatching& copy)
+{
+	_width = copy._width;
+	_height = copy._height;
+	_block_size = copy._block_size;
+	_cells_width = copy._cells_width;
+	_cells_height = copy._cells_height;
+
+	_image_prev.copy(copy._image_prev);
+	_image_next.copy(copy._image_next);
+	_motion_vector.copy(copy._motion_vector);
 }
 
 template <class T>
@@ -58,16 +103,52 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& imag
 	_block_size = 0;
 	_cells_width = 0;
 	_cells_height = 0;
-	if (img_prev.isNULL() || img_next.isNULL()) {
-		throw std::invalid_argument("img_prev, img_next");
-	} else if (img_prev.width() != img_next.width() || img_prev.height() != img_next.height()) {
-		throw std::invalid_argument("width or height of (img_prev, img_next)");
+	if (image_prev.isNULL()) {
+		throw std::invalid_argument("const ImgVector<T>* image_prev");
+	} else if (image_next.isNULL()) {
+		throw std::invalid_argument("const ImgVector<T>* image_next");
+	} else if (image_prev.width() != image_next.width() || image_prev.height() != image_next.height()) {
+		throw std::invalid_argument("width or height of image_prev and image_next not match");
 	} else if (BlockSize < 0) {
 		throw std::out_of_range("BlockSize");
 	}
 
-	_width = img_prev.width();
-	_height = img_prev.height();
+	_width = image_prev.width();
+	_height = image_prev.height();
+	_block_size = BlockSize;
+	_image_prev.copy(image_prev);
+	_image_next.copy(image_next);
+	_motion_vector.reset(0, 0);
+
+	_cells_width = (int)ceil(_width / BlockSize);
+	_cells_height = (int)ceil(_height / BlockSize);
+}
+
+template <class T>
+void
+BlockMatching<T>::reset(const ImgVector<T>* image_prev, const ImgVector<T>* image_next, const int BlockSize)
+{
+	_width = 0;
+	_height = 0;
+	_block_size = 0;
+	_cells_width = 0;
+	_cells_height = 0;
+	if (image_prev == nullptr) {
+		throw std::invalid_argument("const ImgVector<T>* image_prev");
+	} else if (image_next == nullptr) {
+		throw std::invalid_argument("const ImgVector<T>* image_next");
+	} else if (image_prev->isNULL()) {
+		throw std::invalid_argument("const ImgVector<T>* image_prev");
+	} else if (image_next->isNULL()) {
+		throw std::invalid_argument("const ImgVector<T>* image_next");
+	} else if (image_prev->width() != image_next->width() || image_prev->height() != image_next->height()) {
+		throw std::invalid_argument("width or height of image_prev and image_next not match");
+	} else if (BlockSize < 0) {
+		throw std::out_of_range("BlockSize");
+	}
+
+	_width = image_prev->width();
+	_height = image_prev->height();
 	_block_size = BlockSize;
 	_image_prev.copy(image_prev);
 	_image_next.copy(image_next);
@@ -124,11 +205,11 @@ BlockMatching<T>::MAD(const int x_prev, const int y_prev, const int x_next, cons
 {
 	T mad = 0;
 
-	for (int m = 0; m < block_heihgt; m++) {
+	for (int m = 0; m < block_height; m++) {
 		for (int n = 0; n < block_width; n++) {
 			for (int y = 0; y < block_height; y++) {
 				for (int x = 0; x < block_width; x++) {
-					mad = mad + abs(image_next.get(x_prev + x, y_prev + y) - image_prev.get(x_next + n, y_next + m));
+					mad = mad + abs(_image_next.get(x_prev + x, y_prev + y) - _image_prev.get(x_next + n, y_next + m));
 				}
 			}
 		}
@@ -171,9 +252,9 @@ bool
 BlockMatching<T>::isNULL(void)
 {
 	if (_width <= 0 || _height <= 0) {
-		true;
+		return true;
 	} else {
-		false;
+		return false;
 	}
 }
 
@@ -189,7 +270,7 @@ template <class T>
 VECTOR_2D<double> &
 BlockMatching<T>::operator[](int n)
 {
-	return _motion_vector[];
+	return _motion_vector[n];
 }
 
 template <class T>

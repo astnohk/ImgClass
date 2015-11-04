@@ -22,7 +22,7 @@ class ImgStatistics
 		ImgStatistics(void);
 		ImgStatistics(const ImgStatistics &copy);
 		ImgStatistics(int W, int H, double *Img);
-		~ImgStatistics(void);
+		virtual ~ImgStatistics(void);
 		void set(int W, int H, double *Img);
 		ImgStatistics& copy(const ImgStatistics &copy);
 		ImgStatistics& operator=(const ImgStatistics &copy);

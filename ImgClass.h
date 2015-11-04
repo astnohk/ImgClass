@@ -23,7 +23,7 @@ class ImgVector
 		ImgVector(int W, int H);
 		ImgVector(int W, int H, const T &value);
 		ImgVector(int W, int H, const T *array);
-		~ImgVector(void);
+		virtual ~ImgVector(void);
 		void reset(int W, int H);
 		void reset(int W, int H, const T &value);
 		void reset(int W, int H, const T *array);

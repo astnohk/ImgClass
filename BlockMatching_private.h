@@ -38,8 +38,8 @@ BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<
 	_image_next.copy(image_next);
 	_motion_vector.reset(0, 0);
 
-	_cells_width = (int)ceil(_width / BlockSize);
-	_cells_height = (int)ceil(_height / BlockSize);
+	_cells_width = (int)ceil((double)_width / BlockSize);
+	_cells_height = (int)ceil((double)_height / BlockSize);
 }
 
 template <class T>
@@ -71,8 +71,8 @@ BlockMatching<T>::BlockMatching(const ImgVector<T>* image_prev, const ImgVector<
 	_image_next.copy(image_next);
 	_motion_vector.reset(0, 0);
 
-	_cells_width = (int)ceil(_width / BlockSize);
-	_cells_height = (int)ceil(_height / BlockSize);
+	_cells_width = (int)ceil((double)_width / BlockSize);
+	_cells_height = (int)ceil((double)_height / BlockSize);
 }
 
 template <class T>
@@ -120,8 +120,8 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& imag
 	_image_next.copy(image_next);
 	_motion_vector.reset(0, 0);
 
-	_cells_width = (int)ceil(_width / BlockSize);
-	_cells_height = (int)ceil(_height / BlockSize);
+	_cells_width = (int)ceil((double)_width / BlockSize);
+	_cells_height = (int)ceil((double)_height / BlockSize);
 }
 
 template <class T>
@@ -154,8 +154,8 @@ BlockMatching<T>::reset(const ImgVector<T>* image_prev, const ImgVector<T>* imag
 	_image_next.copy(image_next);
 	_motion_vector.reset(0, 0);
 
-	_cells_width = (int)ceil(_width / BlockSize);
-	_cells_height = (int)ceil(_height / BlockSize);
+	_cells_width = (int)ceil((double)_width / BlockSize);
+	_cells_height = (int)ceil((double)_height / BlockSize);
 }
 
 

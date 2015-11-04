@@ -31,7 +31,7 @@ class BlockMatching
 
 		// Main functions
 		void block_matching(void);
-		VECTOR_2D<double>& max_crosscorr(const int x_prev, const int y_prev);
+		VECTOR_2D<double> max_crosscorr(const int x_prev, const int y_prev);
 		T MAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
 
 		// Get state

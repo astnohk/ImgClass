@@ -170,7 +170,7 @@ BlockMatching<T>::block_matching(void)
 	}
 
 	// Initialize
-	_motion_vector.reset(_width, _height);
+	_motion_vector.reset(_cells_width, _cells_height);
 
 	for (int y_c = 0; y_c < _cells_height; y_c++) {
 		for (int x_c = 0; x_c < _cells_width; x_c++) {
@@ -180,7 +180,7 @@ BlockMatching<T>::block_matching(void)
 }
 
 template <class T>
-VECTOR_2D<double> &
+VECTOR_2D<double>
 BlockMatching<T>::max_crosscorr(const int x_prev, const int y_prev)
 {
 	VECTOR_2D<double> vector;
@@ -263,6 +263,9 @@ template <class T>
 ImgVector<VECTOR_2D<double> > &
 BlockMatching<T>::data(void)
 {
+	if (_motion_vector.isNULL()) {
+		this->block_matching();
+	}
 	return _motion_vector;
 }
 
@@ -270,6 +273,9 @@ template <class T>
 VECTOR_2D<double> &
 BlockMatching<T>::operator[](int n)
 {
+	if (_motion_vector.isNULL()) {
+		this->block_matching();
+	}
 	return _motion_vector[n];
 }
 
@@ -277,6 +283,9 @@ template <class T>
 VECTOR_2D<double>&
 BlockMatching<T>::ref(int x, int y)
 {
+	if (_motion_vector.isNULL()) {
+		this->block_matching();
+	}
 	return _motion_vector.ref(x, y);
 }
 
@@ -285,6 +294,9 @@ template <class T>
 VECTOR_2D<double>
 BlockMatching<T>::get(int x, int y) const
 {
+	if (_motion_vector.isNULL()) {
+		this->block_matching();
+	}
 	return _motion_vector.get(x, y);
 }
 

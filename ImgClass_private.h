@@ -197,51 +197,77 @@ ImgVector<T>::reset(int W, int H, const T *array)
 
 template <typename T>
 ImgVector<T> &
-ImgVector<T>::copy(const ImgVector<T> &target)
+ImgVector<T>::copy(const ImgVector<T> &vector)
 {
-	if (target._width > 0 && target._height > 0) {
+	if (this != &vector
+	    && vector._width > 0 && vector._height > 0) {
 		T *tmp_data = nullptr;
 		try {
-			tmp_data = new T[target._width * target._height]();
+			tmp_data = new T[vector._width * vector._height]();
 		}
 		catch (const std::bad_alloc &bad) {
-			fprintf(stderr, "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory\n");
+			fprintf(stderr, "ImgVector::copy(const ImgVector<T>&) : Cannot Allocate Memory\n");
 			throw;
 			return *this;
 		}
-		_width = target._width;
-		_height = target._height;
+		_width = vector._width;
+		_height = vector._height;
 		delete[] _data;
 		_data = tmp_data;
 		for (int i = 0; i < _width * _height; i++) {
-			_data[i] = target._data[i];
+			_data[i] = vector._data[i];
 		}
 	}
 	return *this;
 }
 
-
 template <typename T>
 ImgVector<T> &
-ImgVector<T>::copy(const ImgVector<T> *target)
+ImgVector<T>::copy(const ImgVector<T> *vector)
 {
-	if (target != nullptr && this != target
-	    && target->_width > 0 && target->_height > 0) {
+	if (vector != nullptr && this != vector
+	    && vector->_width > 0 && vector->_height > 0) {
 		T *tmp_data = nullptr;
 		try {
-			tmp_data = new T[target->_width * target->_height]();
+			tmp_data = new T[vector->_width * vector->_height]();
 		}
 		catch (const std::bad_alloc &bad) {
-			fprintf(stderr, "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory\n");
+			fprintf(stderr, "ImgVector::copy(const ImgVector<T>*) : Cannot Allocate Memory\n");
 			throw;
 			return *this;
 		}
-		_width = target->_width;
-		_height = target->_height;
+		_width = vector->_width;
+		_height = vector->_height;
 		delete _data;
 		_data = tmp_data;
 		for (int i = 0; i < _width * _height; i++) {
-			_data[i] = target->_data[i];
+			_data[i] = vector->_data[i];
+		}
+	}
+	return *this;
+}
+
+template <typename T>
+ImgVector<T> &
+ImgVector<T>::operator=(const ImgVector<T> &vector)
+{
+	if (this != &vector
+	    && vector._width > 0 && vector._height > 0) {
+		T *tmp_data = nullptr;
+		try {
+			tmp_data = new T[vector._width * vector._height]();
+		}
+		catch (const std::bad_alloc &bad) {
+			fprintf(stderr, "ImgVector::operator=(ImgVector<T>&) : Cannot Allocate Memory\n");
+			throw;
+			return *this;
+		}
+		_width = vector._width;
+		_height = vector._height;
+		delete[] _data;
+		_data = tmp_data;
+		for (int i = 0; i < _width * _height; i++) {
+			_data[i] = vector._data[i];
 		}
 	}
 	return *this;
@@ -258,37 +284,6 @@ ImgVector<T>::set(int x, int y, const T &value)
 		throw std::out_of_range("int y");
 	}
 	_data[_width * y + x] = value;
-}
-
-
-template <typename T>
-ImgVector<T> &
-ImgVector<T>::operator=(const ImgVector<T> &copy)
-{
-	if (this == &copy) {
-		return *this;
-	}
-	delete[] _data;
-	_data = nullptr;
-	_width = 0;
-	_height = 0;
-	if (copy._width > 0 && copy._height > 0) {
-		try {
-			_data = new T[copy._width * copy._height]();
-		}
-		catch (const std::bad_alloc &bad) {
-			fprintf(stderr, "ImgVector::operator=(ImgVector<T> &) : Cannot Allocate Memory\n");
-			_data = nullptr;
-			throw;
-			return *this;
-		}
-		_width = copy._width;
-		_height = copy._height;
-		for (int i = 0; i < _width * _height; i++) {
-			_data[i] = copy._data[i];
-		}
-	}
-	return *this;
 }
 
 

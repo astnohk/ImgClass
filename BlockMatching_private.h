@@ -1,7 +1,12 @@
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <new>
 #include <stdexcept>
+
+#if defined(_OPENMP)
+#include <omp.h>
+#endif
 
 
 
@@ -23,12 +28,16 @@ BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<
 	_block_size = 0;
 	_cells_width = 0;
 	_cells_height = 0;
-	if (image_prev.isNULL() || image_next.isNULL()) {
-		throw std::invalid_argument("image_prev, image_next");
-	} else if (image_prev.width() != image_next.width() || image_prev.height() != image_next.height()) {
-		throw std::invalid_argument("width or height of (image_prev, image_next)");
+	if (image_prev.isNULL()) {
+		throw std::invalid_argument("BlockMatching<T>::BlockMatching(const ImgVector<T>&, const ImgVector<T>&, const int) : ImgVector<T>& image_prev");
+	} else if (image_next.isNULL()) {
+		throw std::invalid_argument("BlockMatching<T>::BlockMatching(const ImgVector<T>&, const ImgVector<T>&, const int) : ImgVector<T>& image_next");
+	} else if (image_prev.width() != image_next.width()) {
+		throw std::invalid_argument("BlockMatching<T>::BlockMatching(const ImgVector<T>&, const ImgVector<T>&, const int) : width of image_prev and image_next not match");
+	} else if (image_prev.height() != image_next.height()) {
+		throw std::invalid_argument("BlockMatching<T>::BlockMatching(const ImgVector<T>&, const ImgVector<T>&, const int) : height of image_prev and image_next not match");
 	} else if (BlockSize < 0) {
-		throw std::out_of_range("BlockSize");
+		throw std::out_of_range("BlockMatching<T>::BlockMatching(const ImgVector<T>&, const ImgVector<T>&, const int) : BlockSize");
 	}
 
 	_width = image_prev.width();
@@ -132,19 +141,20 @@ BlockMatching<T>::reset(const ImgVector<T>* image_prev, const ImgVector<T>* imag
 	_height = 0;
 	_block_size = 0;
 	_cells_width = 0;
-	_cells_height = 0;
-	if (image_prev == nullptr) {
-		throw std::invalid_argument("const ImgVector<T>* image_prev");
+	_cells_height = 0; if (image_prev == nullptr) {
+		throw std::invalid_argument("void BlockMatching<T>::reset(const ImgVector<T>*, const ImgVector<T>*, const int) : const ImgVector<T>* image_prev");
 	} else if (image_next == nullptr) {
-		throw std::invalid_argument("const ImgVector<T>* image_next");
+		throw std::invalid_argument("void BlockMatching<T>::reset(const ImgVector<T>*, const ImgVector<T>*, const int) : const ImgVector<T>* image_next");
 	} else if (image_prev->isNULL()) {
-		throw std::invalid_argument("const ImgVector<T>* image_prev");
+		throw std::invalid_argument("void BlockMatching<T>::reset(const ImgVector<T>*, const ImgVector<T>*, const int) : const ImgVector<T>* image_prev");
 	} else if (image_next->isNULL()) {
-		throw std::invalid_argument("const ImgVector<T>* image_next");
-	} else if (image_prev->width() != image_next->width() || image_prev->height() != image_next->height()) {
-		throw std::invalid_argument("width or height of image_prev and image_next not match");
+		throw std::invalid_argument("void BlockMatching<T>::reset(const ImgVector<T>*, const ImgVector<T>*, const int) : const ImgVector<T>* image_next");
+	} else if (image_prev->width() != image_next->width()) {
+		throw std::invalid_argument("void BlockMatching<T>::reset(const ImgVector<T>*, const ImgVector<T>*, const int) : the width of image_prev and image_next not match");
+	} else if (image_prev->height() != image_next->height()) {
+		throw std::invalid_argument("void BlockMatching<T>::reset(const ImgVector<T>*, const ImgVector<T>*, const int) : the height of image_prev and image_next not match");
 	} else if (BlockSize < 0) {
-		throw std::out_of_range("BlockSize");
+		throw std::out_of_range("void BlockMatching<T>::reset(const ImgVector<T>*, const ImgVector<T>*, const int) : BlockSize");
 	}
 
 	_width = image_prev->width();
@@ -161,7 +171,7 @@ BlockMatching<T>::reset(const ImgVector<T>* image_prev, const ImgVector<T>* imag
 
 template <class T>
 void
-BlockMatching<T>::block_matching(void)
+BlockMatching<T>::block_matching(const int search_range)
 {
 	if (this->isNULL()) {
 		return;
@@ -172,27 +182,53 @@ BlockMatching<T>::block_matching(void)
 	// Initialize
 	_motion_vector.reset(_cells_width, _cells_height);
 
-	for (int y_c = 0; y_c < _cells_height; y_c++) {
-		for (int x_c = 0; x_c < _cells_width; x_c++) {
-			_motion_vector.ref(x_c, y_c) = max_crosscorr(x_c * _block_size, y_c * _block_size);
+	int x_c, y_c;
+#pragma omp parallel for private(x_c)
+	for (y_c = 0; y_c < _cells_height; y_c++) {
+		for (x_c = 0; x_c < _cells_width; x_c++) {
+			_motion_vector.ref(x_c, y_c) = max_crosscorr(x_c * _block_size, y_c * _block_size, search_range);
+			printf("_motion_vector(%d, %d) = (%f, %f)\n", x_c, y_c, _motion_vector.get(x_c, y_c).x, _motion_vector.get(x_c, y_c).y);
 		}
 	}
 }
 
 template <class T>
 VECTOR_2D<double>
-BlockMatching<T>::max_crosscorr(const int x_prev, const int y_prev)
+BlockMatching<T>::max_crosscorr(const int x_prev, const int y_prev, const int search_range)
 {
-	VECTOR_2D<double> vector;
-	T max = 0;
+	VECTOR_2D<double> vector(.0, .0);
+	T min;
+	int x_start, x_end;
+	int y_start, y_end;
 
-	for (int y = 0; y < _cells_height; y++) {
-		for (int x = 0; x < _cells_width; x++) {
-			T tmp = this->MAD(x_prev, y_prev, x, y, _block_size, _block_size);
-			if (tmp > max) {
-				max = tmp;
-				vector.x = x - x_prev;
-				vector.y = y - y_prev;
+	if (search_range < 0) {
+		x_start = 1 - _block_size;
+		x_end = _width - 1;
+		y_start = 1 - _block_size;
+		y_end = _height - 1;
+	} else {
+		x_start = std::max(x_prev - search_range / 2, 1 - _block_size);
+		x_end = x_prev + search_range / 2;
+		y_start = std::max(y_prev - search_range / 2, 1 - _block_size);
+		y_end = y_prev + search_range / 2;
+	}
+	// Initialize temporal minimum of SAD
+	min = this->SAD(x_prev, y_prev, x_start, y_start, _block_size, _block_size);
+	// Search infimum of SAD
+	for (int y = y_start; y <= y_end; y++) {
+		for (int x = x_start; x <= x_end; x++) {
+			T sad = this->SAD(x_prev, y_prev, x, y, _block_size, _block_size);
+
+			if (sad < min) {
+				min = sad;
+				vector.x = (double)x - x_prev;
+				vector.y = (double)y - y_prev;
+			} else if (fabs(sad - min) < 1E-6) {
+				if (Vector_2D::norm(vector) > (double)sqrt((x - x_prev) * (x - x_prev) + (y - y_prev) * (y - y_prev))) {
+					min = sad;
+					vector.x = (double)x - x_prev;
+					vector.y = (double)y - y_prev;
+				}
 			}
 		}
 	}
@@ -201,20 +237,16 @@ BlockMatching<T>::max_crosscorr(const int x_prev, const int y_prev)
 
 template <class T>
 T
-BlockMatching<T>::MAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height)
+BlockMatching<T>::SAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height)
 {
-	T mad = 0;
+	T sad = 0;
 
-	for (int m = 0; m < block_height; m++) {
-		for (int n = 0; n < block_width; n++) {
-			for (int y = 0; y < block_height; y++) {
-				for (int x = 0; x < block_width; x++) {
-					mad = mad + abs(_image_next.get(x_prev + x, y_prev + y) - _image_prev.get(x_next + n, y_next + m));
-				}
-			}
+	for (int y = 0; y < block_height; y++) {
+		for (int x = 0; x < block_width; x++) {
+			sad = sad + fabs((double)_image_next.get_zeropad(x_next + x, y_next + y) - _image_prev.get_zeropad(x_prev + x, y_prev + y));
 		}
 	}
-	return mad / (block_width * block_height);
+	return sad;
 }
 
 

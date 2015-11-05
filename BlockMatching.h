@@ -30,9 +30,9 @@ class BlockMatching
 		void reset(const ImgVector<T>* image_prev, const ImgVector<T>* image_next, const int BlockSize);
 
 		// Main functions
-		void block_matching(void);
-		VECTOR_2D<double> max_crosscorr(const int x_prev, const int y_prev);
-		T MAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
+		void block_matching(const int search_range = 101); // search_range < 0 then do full search
+		VECTOR_2D<double> max_crosscorr(const int x_prev, const int y_prev, const int search_range);
+		T SAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
 
 		// Get state
 		int width(void) const;

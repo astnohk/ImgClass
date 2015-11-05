@@ -187,7 +187,6 @@ BlockMatching<T>::block_matching(const int search_range)
 	for (y_c = 0; y_c < _cells_height; y_c++) {
 		for (x_c = 0; x_c < _cells_width; x_c++) {
 			_motion_vector.ref(x_c, y_c) = max_crosscorr(x_c * _block_size, y_c * _block_size, search_range);
-			printf("_motion_vector(%d, %d) = (%f, %f)\n", x_c, y_c, _motion_vector.get(x_c, y_c).x, _motion_vector.get(x_c, y_c).y);
 		}
 	}
 }

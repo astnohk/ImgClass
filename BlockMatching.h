@@ -37,6 +37,7 @@ class BlockMatching
 		// Get state
 		int width(void) const;
 		int height(void) const;
+		int block_size(void) const;
 		int vector_width(void) const;
 		int vector_height(void) const;
 		bool isNULL(void);
@@ -45,7 +46,7 @@ class BlockMatching
 		VECTOR_2D<double>& operator[](int n);
 		VECTOR_2D<double>& ref(int x, int y);
 		// Get data
-		VECTOR_2D<double> get(int x, int y) const;
+		VECTOR_2D<double> get(int x, int y); // NOT const because it will make new motion vector when it didn't do block matching
 };
 
 #include "BlockMatching_private.h"

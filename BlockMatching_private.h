@@ -266,6 +266,13 @@ BlockMatching<T>::height(void) const
 
 template <class T>
 int
+BlockMatching<T>::block_size(void) const
+{
+	return _block_size;
+}
+
+template <class T>
+int
 BlockMatching<T>::vector_width(void) const
 {
 	return _cells_width;
@@ -323,7 +330,7 @@ BlockMatching<T>::ref(int x, int y)
 // Get data
 template <class T>
 VECTOR_2D<double>
-BlockMatching<T>::get(int x, int y) const
+BlockMatching<T>::get(int x, int y)
 {
 	if (_motion_vector.isNULL()) {
 		this->block_matching();

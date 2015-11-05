@@ -93,7 +93,9 @@ VECTOR_2D<T>::operator!=(const VECTOR_2D<T>& vector)
 
 
 
-// Global operators
+//
+// ----- Global operators -----
+//
 template<class Type>
 VECTOR_2D<Type> &
 operator+(const VECTOR_2D<Type> vector)
@@ -161,17 +163,19 @@ operator*(const Type& lvalue, const VECTOR_2D<Type> rvector)
 }
 
 
-template<class Type>
-double
-norm(const VECTOR_2D<Type> &vector)
-{
-	return sqrt((double)vector.x * vector.x + vector.y * vector.y);
-}
+namespace Vector_2D {
+	template<class Type>
+	double
+	norm(const VECTOR_2D<Type> &vector)
+	{
+		return sqrt((double)vector.x * vector.x + vector.y * vector.y);
+	}
 
-template<class Type>
-double
-arg(const VECTOR_2D<Type> &vector)
-{
-	return atan2(vector.y, vector.x);
+	template<class Type>
+	double
+	arg(const VECTOR_2D<Type> &vector)
+	{
+		return atan2(vector.y, vector.x);
+	}
 }
 

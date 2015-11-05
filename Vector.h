@@ -49,8 +49,10 @@ template<class Type> Type& operator*(const VECTOR_2D<Type> lvector, const VECTOR
 template<class Type> Type& operator*(const VECTOR_2D<Type> lvector, const Type& rvalue);
 template<class Type> Type& operator*(const Type& lvalue, const VECTOR_2D<Type> rvector);
 
-template<class Type> double norm(const VECTOR_2D<Type> &vector);
-template<class Type> double arg(const VECTOR_2D<Type> &vector);
+namespace Vector_2D {
+	template<class Type> double norm(const VECTOR_2D<Type> &vector);
+	template<class Type> double arg(const VECTOR_2D<Type> &vector);
+}
 
 #include "Vector_private.h"
 

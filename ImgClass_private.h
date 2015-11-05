@@ -279,9 +279,9 @@ void
 ImgVector<T>::set(int x, int y, const T &value)
 {
 	if (x < 0 || _width <= x) {
-		throw std::out_of_range("int x");
+		throw std::out_of_range("ImgVector<T>::set(int, int, const T&) : int x");
 	} else if (y < 0 || _height <= y) {
-		throw std::out_of_range("int y");
+		throw std::out_of_range("ImgVector<T>::set(int, int, const T&) : int y");
 	}
 	_data[_width * y + x] = value;
 }
@@ -473,8 +473,10 @@ ImgVector<T>::resize_zerohold(int W, int H)
 	int x, y;
 	T sum;
 
-	if (W <= 0 || H <= 0) {
-		throw std::out_of_range("int W, int H");
+	if (W <= 0) {
+		throw std::out_of_range("ImgVector<T>::resize_zerohold(int, int) : int W");
+	}else if (H <= 0) {
+		throw std::out_of_range("ImgVector<T>::resize_zerohold(int, int) : int H");
 	}
 	scale_x = (double)W / _width;
 	scale_y = (double)H / _height;
@@ -482,7 +484,7 @@ ImgVector<T>::resize_zerohold(int W, int H)
 		resized = new T[W * H]();
 	}
 	catch (const std::bad_alloc &bad) {
-		fprintf(stderr, "ImgVector<T>::resize_zerohold(int, int) error : Cannot allocate memory\n");
+		fprintf(stderr, "ImgVector<T>::resize_zerohold(int, int) : Cannot allocate memory\n");
 		throw;
 	}
 	area_x = ceil((double)_width / W);
@@ -528,8 +530,10 @@ ImgVector<T>::resize_bicubic(int W, int H, double min, double max, T (*Nearest_I
 	int m, n;
 	double sum;
 
-	if (W <= 0 || H <= 0) {
-		throw std::out_of_range("int W, int H");
+	if (W <= 0) {
+		throw std::out_of_range("ImgVector<T>::resize_bicubic(int, int, double, double, T (*)(double &d), double, double) :int W");
+	} else if (H <= 0) {
+		throw std::out_of_range("ImgVector<T>::resize_bicubic(int, int, double, double, T (*)(double &d), double, double) :int H");
 	}
 	scale_x = (double)W / _width;
 	scale_y = (double)H / _height;

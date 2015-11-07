@@ -150,9 +150,27 @@ namespace ImgClass {
 
 // Arithmetic
 
-template <class T>
-ImgClass::RGB<T> &
-operator+(ImgClass::RGB<T> lcolor, const ImgClass::RGB<T>& rcolor)
+template <class Type>
+ImgClass::RGB<Type> &
+operator+(ImgClass::RGB<Type> color)
+{
+	return color;
+}
+
+template <class Type>
+ImgClass::RGB<Type> &
+operator-(ImgClass::RGB<Type> color)
+{
+	color._red = -color._red;
+	color._green = -color._green;
+	color._blue = -color._blue;
+	return color;
+}
+
+
+template <class Type>
+ImgClass::RGB<Type> &
+operator+(ImgClass::RGB<Type> lcolor, const ImgClass::RGB<Type>& rcolor)
 {
 	lcolor._red += rcolor._red;
 	lcolor._green += rcolor._green;
@@ -160,9 +178,9 @@ operator+(ImgClass::RGB<T> lcolor, const ImgClass::RGB<T>& rcolor)
 	return lcolor;
 }
 
-template <class T>
-ImgClass::RGB<T> &
-operator+(ImgClass::RGB<T> lcolor, const T& rvalue)
+template <class Type>
+ImgClass::RGB<Type> &
+operator+(ImgClass::RGB<Type> lcolor, const Type& rvalue)
 {
 	lcolor._red += rvalue;
 	lcolor._green += rvalue;
@@ -170,9 +188,9 @@ operator+(ImgClass::RGB<T> lcolor, const T& rvalue)
 	return lcolor;
 }
 
-template <class T>
-ImgClass::RGB<T> &
-operator+(const T& lvalue, ImgClass::RGB<T> rcolor)
+template <class Type>
+ImgClass::RGB<Type> &
+operator+(const Type& lvalue, ImgClass::RGB<Type> rcolor)
 {
 	rcolor._red += lvalue;
 	rcolor._green += lvalue;
@@ -180,9 +198,9 @@ operator+(const T& lvalue, ImgClass::RGB<T> rcolor)
 	return rcolor;
 }
 
-template <class T>
-ImgClass::RGB<T> &
-operator-(ImgClass::RGB<T> lcolor, const ImgClass::RGB<T>& rcolor)
+template <class Type>
+ImgClass::RGB<Type> &
+operator-(ImgClass::RGB<Type> lcolor, const ImgClass::RGB<Type>& rcolor)
 {
 	lcolor._red -= rcolor._red;
 	lcolor._green -= rcolor._green;
@@ -190,9 +208,9 @@ operator-(ImgClass::RGB<T> lcolor, const ImgClass::RGB<T>& rcolor)
 	return lcolor;
 }
 
-template <class T>
-ImgClass::RGB<T> &
-operator-(ImgClass::RGB<T> lcolor, const T& rvalue)
+template <class Type>
+ImgClass::RGB<Type> &
+operator-(ImgClass::RGB<Type> lcolor, const Type& rvalue)
 {
 	lcolor._red -= rvalue;
 	lcolor._green -= rvalue;
@@ -200,9 +218,9 @@ operator-(ImgClass::RGB<T> lcolor, const T& rvalue)
 	return lcolor;
 }
 
-template <class T>
-ImgClass::RGB<T> &
-operator-(const T& lvalue, ImgClass::RGB<T> rcolor)
+template <class Type>
+ImgClass::RGB<Type> &
+operator-(const Type& lvalue, ImgClass::RGB<Type> rcolor)
 {
 	rcolor._red -= lvalue;
 	rcolor._green -= lvalue;
@@ -210,9 +228,9 @@ operator-(const T& lvalue, ImgClass::RGB<T> rcolor)
 	return rcolor;
 }
 
-template <class T>
-ImgClass::RGB<T> &
-operator*(ImgClass::RGB<T> lcolor, const ImgClass::RGB<T>& rcolor)
+template <class Type>
+ImgClass::RGB<Type> &
+operator*(ImgClass::RGB<Type> lcolor, const ImgClass::RGB<Type>& rcolor)
 {
 	lcolor._red *= rcolor._red;
 	lcolor._green *= rcolor._green;
@@ -220,9 +238,9 @@ operator*(ImgClass::RGB<T> lcolor, const ImgClass::RGB<T>& rcolor)
 	return lcolor;
 }
 
-template <class T>
-ImgClass::RGB<T> &
-operator*(ImgClass::RGB<T> lcolor, const T& rvalue)
+template <class Type>
+ImgClass::RGB<Type> &
+operator*(ImgClass::RGB<Type> lcolor, const Type& rvalue)
 {
 	lcolor._red *= rvalue;
 	lcolor._green *= rvalue;
@@ -230,9 +248,9 @@ operator*(ImgClass::RGB<T> lcolor, const T& rvalue)
 	return lcolor;
 }
 
-template <class T>
-ImgClass::RGB<T> &
-operator*(const T& lvalue, ImgClass::RGB<T> rcolor)
+template <class Type>
+ImgClass::RGB<Type> &
+operator*(const Type& lvalue, ImgClass::RGB<Type> rcolor)
 {
 	rcolor._red *= lvalue;
 	rcolor._green *= lvalue;
@@ -240,9 +258,9 @@ operator*(const T& lvalue, ImgClass::RGB<T> rcolor)
 	return rcolor;
 }
 
-template <class T>
-ImgClass::RGB<T> &
-operator/(ImgClass::RGB<T> lcolor, const ImgClass::RGB<T>& rcolor)
+template <class Type>
+ImgClass::RGB<Type> &
+operator/(ImgClass::RGB<Type> lcolor, const ImgClass::RGB<Type>& rcolor)
 {
 	lcolor._red /= rcolor._red;
 	lcolor._green /= rcolor._green;
@@ -250,9 +268,9 @@ operator/(ImgClass::RGB<T> lcolor, const ImgClass::RGB<T>& rcolor)
 	return lcolor;
 }
 
-template <class T>
-ImgClass::RGB<T> &
-operator/(ImgClass::RGB<T> lcolor, const T& rvalue)
+template <class Type>
+ImgClass::RGB<Type> &
+operator/(ImgClass::RGB<Type> lcolor, const Type& rvalue)
 {
 	lcolor._red /= rvalue;
 	lcolor._green /= rvalue;
@@ -260,9 +278,9 @@ operator/(ImgClass::RGB<T> lcolor, const T& rvalue)
 	return lcolor;
 }
 
-template <class T>
-ImgClass::RGB<T> &
-operator/(const T& lvalue, ImgClass::RGB<T> rcolor)
+template <class Type>
+ImgClass::RGB<Type> &
+operator/(const Type& lvalue, ImgClass::RGB<Type> rcolor)
 {
 	rcolor._red = lvalue / rcolor._red;
 	rcolor._green = lvalue / rcolor._green;
@@ -272,9 +290,9 @@ operator/(const T& lvalue, ImgClass::RGB<T> rcolor)
 
 
 // Comparator
-template <class T>
+template <class Type>
 bool
-operator==(const ImgClass::RGB<T>& lcolor, const ImgClass::RGB<T>& rcolor)
+operator==(const ImgClass::RGB<Type>& lcolor, const ImgClass::RGB<Type>& rcolor)
 {
 	if (lcolor._red == rcolor._red
 	    && lcolor._green == rcolor._green
@@ -285,9 +303,9 @@ operator==(const ImgClass::RGB<T>& lcolor, const ImgClass::RGB<T>& rcolor)
 	}
 }
 
-template <class T>
+template <class Type>
 bool
-operator!=(const ImgClass::RGB<T>& lcolor, const ImgClass::RGB<T>& rcolor)
+operator!=(const ImgClass::RGB<Type>& lcolor, const ImgClass::RGB<Type>& rcolor)
 {
 	if (lcolor._red != rcolor._red
 	    || lcolor._green != rcolor._green

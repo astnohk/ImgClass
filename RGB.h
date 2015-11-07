@@ -43,6 +43,9 @@ namespace ImgClass {
 
 			// friend Global Operators
 			// Arithmetic
+			template<class Type> friend RGB<Type>& operator+(RGB<Type> color);
+			template<class Type> friend RGB<Type>& operator-(RGB<Type> color);
+
 			template<class Type> friend RGB<Type>& operator+(RGB<Type> lcolor, const RGB<Type>& rcolor);
 			template<class Type> friend RGB<Type>& operator+(RGB<Type> lcolor, const Type& rvalue);
 			template<class Type> friend RGB<Type>& operator+(const Type& lvalue, RGB<Type> rcolor);
@@ -67,6 +70,9 @@ namespace ImgClass {
 
 // Global Operators
 // Arithmetic
+template<class Type> RGB<Type>& operator+(RGB<Type> color);
+template<class Type> RGB<Type>& operator-(RGB<Type> color);
+
 template<class Type> ImgClass::RGB<Type>& operator+(ImgClass::RGB<Type> lcolor, const ImgClass::RGB<Type>& rcolor);
 template<class Type> ImgClass::RGB<Type>& operator+(ImgClass::RGB<Type> lcolor, const Type& rvalue);
 template<class Type> ImgClass::RGB<Type>& operator+(const Type& lvalue, ImgClass::RGB<Type> rcolor);

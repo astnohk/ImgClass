@@ -1,6 +1,6 @@
 #include <cassert>
 #include <cmath>
-#include <cstdio>
+#include <iostream>
 #include <new>
 #include <stdexcept>
 
@@ -28,7 +28,7 @@ ImgVector<T>::ImgVector(const ImgVector<T> &target)
 			_data = new T[target._width * target._height]();
 		}
 		catch (const std::bad_alloc &bad) {
-			fprintf(stderr, "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory");
+			std::cerr << "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory" << std::endl;
 			_data = nullptr;
 			throw;
 		}
@@ -52,7 +52,7 @@ ImgVector<T>::ImgVector(int W, int H)
 			_data = new T[W * H]();
 		}
 		catch (const std::bad_alloc &bad) {
-			fprintf(stderr, "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory");
+			std::cerr << "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory" << std::endl;
 			_data = nullptr;
 			throw;
 		}
@@ -73,7 +73,7 @@ ImgVector<T>::ImgVector(int W, int H, const T &value)
 			_data = new T[W * H]();
 		}
 		catch (const std::bad_alloc &bad) {
-			fprintf(stderr, "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory");
+			std::cerr << "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory" << std::endl;
 			_data = nullptr;
 			throw;
 		}
@@ -97,7 +97,7 @@ ImgVector<T>::ImgVector(int W, int H, const T *array)
 			_data = new T[W * H]();
 		}
 		catch (const std::bad_alloc &bad) {
-			fprintf(stderr, "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory");
+			std::cerr << "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory" << std::endl;
 			_data = nullptr;
 			throw;
 		}
@@ -132,7 +132,7 @@ ImgVector<T>::reset(int W, int H)
 			_data = new T[W * H]();
 		}
 		catch (const std::bad_alloc &bad) {
-			fprintf(stderr, "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory");
+			std::cerr << "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory" << std::endl;
 			_data = nullptr;
 			throw;
 		}
@@ -155,7 +155,7 @@ ImgVector<T>::reset(int W, int H, const T &value)
 			_data = new T[W * H]();
 		}
 		catch (const std::bad_alloc &bad) {
-			fprintf(stderr, "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory");
+			std::cerr << "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory" << std::endl;
 			_data = nullptr;
 			throw;
 		}
@@ -181,7 +181,7 @@ ImgVector<T>::reset(int W, int H, const T *array)
 			_data = new T[W * H]();
 		}
 		catch (const std::bad_alloc &bad) {
-			fprintf(stderr, "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory");
+			std::cerr << "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory" << std::endl;
 			_data = nullptr;
 			throw;
 		}
@@ -207,7 +207,7 @@ ImgVector<T>::copy(const ImgVector<T> &vector)
 			tmp_data = new T[vector._width * vector._height]();
 		}
 		catch (const std::bad_alloc &bad) {
-			fprintf(stderr, "ImgVector::copy(const ImgVector<T>&) : Cannot Allocate Memory\n");
+			std::cerr << "ImgVector::copy(const ImgVector<T>&) : Cannot Allocate Memory" << std::endl;
 			throw;
 			return *this;
 		}
@@ -233,7 +233,7 @@ ImgVector<T>::copy(const ImgVector<T> *vector)
 			tmp_data = new T[vector->_width * vector->_height]();
 		}
 		catch (const std::bad_alloc &bad) {
-			fprintf(stderr, "ImgVector::copy(const ImgVector<T>*) : Cannot Allocate Memory\n");
+			std::cerr << "ImgVector::copy(const ImgVector<T>*) : Cannot Allocate Memory" << std::endl;
 			throw;
 			return *this;
 		}
@@ -259,7 +259,7 @@ ImgVector<T>::operator=(const ImgVector<T> &vector)
 			tmp_data = new T[vector._width * vector._height]();
 		}
 		catch (const std::bad_alloc &bad) {
-			fprintf(stderr, "ImgVector::operator=(ImgVector<T>&) : Cannot Allocate Memory\n");
+			std::cerr << "ImgVector::operator=(ImgVector<T>&) : Cannot Allocate Memory" << std::endl;
 			throw;
 			return *this;
 		}
@@ -286,6 +286,46 @@ ImgVector<T>::set(int x, int y, const T &value)
 	}
 	_data[_width * y + x] = value;
 }
+
+
+
+
+template <class T>
+int
+ImgVector<T>::width(void) const
+{
+	return _width;
+}
+
+
+template <class T>
+int
+ImgVector<T>::height(void) const
+{
+	return _height;
+}
+
+
+template <class T>
+int
+ImgVector<T>::size(void) const
+{
+	return _width * _height;
+}
+
+
+template <class T>
+bool
+ImgVector<T>::isNULL(void) const
+{
+	if (_data == nullptr) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
 
 
 template <class T>
@@ -425,39 +465,108 @@ ImgVector<T>::get_mirror(int x, int y) const
 
 
 template <class T>
-int
-ImgVector<T>::width(void) const
+T
+ImgVector<T>::min(void) const
 {
-	return _width;
+	if (_width <= 0 || _height <= 0) {
+		throw std::logic_error("T ImgVector<T>::min(void) : vector is empty");
+	}
+	T min = _data[0];
+	for (int i = 1; i < _width * _height; i++) {
+		if (_data[i] < min) {
+			min = _data[i];
+		}
+	}
+	return min;
 }
 
 
 template <class T>
-int
-ImgVector<T>::height(void) const
+T
+ImgVector<T>::max(void) const
 {
-	return _height;
+	if (_width <= 0 || _height <= 0) {
+		throw std::logic_error("T ImgVector<T>::min(void) : vector is empty");
+	}
+	T max = _data[0];
+	for (int i = 1; i < _width * _height; i++) {
+		if (_data[i] > max) {
+			max = _data[i];
+		}
+	}
+	return max;
 }
 
 
+
+
 template <class T>
-int
-ImgVector<T>::size(void) const
+ImgVector<T> *
+ImgVector<T>::crop(int top_left_x, int top_left_y, int bottom_right_x, int bottom_right_y) const
 {
-	return _width * _height;
+	ImgVector<T>* tmp = nullptr;
+
+	if (top_left_x < 0 || _width <= top_left_x) {
+		throw std::out_of_range("ImgVector<T>* ImgVector<T>::crop(int, int, int, int) : left_top_x");
+	} else if (top_left_y < 0 || _height <= top_left_y) {
+		throw std::out_of_range("ImgVector<T>* ImgVector<T>::crop(int, int, int, int) : top_left_x");
+	} else if (bottom_right_x < 0 || _width <= bottom_right_x) {
+		throw std::out_of_range("ImgVector<T>* ImgVector<T>::crop(int, int, int, int) : bottom_right_x");
+	} else if (bottom_right_y < 0 || _height <= bottom_right_y) {
+		throw std::out_of_range("ImgVector<T>* ImgVector<T>::crop(int, int, int, int) : bottom_right_y");
+	}
+	if (top_left_x > bottom_right_x) {
+		throw std::invalid_argument("ImgVector<T>* ImgVector<T>::crop(int, int, int, int) : top_left_x exceeds bottom_right_x");
+	} else if (top_left_y > bottom_right_y) {
+		throw std::invalid_argument("ImgVector<T>* ImgVector<T>::crop(int, int, int, int) : top_left_y exceeds bottom_right_y");
+	}
+
+	try {
+		tmp = new ImgVector<T>;
+	}
+	catch (const std::bad_alloc &bad) {
+		std::cerr << "ImgVector<T>* ImgVector<T>::crop(int, int, int, int) : Cannot allocate memory" << std::endl;
+		throw;
+	}
+	// Initialize
+	tmp->reset(bottom_right_x - top_left_x + 1, bottom_right_y - top_left_y + 1);
+	// Crop
+	for (int y = 0; y <= bottom_right_y - top_left_y; y++) {
+		for (int x = 0; x <= bottom_right_x - top_left_x; x++) {
+			tmp->ref(x, y) = _data[_width * (top_left_y + y) + top_left_x + x];
+		}
+	}
+	return tmp;
 }
 
 
+
+
 template <class T>
-bool
-ImgVector<T>::isNULL(void) const
+void
+ImgVector<T>::contrast_stretching(const T& Min, const T& Max)
 {
-	if (_data == nullptr) {
-		return true;
-	} else {
-		return false;
+	if (Min > Max) {
+		throw std::invalid_argument("void ImgVector<T>::contrast_stretching(const T&, const T&) : min > max");
+	}
+	// Initialize
+	T min_tmp = _data[0];
+	T max_tmp = _data[0];
+
+	for (int i = 1; i < _width * _height; i++) {
+		if (_data[i] < min_tmp) {
+			min_tmp = _data[i];
+		} else if (_data[i] > max_tmp) {
+			max_tmp = _data[i];
+		}
+	}
+	// Stretching
+	for (int i = 0; i < _width * _height; i++) {
+		_data[i] = Min + (_data[i] - min_tmp) * Max / (max_tmp - min_tmp);
 	}
 }
+
+
 
 
 template <class T>
@@ -485,7 +594,7 @@ ImgVector<T>::resize_zerohold(int W, int H)
 		resized = new T[W * H]();
 	}
 	catch (const std::bad_alloc &bad) {
-		fprintf(stderr, "ImgVector<T>::resize_zerohold(int, int) : Cannot allocate memory\n");
+		std::cerr << "ImgVector<T>::resize_zerohold(int, int) : Cannot allocate memory" << std::endl;
 		throw;
 	}
 	area_x = ceil((double)_width / W);
@@ -549,7 +658,7 @@ ImgVector<T>::resize_bicubic(int W, int H, double min, double max, T (*Nearest_I
 		conv = new double[(int)scale_conv * 4]();
 	}
 	catch (const std::bad_alloc &bad) {
-		fprintf(stderr, "ImgVector<double>::resize_bicubic(int, int) error : Cannot allocate memory\n");
+		std::cerr << "ImgVector<double>::resize_bicubic(int, int) error : Cannot allocate memory" << std::endl;
 		delete[] resized;
 		delete[] conv;
 		throw;
@@ -632,7 +741,7 @@ ImgVector<T>::resize_bicubic(int W, int H, double min, double max, T (*Nearest_I
 
 template <class T>
 double
-ImgVector<T>::cubic(double x, double B, double C)
+ImgVector<T>::cubic(double x, double B, double C) const
 {
 	double x_abs = fabs(x);
 

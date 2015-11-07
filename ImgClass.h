@@ -29,29 +29,42 @@ class ImgVector
 		ImgVector<T>& operator=(const ImgVector<T> &vector);
 		void set(int x, int y, const T &value);
 
-		// Data access
-		T* data(void) const;
+		// Properties
 		int width(void) const;
 		int height(void) const;
 		int size(void) const;
 		bool isNULL(void) const;
 
+		// Data access
+		T* data(void) const;
+
 		T& operator[](int n);
 		T& ref(int x, int y);
 		T& ref_repeat(int x, int y);
 		T& ref_mirror(int x, int y);
+
 		T get(int n) const;
 		T get(int x, int y) const;
 		T get_zeropad(int x, int y) const;
 		T get_repeat(int x, int y) const;
 		T get_mirror(int x, int y) const;
 
+		T min(void) const;
+		T max(void) const;
+
+		// Cropping
+		ImgVector<T>* crop(int left_top_x, int left_top_y, int right_bottom_x, int right_bottom_y) const;
+
+		// Simple image processing
+		void contrast_stretching(const T& Min, const T& Max);
+		void map(T (*func)(T &value));
+
 		// Resampling
 		void resize_zerohold(int W, int H);
 		//bool resize_bicubic(int W, int H, double min = 0.0, double max = 0.0, T (*Nearest_Integer_Method)(double &d) = nullptr, double B = (1.0 / 3.0), double C = (1.0 / 3.0));
 		void resize_bicubic(int W, int H, double min = 0.0, double max = 0.0, T (*Nearest_Integer_Method)(double &d) = nullptr, double B = (0.0 / 3.0), double C = (1.0 / 2.0));
-		double cubic(double x, double B, double C);
-		void map(T (*func)(T &value));
+
+		double cubic(double x, double B, double C) const;
 };
 
 #include "ImgClass_private.h"

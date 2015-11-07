@@ -70,8 +70,8 @@ namespace ImgClass {
 
 // Global Operators
 // Arithmetic
-template<class Type> RGB<Type>& operator+(RGB<Type> color);
-template<class Type> RGB<Type>& operator-(RGB<Type> color);
+template<class Type> ImgClass::RGB<Type>& operator+(ImgClass::RGB<Type> color);
+template<class Type> ImgClass::RGB<Type>& operator-(ImgClass::RGB<Type> color);
 
 template<class Type> ImgClass::RGB<Type>& operator+(ImgClass::RGB<Type> lcolor, const ImgClass::RGB<Type>& rcolor);
 template<class Type> ImgClass::RGB<Type>& operator+(ImgClass::RGB<Type> lcolor, const Type& rvalue);

@@ -1,6 +1,4 @@
 #include <cmath>
-#include "Vector.h"
-
 
 
 template <class T>
@@ -62,6 +60,15 @@ VECTOR_2D<T>::operator*=(const T& value) // Scalar multiplication
 {
 	this->x *= value;
 	this->y *= value;
+	return *this;
+}
+
+template <class T>
+VECTOR_2D<T> &
+VECTOR_2D<T>::operator/=(const T& value) // Scalar multiplication
+{
+	this->x /= value;
+	this->y /= value;
 	return *this;
 }
 
@@ -160,6 +167,16 @@ operator*(const Type& lvalue, const VECTOR_2D<Type> rvector)
 	rvector.x = rvector.x * lvalue;
 	rvector.y = rvector.y * lvalue;
 	return rvector;
+}
+
+// Here "/" means scaling by scalar
+template <class Type>
+Type &
+operator/(const VECTOR_2D<Type> lvector, const Type& rvalue)
+{
+	lvector.x = lvector.x / rvalue;
+	lvector.y = lvector.y / rvalue;
+	return lvector;
 }
 
 

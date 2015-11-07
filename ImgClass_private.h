@@ -2,11 +2,12 @@
 #include <cmath>
 #include <cstdio>
 #include <new>
+#include <stdexcept>
 
 
 
 
-template <typename T>
+template <class T>
 ImgVector<T>::ImgVector(void)
 {
 	_data = nullptr;
@@ -16,7 +17,7 @@ ImgVector<T>::ImgVector(void)
 
 
 // Copy Constructor
-template <typename T>
+template <class T>
 ImgVector<T>::ImgVector(const ImgVector<T> &target)
 {
 	_data = nullptr;
@@ -40,7 +41,7 @@ ImgVector<T>::ImgVector(const ImgVector<T> &target)
 }
 
 
-template <typename T>
+template <class T>
 ImgVector<T>::ImgVector(int W, int H)
 {
 	_data = nullptr;
@@ -61,7 +62,7 @@ ImgVector<T>::ImgVector(int W, int H)
 }
 
 
-template <typename T>
+template <class T>
 ImgVector<T>::ImgVector(int W, int H, const T &value)
 {
 	_data = nullptr;
@@ -85,7 +86,7 @@ ImgVector<T>::ImgVector(int W, int H, const T &value)
 }
 
 
-template <typename T>
+template <class T>
 ImgVector<T>::ImgVector(int W, int H, const T *array)
 {
 	_data = nullptr;
@@ -111,14 +112,14 @@ ImgVector<T>::ImgVector(int W, int H, const T *array)
 }
 
 
-template <typename T>
+template <class T>
 ImgVector<T>::~ImgVector(void)
 {
 	delete[] _data;
 }
 
 
-template <typename T>
+template <class T>
 void
 ImgVector<T>::reset(int W, int H)
 {
@@ -141,7 +142,7 @@ ImgVector<T>::reset(int W, int H)
 }
 
 
-template <typename T>
+template <class T>
 void
 ImgVector<T>::reset(int W, int H, const T &value)
 {
@@ -167,7 +168,7 @@ ImgVector<T>::reset(int W, int H, const T &value)
 }
 
 
-template <typename T>
+template <class T>
 void
 ImgVector<T>::reset(int W, int H, const T *array)
 {
@@ -195,7 +196,7 @@ ImgVector<T>::reset(int W, int H, const T *array)
 }
 
 
-template <typename T>
+template <class T>
 ImgVector<T> &
 ImgVector<T>::copy(const ImgVector<T> &vector)
 {
@@ -221,7 +222,7 @@ ImgVector<T>::copy(const ImgVector<T> &vector)
 	return *this;
 }
 
-template <typename T>
+template <class T>
 ImgVector<T> &
 ImgVector<T>::copy(const ImgVector<T> *vector)
 {
@@ -247,7 +248,7 @@ ImgVector<T>::copy(const ImgVector<T> *vector)
 	return *this;
 }
 
-template <typename T>
+template <class T>
 ImgVector<T> &
 ImgVector<T>::operator=(const ImgVector<T> &vector)
 {
@@ -274,7 +275,7 @@ ImgVector<T>::operator=(const ImgVector<T> &vector)
 }
 
 
-template <typename T>
+template <class T>
 void
 ImgVector<T>::set(int x, int y, const T &value)
 {
@@ -287,7 +288,7 @@ ImgVector<T>::set(int x, int y, const T &value)
 }
 
 
-template <typename T>
+template <class T>
 T *
 ImgVector<T>::data(void) const
 {
@@ -295,7 +296,7 @@ ImgVector<T>::data(void) const
 }
 
 
-template <typename T>
+template <class T>
 T &
 ImgVector<T>::operator[](int n)
 {
@@ -304,7 +305,7 @@ ImgVector<T>::operator[](int n)
 }
 
 
-template <typename T>
+template <class T>
 T &
 ImgVector<T>::ref(int x, int y)
 {
@@ -313,7 +314,7 @@ ImgVector<T>::ref(int x, int y)
 }
 
 
-template <typename T>
+template <class T>
 T &
 ImgVector<T>::ref_repeat(int x, int y)
 {
@@ -333,7 +334,7 @@ ImgVector<T>::ref_repeat(int x, int y)
 }
 
 
-template <typename T>
+template <class T>
 T &
 ImgVector<T>::ref_mirror(int x, int y)
 {
@@ -351,7 +352,7 @@ ImgVector<T>::ref_mirror(int x, int y)
 }
 
 
-template <typename T>
+template <class T>
 T
 ImgVector<T>::get(int n) const
 {
@@ -360,7 +361,7 @@ ImgVector<T>::get(int n) const
 }
 
 
-template <typename T>
+template <class T>
 T
 ImgVector<T>::get(int x, int y) const
 {
@@ -370,7 +371,7 @@ ImgVector<T>::get(int x, int y) const
 }
 
 
-template <typename T>
+template <class T>
 T
 ImgVector<T>::get_zeropad(int x, int y) const
 {
@@ -385,7 +386,7 @@ ImgVector<T>::get_zeropad(int x, int y) const
 }
 
 
-template <typename T>
+template <class T>
 T
 ImgVector<T>::get_repeat(int x, int y) const
 {
@@ -405,7 +406,7 @@ ImgVector<T>::get_repeat(int x, int y) const
 }
 
 
-template <typename T>
+template <class T>
 T
 ImgVector<T>::get_mirror(int x, int y) const
 {
@@ -423,7 +424,7 @@ ImgVector<T>::get_mirror(int x, int y) const
 }
 
 
-template <typename T>
+template <class T>
 int
 ImgVector<T>::width(void) const
 {
@@ -431,7 +432,7 @@ ImgVector<T>::width(void) const
 }
 
 
-template <typename T>
+template <class T>
 int
 ImgVector<T>::height(void) const
 {
@@ -439,7 +440,7 @@ ImgVector<T>::height(void) const
 }
 
 
-template <typename T>
+template <class T>
 int
 ImgVector<T>::size(void) const
 {
@@ -447,7 +448,7 @@ ImgVector<T>::size(void) const
 }
 
 
-template <typename T>
+template <class T>
 bool
 ImgVector<T>::isNULL(void) const
 {
@@ -459,7 +460,7 @@ ImgVector<T>::isNULL(void) const
 }
 
 
-template <typename T>
+template <class T>
 void
 ImgVector<T>::resize_zerohold(int W, int H)
 {
@@ -515,7 +516,7 @@ ImgVector<T>::resize_zerohold(int W, int H)
     T (*Nearest_Integer_Method)(double &d) : round method (e.g. floor(), round(), etc.)
     A : cubic method's parameter (default A = -0.5 which correspond to Hermite)
 */
-template <typename T>
+template <class T>
 void
 ImgVector<T>::resize_bicubic(int W, int H, double min, double max, T (*Nearest_Integer_Method)(double &d), double B, double C)
 {
@@ -629,7 +630,7 @@ ImgVector<T>::resize_bicubic(int W, int H, double min, double max, T (*Nearest_I
 }
 
 
-template <typename T>
+template <class T>
 double
 ImgVector<T>::cubic(double x, double B, double C)
 {
@@ -645,7 +646,7 @@ ImgVector<T>::cubic(double x, double B, double C)
 }
 
 
-template <typename T>
+template <class T>
 void
 ImgVector<T>::map(T (*func)(T &value))
 {

@@ -1,6 +1,3 @@
-#include <stdexcept>
-
-
 #ifndef nullptr
 #define nullptr 0
 #endif
@@ -10,7 +7,7 @@
 #ifndef LIB_ImgClass
 #define LIB_ImgClass
 
-template <typename T>
+template <class T>
 class ImgVector
 {
 	private:

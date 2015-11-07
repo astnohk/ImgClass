@@ -3,8 +3,8 @@
 #endif
 
 
-#ifndef LIB_ImgStatistics
-#define LIB_ImgStatistics
+#ifndef LIB_ImgClass_ImgStatistics
+#define LIB_ImgClass_ImgStatistics
 
 class Histogram
 {

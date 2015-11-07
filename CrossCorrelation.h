@@ -10,8 +10,8 @@
 
 
 
-#ifndef LIB_CrossCorrelation
-#define LIB_CrossCorrelation
+#ifndef LIB_ImgClass_CrossCorrelation
+#define LIB_ImgClass_CrossCorrelation
 class ImgStatistics
 {
 	private:

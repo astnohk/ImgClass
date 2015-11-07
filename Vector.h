@@ -1,5 +1,5 @@
-#ifndef LIB_Vector
-#define LIB_Vector
+#ifndef LIB_ImgClass_Vector
+#define LIB_ImgClass_Vector
 
 template <class T>
 struct VECTOR_2D
@@ -16,9 +16,13 @@ struct VECTOR_2D
 
 		// Operators
 		VECTOR_2D<T>& operator+=(const VECTOR_2D<T>& vector);
+
 		VECTOR_2D<T>& operator-=(const VECTOR_2D<T>& vector);
+
 		VECTOR_2D<T>& operator*=(const VECTOR_2D<T>& vector);
 		VECTOR_2D<T>& operator*=(const T& value);
+
+		VECTOR_2D<T>& operator/=(const T& value);
 
 		bool operator==(const VECTOR_2D<T>& vector);
 		bool operator!=(const VECTOR_2D<T>& vector);
@@ -34,6 +38,8 @@ struct VECTOR_2D
 		template<class Type> friend Type& operator*(const VECTOR_2D<Type> lvector, const Type& rvalue);
 		template<class Type> friend Type& operator*(const Type& lvalue, const VECTOR_2D<Type> rvector);
 
+		template<class Type> friend Type& operator/(const VECTOR_2D<Type> lvector, const Type& rvalue);
+
 		template<class Type> friend Type& norm(const VECTOR_2D<Type> &vector);
 };
 
@@ -48,6 +54,8 @@ template<class Type> VECTOR_2D<Type>& operator-(const VECTOR_2D<Type> lvector, c
 template<class Type> Type& operator*(const VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
 template<class Type> Type& operator*(const VECTOR_2D<Type> lvector, const Type& rvalue);
 template<class Type> Type& operator*(const Type& lvalue, const VECTOR_2D<Type> rvector);
+
+template<class Type> Type& operator/(const VECTOR_2D<Type> lvector, const Type& rvalue);
 
 namespace Vector_2D {
 	template<class Type> double norm(const VECTOR_2D<Type> &vector);

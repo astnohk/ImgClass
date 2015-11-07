@@ -1,5 +1,5 @@
-#ifndef LIB_BlockMatching
-#define LIB_BlockMatching
+#ifndef LIB_ImgClass_BlockMatching
+#define LIB_ImgClass_BlockMatching
 
 #include "ImgClass.h"
 #include "Vector.h"

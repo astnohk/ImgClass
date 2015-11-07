@@ -1,3 +1,8 @@
+#ifndef nullptr
+#define nullptr 0
+#endif
+
+
 #ifndef LIB_ImgClass_BlockMatching
 #define LIB_ImgClass_BlockMatching
 
@@ -17,6 +22,9 @@ class BlockMatching
 		int _block_size;
 		int _cells_width;
 		int _cells_height;
+		bool _MV_forward; // Default value is 'false'
+		// If it is 'true' it's mean MV displays flow of image
+		// while MV points the pixel on the previous frame from where the next frame's pixel coming when it is 'false'
 
 	public:
 		// Constructors
@@ -29,11 +37,6 @@ class BlockMatching
 		void reset(const ImgVector<T>& image_prev, const ImgVector<T>& image_next, const int BlockSize);
 		void reset(const ImgVector<T>* image_prev, const ImgVector<T>* image_next, const int BlockSize);
 
-		// Main functions
-		void block_matching(const int search_range = 101); // search_range < 0 then do full search
-		VECTOR_2D<double> max_crosscorr(const int x_prev, const int y_prev, const int search_range);
-		T SAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
-
 		// Get state
 		int width(void) const;
 		int height(void) const;
@@ -41,12 +44,24 @@ class BlockMatching
 		int vector_width(void) const;
 		int vector_height(void) const;
 		bool isNULL(void);
+		bool isForward(void);
+
 		// Get reference
 		ImgVector<VECTOR_2D<double> >& data(void);
 		VECTOR_2D<double>& operator[](int n);
 		VECTOR_2D<double>& ref(int x, int y);
+
 		// Get data
 		VECTOR_2D<double> get(int x, int y); // NOT const because it will make new motion vector when it didn't do block matching
+
+		// Block Matching methods
+		// Search in the range of [-floor(search_range / 2), floor(search_range / 2)]
+		void block_matching(const int search_range = 101, bool normalize = false); // search_range < 0 then do full search
+		void block_matching_forward(const int search_range = 101, bool normalize = false); // search_range < 0 then do full search
+
+		VECTOR_2D<double> max_crosscorr(const int x_prev, const int y_prev, const int search_range);
+		T SAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
+		T NSAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height); // Normalized Sum of Absolute Difference
 };
 
 #include "BlockMatching_private.h"

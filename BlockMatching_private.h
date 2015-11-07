@@ -284,15 +284,15 @@ template <class T>
 void
 BlockMatching<T>::block_matching(const int search_range, bool normalize)
 {
-	T& (BlockMatching<T>::*SAD_func)(int, int, int, int, int, int);
+	T (BlockMatching<T>::*SAD_func)(int, int, int, int, int, int);
 
 	if (this->isNULL()) {
 		return;
 	}
 	if (normalize) {
-		SAD_func = BlockMatching<T>::NSAD;
+		SAD_func = &BlockMatching<T>::NSAD;
 	} else {
-		SAD_func = BlockMatching<T>::SAD;
+		SAD_func = &BlockMatching<T>::SAD;
 	}
 	// Initialize
 	_motion_vector.reset(_cells_width, _cells_height);
@@ -350,15 +350,15 @@ template <class T>
 void
 BlockMatching<T>::block_matching_forward(const int search_range, bool normalize)
 {
-	T& (BlockMatching<T>::*SAD_func)(int, int, int, int, int, int);
+	T (BlockMatching<T>::*SAD_func)(int, int, int, int, int, int);
 
 	if (this->isNULL()) {
 		return;
 	}
 	if (normalize) {
-		SAD_func = BlockMatching<T>::NSAD;
+		SAD_func = &BlockMatching<T>::NSAD;
 	} else {
-		SAD_func = BlockMatching<T>::SAD;
+		SAD_func = &BlockMatching<T>::SAD;
 	}
 	// Initialize
 	_motion_vector.reset(_cells_width, _cells_height);
@@ -439,12 +439,12 @@ BlockMatching<T>::NSAD(const int x_prev, const int y_prev, const int x_next, con
 	norm_image_next = _image_next.crop(x_next, y_next, x_next + block_width, y_next + block_height);
 	// Contrast stretching for normalization
 	T max = std::max(_image_prev.max(), _image_next.max());
-	norm_image_prev.contrast_stretching(0, max);
-	norm_image_next.contrast_stretching(0, max);
+	norm_image_prev->contrast_stretching(0, max);
+	norm_image_next->contrast_stretching(0, max);
 	// Compute SAD
 	for (int y = 0; y < block_height; y++) {
 		for (int x = 0; x < block_width; x++) {
-			sad = sad + fabs((double)_image_next.get_zeropad(x_next + x, y_next + y) - _image_prev.get_zeropad(x_prev + x, y_prev + y));
+			sad = sad + fabs((double)norm_image_next->get_zeropad(x, y) - norm_image_prev->get_zeropad(x, y));
 		}
 	}
 	delete norm_image_prev;

@@ -43,11 +43,17 @@ class ImgVector
 		T& ref_repeat(int x, int y);
 		T& ref_mirror(int x, int y);
 
+		// Get image intencity
 		T get(int n) const;
 		T get(int x, int y) const;
+
 		T get_zeropad(int x, int y) const;
 		T get_repeat(int x, int y) const;
 		T get_mirror(int x, int y) const;
+
+		T get_zeropad(double x, double y, double B = (0.0 / 3.0), double C = (1.0 / 2.0)) const;
+		T get_repeat(double x, double y, double B = (0.0 / 3.0), double C = (1.0 / 2.0)) const;
+		T get_mirror(double x, double y, double B = (0.0 / 3.0), double C = (1.0 / 2.0)) const;
 
 		T min(void) const;
 		T max(void) const;

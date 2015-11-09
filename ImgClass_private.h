@@ -464,6 +464,73 @@ ImgVector<T>::get_mirror(int x, int y) const
 }
 
 
+// Get continuous value interpolated by bicubic
+template <class T>
+T
+ImgVector<T>::get_zeropad(double x, double y, double B, double C) const
+{
+	double bicubic_x[4];
+	double bicubic_y[4];
+	T value = T();
+
+	for (int n = 0; n < 4; n++) {
+		bicubic_x[n] = ImgVector<double>::cubic(n - 1.0 - (x - floor(x)), B, C);
+		bicubic_y[n] = ImgVector<double>::cubic(n - 1.0 - (y - floor(y)), B, C);
+	}
+	for (int m = 0; m < 4; m++) {
+		for (int n = 0; n < 4; n++) {
+			value = value
+			    + this->get_zeropad((int)floor(x), (int)floor(y)) * bicubic_x[n] * bicubic_y[m];
+		}
+	}
+	return value;
+}
+
+
+template <class T>
+T
+ImgVector<T>::get_repeat(double x, double y, double B, double C) const
+{
+	double bicubic_x[4];
+	double bicubic_y[4];
+	T value = T();
+
+	for (int n = 0; n < 4; n++) {
+		bicubic_x[n] = ImgVector<double>::cubic(n - 1.0 - (x - floor(x)), B, C);
+		bicubic_y[n] = ImgVector<double>::cubic(n - 1.0 - (y - floor(y)), B, C);
+	}
+	for (int m = 0; m < 4; m++) {
+		for (int n = 0; n < 4; n++) {
+			value = value
+			    + this->get_repeat((int)floor(x), (int)floor(y)) * bicubic_x[n] * bicubic_y[m];
+		}
+	}
+	return value;
+}
+
+
+template <class T>
+T
+ImgVector<T>::get_mirror(double x, double y, double B, double C) const
+{
+	double bicubic_x[4];
+	double bicubic_y[4];
+	T value = T();
+
+	for (int n = 0; n < 4; n++) {
+		bicubic_x[n] = ImgVector<double>::cubic(n - 1.0 - (x - floor(x)), B, C);
+		bicubic_y[n] = ImgVector<double>::cubic(n - 1.0 - (y - floor(y)), B, C);
+	}
+	for (int m = 0; m < 4; m++) {
+		for (int n = 0; n < 4; n++) {
+			value = value
+			    + this->get_mirror((int)floor(x), (int)floor(y)) * bicubic_x[n] * bicubic_y[m];
+		}
+	}
+	return value;
+}
+
+
 template <class T>
 T
 ImgVector<T>::min(void) const

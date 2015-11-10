@@ -104,14 +104,14 @@ VECTOR_2D<T>::operator!=(const VECTOR_2D<T>& vector)
 // ----- Global operators -----
 //
 template<class Type>
-VECTOR_2D<Type> &
+VECTOR_2D<Type>
 operator+(const VECTOR_2D<Type> vector)
 {
 	return vector;
 }
 
 template<class Type>
-VECTOR_2D<Type> &
+VECTOR_2D<Type>
 operator-(const VECTOR_2D<Type> vector)
 {
 	vector.x = -vector.x;
@@ -121,7 +121,7 @@ operator-(const VECTOR_2D<Type> vector)
 
 
 template <class Type>
-VECTOR_2D<Type> &
+VECTOR_2D<Type>
 operator+(const VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector)
 {
 	lvector.x += rvector.x;
@@ -130,8 +130,8 @@ operator+(const VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector)
 }
 
 template <class Type>
-VECTOR_2D<Type> &
-operator-(const VECTOR_2D<Type> lvector, const VECTOR_2D<Type> &rvector)
+VECTOR_2D<Type>
+operator-(const VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector)
 {
 	lvector.x = lvector.x - rvector.x;
 	lvector.y = lvector.y - rvector.y;
@@ -141,7 +141,7 @@ operator-(const VECTOR_2D<Type> lvector, const VECTOR_2D<Type> &rvector)
 
 // Here "*" means product of vectors
 template <class Type>
-Type &
+VECTOR_2D<Type>
 operator*(const VECTOR_2D<Type>& lvector, const VECTOR_2D<Type>& rvector)
 {
 	Type tmp;
@@ -150,9 +150,9 @@ operator*(const VECTOR_2D<Type>& lvector, const VECTOR_2D<Type>& rvector)
 }
 
 // Here "*" means scaling by scalar
-template <class Type>
-Type &
-operator*(const VECTOR_2D<Type> lvector, const Type& rvalue)
+template <class Type, class Tval>
+VECTOR_2D<Type>
+operator*(const VECTOR_2D<Type> lvector, const Tval& rvalue)
 {
 	lvector.x = lvector.x * rvalue;
 	lvector.y = lvector.y * rvalue;
@@ -160,9 +160,9 @@ operator*(const VECTOR_2D<Type> lvector, const Type& rvalue)
 }
 
 // Here "*" means scaling by scalar
-template <class Type>
-Type &
-operator*(const Type& lvalue, const VECTOR_2D<Type> rvector)
+template <class Type, class Tval>
+VECTOR_2D<Type>
+operator*(const Tval& lvalue, VECTOR_2D<Type> rvector)
 {
 	rvector.x = rvector.x * lvalue;
 	rvector.y = rvector.y * lvalue;
@@ -170,9 +170,9 @@ operator*(const Type& lvalue, const VECTOR_2D<Type> rvector)
 }
 
 // Here "/" means scaling by scalar
-template <class Type>
-Type &
-operator/(const VECTOR_2D<Type> lvector, const Type& rvalue)
+template <class Type, class Tval>
+VECTOR_2D<Type>
+operator/(VECTOR_2D<Type> lvector, const Tval& rvalue)
 {
 	lvector.x = lvector.x / rvalue;
 	lvector.y = lvector.y / rvalue;

@@ -28,38 +28,39 @@ struct VECTOR_2D
 		bool operator!=(const VECTOR_2D<T>& vector);
 
 		// Friend operators
-		template<class Type> friend VECTOR_2D<Type>& operator+(const VECTOR_2D<Type> vector);
-		template<class Type> friend VECTOR_2D<Type>& operator-(const VECTOR_2D<Type> vector);
+		template<class Type> friend VECTOR_2D<Type> operator+(VECTOR_2D<Type> vector);
+		template<class Type> friend VECTOR_2D<Type> operator-(VECTOR_2D<Type> vector);
                                             
-		template<class Type> friend VECTOR_2D<Type>& operator+(const VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
-		template<class Type> friend VECTOR_2D<Type>& operator-(const VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
+		template<class Type> friend VECTOR_2D<Type> operator+(VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
+		template<class Type> friend VECTOR_2D<Type> operator-(VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
                                             
-		template<class Type> friend Type& operator*(const VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
-		template<class Type> friend Type& operator*(const VECTOR_2D<Type> lvector, const Type& rvalue);
-		template<class Type> friend Type& operator*(const Type& lvalue, const VECTOR_2D<Type> rvector);
+		template<class Type> friend VECTOR_2D<Type> operator*(VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
+		template<class Type, class Tval> friend VECTOR_2D<Type> operator*(VECTOR_2D<Type> lvector, const Tval& rvalue);
+		template<class Type, class Tval> friend VECTOR_2D<Type> operator*(const Tval& lvalue, VECTOR_2D<Type> rvector);
 
-		template<class Type> friend Type& operator/(const VECTOR_2D<Type> lvector, const Type& rvalue);
+		template<class Type, class Tval> friend VECTOR_2D<Type> operator/(VECTOR_2D<Type> lvector, const Tval& rvalue);
 
-		template<class Type> friend Type& norm(const VECTOR_2D<Type> &vector);
+		template<class Type> friend double norm(const VECTOR_2D<Type> &vector);
+		template<class Type> friend double arg(const VECTOR_2D<Type> &vector);
 };
 
 
 // Global operator overloading
-template<class Type> VECTOR_2D<Type>& operator+(const VECTOR_2D<Type> vector);
-template<class Type> VECTOR_2D<Type>& operator-(const VECTOR_2D<Type> vector);
+template<class Type> VECTOR_2D<Type> operator+(VECTOR_2D<Type> vector);
+template<class Type> VECTOR_2D<Type> operator-(VECTOR_2D<Type> vector);
 
-template<class Type> VECTOR_2D<Type>& operator+(const VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
-template<class Type> VECTOR_2D<Type>& operator-(const VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
+template<class Type> VECTOR_2D<Type> operator+(VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
+template<class Type> VECTOR_2D<Type> operator-(VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
 
-template<class Type> Type& operator*(const VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
-template<class Type> Type& operator*(const VECTOR_2D<Type> lvector, const Type& rvalue);
-template<class Type> Type& operator*(const Type& lvalue, const VECTOR_2D<Type> rvector);
+template<class Type> VECTOR_2D<Type> operator*(VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
+template<class Type, class Tval> VECTOR_2D<Type> operator*(VECTOR_2D<Type> lvector, const Tval& rvalue);
+template<class Type, class Tval> VECTOR_2D<Type> operator*(const Tval& lvalue, VECTOR_2D<Type> rvector);
 
-template<class Type> Type& operator/(const VECTOR_2D<Type> lvector, const Type& rvalue);
+template<class Type, class Tval> VECTOR_2D<Type> operator/(VECTOR_2D<Type> lvector, const Tval& rvalue);
 
 namespace Vector_2D {
-	template<class Type> double norm(const VECTOR_2D<Type> &vector);
-	template<class Type> double arg(const VECTOR_2D<Type> &vector);
+	template<class Type> double norm(const VECTOR_2D<Type>& vector);
+	template<class Type> double arg(const VECTOR_2D<Type>& vector);
 }
 
 #include "Vector_private.h"

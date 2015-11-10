@@ -60,11 +60,15 @@ class BlockMatching
 		void block_matching_forward(const int search_range = 41); // search_range < 0 then do full search
 
 		void block_matching_SAD_ZNCC(const int search_range = 41);
+		void block_matching_subset(const int search_range = 41);
 
 		T SAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
 		T MAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
 		T NCC(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
 		T ZNCC(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
+		// Masked one
+		T MAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height, const ImgVector<bool>& mask);
+		T ZNCC(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height, const ImgVector<bool>& mask);
 };
 
 #include "BlockMatching_private_initializer.h"

@@ -55,6 +55,7 @@ class MotionCompensation
 
 		void create_image_compensated(ImgVector<bool> *mask = nullptr);
 		void create_image_compensated_forward(ImgVector<bool> *mask = nullptr);
+		void create_image_estimated(double estimate_frame, ImgVector<bool> *mask = nullptr);
 };
 
 #endif

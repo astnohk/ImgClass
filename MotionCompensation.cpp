@@ -500,3 +500,36 @@ MotionCompensation::create_image_compensated_forward(ImgVector<bool> *mask)
 	}
 }
 
+/*
+  void MotionCompensation::create_image_masked_compensated(ImgVector<bool> *mask)
+
+  Make estimated (compensated) image.
+  if estimate_frame = 2 then it estimate the image of next of next frame, NOT next frame as create_image_compensated()
+*/
+void
+MotionCompensation::create_image_estimated(double estimate_frame, ImgVector<bool> *mask)
+{
+	if (mask == nullptr) {
+		_image_compensated.reset(_width, _height);
+		for (int y = 0; y < _height; y++) {
+			for (int x = 0; x < _width; x++) {
+				VECTOR_2D<double> v = estimate_frame * _vector.get(x, y);
+				_image_compensated.set(x, y, _image_prev.get_zeropad(x + v.x, y + v.y));
+			}
+		}
+		motion_compensated = true;
+	} else {
+		_image_compensated.copy(_image_next); // Initialize with Original image (image_next)
+		for (int y = 0; y < _height; y++) {
+			for (int x = 0; x < _width; x++) {
+				if (mask->get(x, y) == false) {
+					continue;
+				}
+				VECTOR_2D<double> v = estimate_frame * _vector.get(x, y);
+				_image_compensated.set(x, y, _image_prev.get_zeropad(x + v.x, y + v.y));
+			}
+		}
+		motion_compensated = true;
+	}
+}
+

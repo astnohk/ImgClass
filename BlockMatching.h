@@ -56,15 +56,20 @@ class BlockMatching
 
 		// Block Matching methods
 		// Search in the range of [-floor(search_range / 2), floor(search_range / 2)]
-		void block_matching(const int search_range = 101, bool normalize = false); // search_range < 0 then do full search
-		void block_matching_forward(const int search_range = 101, bool normalize = false); // search_range < 0 then do full search
+		void block_matching(const int search_range = 41); // search_range < 0 then do full search
+		void block_matching_forward(const int search_range = 41); // search_range < 0 then do full search
 
-		VECTOR_2D<double> max_crosscorr(const int x_prev, const int y_prev, const int search_range);
+		void block_matching_SAD_ZNCC(const int search_range = 41);
+
 		T SAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
-		T NSAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height); // Normalized Sum of Absolute Difference
+		T MAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
+		T NCC(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
+		T ZNCC(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
 };
 
-#include "BlockMatching_private.h"
+#include "BlockMatching_private_initializer.h"
+#include "BlockMatching_private_accessor.h"
+#include "BlockMatching_private_main.h"
 
 #endif
 

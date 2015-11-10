@@ -573,15 +573,6 @@ ImgVector<T>::crop(int top_left_x, int top_left_y, int bottom_right_x, int botto
 {
 	ImgVector<T>* tmp = nullptr;
 
-	if (top_left_x < 0 || _width <= top_left_x) {
-		throw std::out_of_range("ImgVector<T>* ImgVector<T>::crop(int, int, int, int) : left_top_x");
-	} else if (top_left_y < 0 || _height <= top_left_y) {
-		throw std::out_of_range("ImgVector<T>* ImgVector<T>::crop(int, int, int, int) : top_left_x");
-	} else if (bottom_right_x < 0 || _width <= bottom_right_x) {
-		throw std::out_of_range("ImgVector<T>* ImgVector<T>::crop(int, int, int, int) : bottom_right_x");
-	} else if (bottom_right_y < 0 || _height <= bottom_right_y) {
-		throw std::out_of_range("ImgVector<T>* ImgVector<T>::crop(int, int, int, int) : bottom_right_y");
-	}
 	if (top_left_x > bottom_right_x) {
 		throw std::invalid_argument("ImgVector<T>* ImgVector<T>::crop(int, int, int, int) : top_left_x exceeds bottom_right_x");
 	} else if (top_left_y > bottom_right_y) {
@@ -600,7 +591,12 @@ ImgVector<T>::crop(int top_left_x, int top_left_y, int bottom_right_x, int botto
 	// Crop
 	for (int y = 0; y <= bottom_right_y - top_left_y; y++) {
 		for (int x = 0; x <= bottom_right_x - top_left_x; x++) {
-			tmp->ref(x, y) = _data[_width * (top_left_y + y) + top_left_x + x];
+			if (0 <= top_left_y + y && top_left_y + y < _height
+			    && 0 <= top_left_x + x && top_left_x + x < _width) {
+				tmp->ref(x, y) = _data[_width * (top_left_y + y) + top_left_x + x];
+			} else {
+				tmp->ref(x, y) = 0;
+			}
 		}
 	}
 	return tmp;

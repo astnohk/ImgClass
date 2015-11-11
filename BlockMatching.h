@@ -54,12 +54,13 @@ class BlockMatching
 		// Get data
 		VECTOR_2D<double> get(int x, int y); // NOT const because it will make new motion vector when it didn't do block matching
 
+		T MAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height, const ImgVector<T>& img_prev, const ImgVector<T>& img_next);
 		// Block Matching methods
 		// Search in the range of [-floor(search_range / 2), floor(search_range / 2)]
-		void block_matching(const int search_range = 41); // search_range < 0 then do full search
+		void block_matching(const int search_range = 41);
+		ImgVector<VECTOR_2D<double> >* grad_prev(const int top_left_x, const int top_left_y, const int crop_width, const int crop_height);
 		void block_matching_forward(const int search_range = 41); // search_range < 0 then do full search
 
-		void block_matching_SAD_ZNCC(const int search_range = 41);
 		void block_matching_subset(const int search_range = 41);
 
 		T SAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);

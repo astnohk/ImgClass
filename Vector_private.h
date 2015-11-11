@@ -32,6 +32,29 @@ VECTOR_2D<T>::reset(const T& init_x, const T& init_y)
 }
 
 
+
+
+// ----- Operators -----
+template<class T>
+VECTOR_2D<T> &
+VECTOR_2D<T>::operator=(const VECTOR_2D<T>& vector)
+{
+	x = vector.x;
+	y = vector.y;
+	return *this;
+}
+
+template<class T>
+template<class Tval>
+VECTOR_2D<T> &
+VECTOR_2D<T>::operator=(const Tval& value)
+{
+	x = value;
+	y = value;
+	return *this;
+}
+
+
 template <class T>
 VECTOR_2D<T> &
 VECTOR_2D<T>::operator+=(const VECTOR_2D<T>& vector)
@@ -112,7 +135,7 @@ operator+(const VECTOR_2D<Type> vector)
 
 template<class Type>
 VECTOR_2D<Type>
-operator-(const VECTOR_2D<Type> vector)
+operator-(VECTOR_2D<Type> vector)
 {
 	vector.x = -vector.x;
 	vector.y = -vector.y;
@@ -122,7 +145,7 @@ operator-(const VECTOR_2D<Type> vector)
 
 template <class Type>
 VECTOR_2D<Type>
-operator+(const VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector)
+operator+(VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector)
 {
 	lvector.x += rvector.x;
 	lvector.y += rvector.y;
@@ -131,7 +154,7 @@ operator+(const VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector)
 
 template <class Type>
 VECTOR_2D<Type>
-operator-(const VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector)
+operator-(VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector)
 {
 	lvector.x = lvector.x - rvector.x;
 	lvector.y = lvector.y - rvector.y;
@@ -141,7 +164,7 @@ operator-(const VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector)
 
 // Here "*" means product of vectors
 template <class Type>
-VECTOR_2D<Type>
+Type
 operator*(const VECTOR_2D<Type>& lvector, const VECTOR_2D<Type>& rvector)
 {
 	Type tmp;
@@ -152,7 +175,7 @@ operator*(const VECTOR_2D<Type>& lvector, const VECTOR_2D<Type>& rvector)
 // Here "*" means scaling by scalar
 template <class Type, class Tval>
 VECTOR_2D<Type>
-operator*(const VECTOR_2D<Type> lvector, const Tval& rvalue)
+operator*(VECTOR_2D<Type> lvector, const Tval& rvalue)
 {
 	lvector.x = lvector.x * rvalue;
 	lvector.y = lvector.y * rvalue;

@@ -15,6 +15,9 @@ struct VECTOR_2D
 		void reset(const T& init_x, const T& init_y);
 
 		// Operators
+		VECTOR_2D<T>& operator=(const VECTOR_2D<T>& vector);
+		template<class Tval> VECTOR_2D<T>& operator=(const Tval& value);
+
 		VECTOR_2D<T>& operator+=(const VECTOR_2D<T>& vector);
 
 		VECTOR_2D<T>& operator-=(const VECTOR_2D<T>& vector);
@@ -34,7 +37,7 @@ struct VECTOR_2D
 		template<class Type> friend VECTOR_2D<Type> operator+(VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
 		template<class Type> friend VECTOR_2D<Type> operator-(VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
                                             
-		template<class Type> friend VECTOR_2D<Type> operator*(VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
+		template<class Type> friend Type operator*(const VECTOR_2D<Type>& lvector, const VECTOR_2D<Type>& rvector);
 		template<class Type, class Tval> friend VECTOR_2D<Type> operator*(VECTOR_2D<Type> lvector, const Tval& rvalue);
 		template<class Type, class Tval> friend VECTOR_2D<Type> operator*(const Tval& lvalue, VECTOR_2D<Type> rvector);
 
@@ -52,7 +55,7 @@ template<class Type> VECTOR_2D<Type> operator-(VECTOR_2D<Type> vector);
 template<class Type> VECTOR_2D<Type> operator+(VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
 template<class Type> VECTOR_2D<Type> operator-(VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
 
-template<class Type> VECTOR_2D<Type> operator*(VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
+template<class Type> Type operator*(const VECTOR_2D<Type>& lvector, const VECTOR_2D<Type>& rvector);
 template<class Type, class Tval> VECTOR_2D<Type> operator*(VECTOR_2D<Type> lvector, const Tval& rvalue);
 template<class Type, class Tval> VECTOR_2D<Type> operator*(const Tval& lvalue, VECTOR_2D<Type> rvector);
 

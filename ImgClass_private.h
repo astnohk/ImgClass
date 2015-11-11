@@ -531,6 +531,8 @@ ImgVector<T>::get_mirror(double x, double y, double B, double C) const
 }
 
 
+
+
 template <class T>
 T
 ImgVector<T>::min(void) const
@@ -553,7 +555,7 @@ T
 ImgVector<T>::max(void) const
 {
 	if (_width <= 0 || _height <= 0) {
-		throw std::logic_error("T ImgVector<T>::min(void) : vector is empty");
+		throw std::logic_error("T ImgVector<T>::max(void) : vector is empty");
 	}
 	T max = _data[0];
 	for (int i = 1; i < _width * _height; i++) {
@@ -565,20 +567,112 @@ ImgVector<T>::max(void) const
 }
 
 
+template <class T>
+T
+ImgVector<T>::min(int top_left_x, int top_left_y, int crop_width, int crop_height) const
+{
+	if (_width <= 0 || _height <= 0) {
+		throw std::logic_error("T ImgVector<T>::min(void) : vector is empty");
+	} else if (crop_width <= 0) {
+		throw std::invalid_argument("T ImgVector<T>::min(int, int, int, int) : crop_width <= 0");
+	} else if (crop_height <= 0) {
+		throw std::invalid_argument("T ImgVector<T>::min(int, int, int, int) : crop_height<= 0");
+	}
+	T min = _data[_width * top_left_y + top_left_x];
+	for (int y = 0; y < crop_height; y++) {
+		for (int x = 0; x < crop_width; x++) {
+			if (0 <= x + top_left_x && x + top_left_x < _width
+			    && 0 <= y + top_left_y && y + top_left_y < _height
+			    && _data[_width * (y + top_left_y) + x + top_left_x] < min) {
+				min = _data[_width * (y + top_left_y) + x + top_left_x];
+			}
+		}
+	}
+	return min;
+}
 
 
 template <class T>
+T
+ImgVector<T>::max(int top_left_x, int top_left_y, int crop_width, int crop_height) const
+{
+	if (_width <= 0 || _height <= 0) {
+		throw std::logic_error("T ImgVector<T>::max(void) : vector is empty");
+	} else if (crop_width <= 0) {
+		throw std::invalid_argument("T ImgVector<T>::max(int, int, int, int) : crop_width <= 0");
+	} else if (crop_height <= 0) {
+		throw std::invalid_argument("T ImgVector<T>::max(int, int, int, int) : crop_height <= 0");
+	}
+	T max = _data[_width * top_left_y + top_left_x];
+	for (int y = 0; y < crop_height; y++) {
+		for (int x = 0; x < crop_width; x++) {
+			if (0 <= x + top_left_x && x + top_left_x < _width
+			    && 0 <= y + top_left_y && y + top_left_y < _height
+			    && _data[_width * (y + top_left_y) + x + top_left_x] > max) {
+				max = _data[_width * (y + top_left_y) + x + top_left_x];
+			}
+		}
+	}
+	return max;
+}
+
+
+
+
+// ----- Statistics -----
+template <class T>
+T
+ImgVector<T>::variance() const
+{
+	double N = double(_width * _height);
+	T sum_squared = .0;
+	T sum = .0;
+
+	for (int y = 0; y < _height; y++) {
+		for (int x = 0; x < _width; x++) {
+			sum += _data[_width * y + x];
+			sum_squared += _data[_width * y + x] * _data[_width * y + x];
+		}
+	}
+	return sum_squared / N - sum * sum / (N * N);
+}
+
+template <class T>
+T
+ImgVector<T>::variance(const int top_left_x, const int top_left_y, const int crop_width, const int crop_height) const
+{
+	double N = .0;
+	T sum_squared = .0;
+	T sum = .0;
+
+	for (int y = top_left_y; y < top_left_y + crop_height; y++) {
+		for (int x = top_left_x; x < top_left_x + crop_width; x++) {
+			if (0 <= x && x < _width
+			    && 0 <= y && y < _height) {
+				N += 1.0;
+				sum += _data[_width * y + x];
+				sum_squared += _data[_width * y + x] * _data[_width * y + x];
+			}
+		}
+	}
+	return sum_squared / N - sum * sum / (N * N);
+}
+
+
+
+
+// ----- Image Operation -----
+template <class T>
 ImgVector<T> *
-ImgVector<T>::crop(int top_left_x, int top_left_y, int bottom_right_x, int bottom_right_y) const
+ImgVector<T>::crop(int top_left_x, int top_left_y, int crop_width, int crop_height) const
 {
 	ImgVector<T>* tmp = nullptr;
 
-	if (top_left_x > bottom_right_x) {
-		throw std::invalid_argument("ImgVector<T>* ImgVector<T>::crop(int, int, int, int) : top_left_x exceeds bottom_right_x");
-	} else if (top_left_y > bottom_right_y) {
-		throw std::invalid_argument("ImgVector<T>* ImgVector<T>::crop(int, int, int, int) : top_left_y exceeds bottom_right_y");
+	if (crop_width <= 0) {
+		throw std::invalid_argument("ImgVector<T>* ImgVector<T>::crop(int, int, int, int) : crop_width <= 0");
+	} else if (crop_height <= 0) {
+		throw std::invalid_argument("ImgVector<T>* ImgVector<T>::crop(int, int, int, int) : crop_height <= 0");
 	}
-
 	try {
 		tmp = new ImgVector<T>;
 	}
@@ -587,13 +681,13 @@ ImgVector<T>::crop(int top_left_x, int top_left_y, int bottom_right_x, int botto
 		throw;
 	}
 	// Initialize
-	tmp->reset(bottom_right_x - top_left_x + 1, bottom_right_y - top_left_y + 1);
+	tmp->reset(crop_width, crop_height);
 	// Crop
-	for (int y = 0; y <= bottom_right_y - top_left_y; y++) {
-		for (int x = 0; x <= bottom_right_x - top_left_x; x++) {
+	for (int y = 0; y < crop_width; y++) {
+		for (int x = 0; x < crop_height; x++) {
 			if (0 <= top_left_y + y && top_left_y + y < _height
 			    && 0 <= top_left_x + x && top_left_x + x < _width) {
-				tmp->ref(x, y) = _data[_width * (top_left_y + y) + top_left_x + x];
+				tmp->ref(x, y) = _data[_width * (y + top_left_y) + x + top_left_x];
 			} else {
 				tmp->ref(x, y) = 0;
 			}

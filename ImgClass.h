@@ -57,9 +57,14 @@ class ImgVector
 
 		T min(void) const;
 		T max(void) const;
+		T min(int top_left_x, int top_left_y, int crop_width, int crop_height) const;
+		T max(int top_left_x, int top_left_y, int crop_width, int crop_height) const;
+
+		T variance(void) const;
+		T variance(const int top_left_x, const int top_left_y, const int crop_width, const int crop_height) const;
 
 		// Cropping
-		ImgVector<T>* crop(int left_top_x, int left_top_y, int right_bottom_x, int right_bottom_y) const;
+		ImgVector<T>* crop(int top_left_x, int top_left_y, int crop_width, int crop_height) const;
 
 		// Simple image processing
 		void contrast_stretching(const T& Min, const T& Max);

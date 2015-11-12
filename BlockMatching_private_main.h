@@ -14,68 +14,6 @@
 // ----- Algorithm -----
 template <class T>
 void
-BlockMatching<T>::block_matching_forward(const int search_range)
-{
-	T (BlockMatching<T>::*Corr_func)(int, int, int, int, int, int);
-
-	if (this->isNULL()) {
-		return;
-	}
-	// Initialize
-	_motion_vector.reset(_cells_width, _cells_height);
-	// Compute Motion Vectors
-	Corr_func = &BlockMatching<T>::SAD;
-#pragma omp parallel for
-	for (int Y_b = 0; Y_b < _cells_height; Y_b++) {
-		int y_b = Y_b * _block_size;
-		for (int X_b = 0; X_b < _cells_width; X_b++) {
-			int x_b = X_b * _block_size;
-			VECTOR_2D<double> MV(.0, .0);
-			T SAD_min;
-			int x_start, x_end;
-			int y_start, y_end;
-			// Compute start and end coordinates
-			if (search_range < 0) {
-				x_start = 1 - _block_size;
-				x_end = _width - 1;
-				y_start = 1 - _block_size;
-				y_end = _height - 1;
-			} else {
-				x_start = std::max(x_b - (search_range / 2), 1 - _block_size);
-				x_end = std::min(x_b + search_range / 2, _width - 1);
-				y_start = std::max(y_b - (search_range / 2), 1 - _block_size);
-				y_end = std::min(y_b + search_range / 2, _height - 1);
-			}
-			SAD_min = fabs((this->*Corr_func)(
-			    x_b, y_b,
-			    x_start, y_start,
-			    _block_size, _block_size));
-			for (int y = y_start; y <= y_end; y++) {
-				for (int x = x_start; x <= x_end; x++) {
-					VECTOR_2D<double> v_tmp((double)x - x_b, (double)y - y_b);
-					T SAD_tmp = fabs((this->*Corr_func)(
-					    x_b, y_b,
-					    x, y,
-					    _block_size, _block_size));
-					if (SAD_tmp < SAD_min) {
-						SAD_min = SAD_tmp;
-						MV = v_tmp;
-					} else if (fabs(SAD_tmp - SAD_min) < 1E-6) {
-						if (Vector_2D::norm(MV) >= Vector_2D::norm(v_tmp)) {
-							SAD_min = SAD_tmp;
-							MV = v_tmp;
-						}
-					}
-				}
-			}
-			_motion_vector.ref(X_b, Y_b) = MV;
-		}
-	}
-	_MV_forward = true;
-}
-
-template <class T>
-void
 BlockMatching<T>::block_matching(const int search_range)
 {
 	const double coeff_SAD = 1.0;
@@ -92,7 +30,17 @@ BlockMatching<T>::block_matching(const int search_range)
 	}
 	// Initialize
 	_motion_vector.reset(_cells_width, _cells_height);
-	double max_min_prev_global = _image_prev.max() - _image_prev.min();
+	ImgVector<VECTOR_2D<double> >* grad_prev = this->grad_prev(0, 0, _image_prev.width(), _image_prev.height());
+	ImgVector<double> grad_prev_x(grad_prev->width(), grad_prev->height());
+	ImgVector<double> grad_prev_y(grad_prev->width(), grad_prev->height());
+	for (int i = 0; i < grad_prev->size(); i++) {
+		grad_prev_x[i] = grad_prev->get(i).x;
+		grad_prev_y[i] = grad_prev->get(i).y;
+	}
+	delete grad_prev;
+	grad_prev = nullptr;
+	T grad_prev_max_min_x = grad_prev_x.max() - grad_prev_x.min();
+	T grad_prev_max_min_y = grad_prev_y.max() - grad_prev_y.min();
 	// Compute Motion Vectors
 #pragma omp parallel for
 	for (int Y_b = 0; Y_b < _cells_height; Y_b++) {
@@ -100,22 +48,17 @@ BlockMatching<T>::block_matching(const int search_range)
 		for (int X_b = 0; X_b < _cells_width; X_b++) {
 			int x_b = X_b * _block_size;
 			// Check the block can be estimated
-			double max_min_prev =
-			    _image_prev.max(x_b, y_b, _block_size, _block_size)
-			    - _image_prev.min(x_b, y_b, _block_size, _block_size);
-			ImgVector<VECTOR_2D<double> >* grad_prev_local = nullptr;
-			ImgVector<double> grad_arg_prev(_block_size, _block_size);
-			grad_prev_local  = this->grad_prev(x_b, y_b, _block_size, _block_size);
+			ImgVector<VECTOR_2D<double> >* grad_prev_local = this->grad_prev(x_b, y_b, _block_size, _block_size);
+			ImgVector<double> grad_prev_local_x(_block_size, _block_size);
+			ImgVector<double> grad_prev_local_y(_block_size, _block_size);
 			for (int i = 0; i < grad_prev_local->size(); i++) {
-				if (grad_prev_local->get(i).x < 0) {
-					(*grad_prev_local)[i] = -grad_prev_local->get(i);
-				}
-				grad_arg_prev[i] = Vector_2D::arg(grad_prev_local->get(i));
+				grad_prev_local_x[i] = grad_prev_local->get(i).x;
+				grad_prev_local_y[i] = grad_prev_local->get(i).y;
 			}
 			delete grad_prev_local;
 			grad_prev_local = nullptr;
-			if (max_min_prev / max_min_prev_global < 0.07
-			    || grad_arg_prev.variance() < 0.05) {
+			if ((grad_prev_local_x.max() - grad_prev_local_x.min()) / grad_prev_max_min_x < 0.1
+			    || (grad_prev_local_y.max() - grad_prev_local_y.min()) / grad_prev_max_min_y < 0.1) {
 				if (estimated.get_zeropad(X_b - 1, Y_b) || estimated.get_zeropad(X_b, Y_b - 1)) {
 					flat_blocks.push_front(VECTOR_2D<int>(X_b, Y_b));
 				} else {

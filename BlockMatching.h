@@ -59,7 +59,6 @@ class BlockMatching
 		// Search in the range of [-floor(search_range / 2), floor(search_range / 2)]
 		void block_matching(const int search_range = 41);
 		ImgVector<VECTOR_2D<double> >* grad_prev(const int top_left_x, const int top_left_y, const int crop_width, const int crop_height);
-		void block_matching_forward(const int search_range = 41); // search_range < 0 then do full search
 
 		void block_matching_subset(const int search_range = 41);
 

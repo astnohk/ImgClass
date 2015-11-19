@@ -167,15 +167,14 @@ double
 ImgStatistics::mean(int center_x, int center_y, int window_width, int window_height)
 {
 	double sum = 0.0;
-	int x_tmp, y_tmp;
 
 	for (int y = 0; y < window_height; y++) {
-		y_tmp = center_y + y - (window_height - 1) / 2;
+		int y_tmp = center_y + y - (window_height - 1) / 2;
 		if (y_tmp < 0 || _height <= y_tmp) {
 			continue;
 		}
 		for (int x = 0; x < window_width; x++) {
-			x_tmp = center_x + x - (window_width - 1) / 2;
+			int x_tmp = center_x + x - (window_width - 1) / 2;
 			if (x_tmp < 0 || _width <= x_tmp) {
 				continue;
 			}

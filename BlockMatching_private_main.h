@@ -161,9 +161,8 @@ template <class T>
 ImgVector<VECTOR_2D<double> > *
 BlockMatching<T>::grad_prev(const int top_left_x, const int top_left_y, const int crop_width, const int crop_height)
 {
-	ImgVector<VECTOR_2D<double> >* gradients = nullptr;
+	ImgVector<VECTOR_2D<double> >* gradients = new ImgVector<VECTOR_2D<double> >(crop_width, crop_height);
 
-	gradients = new ImgVector<VECTOR_2D<double> >(crop_width, crop_height);
 	for (int y = 0; y < crop_height; y++) {
 		for (int x = 0; x < crop_width; x++) {
 			gradients->ref(x, y).x =

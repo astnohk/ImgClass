@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <list>
 #include <new>
 #include <stdexcept>
 

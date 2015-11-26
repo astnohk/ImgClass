@@ -47,10 +47,10 @@ class MotionCompensation
 		double get_image_compensated(int x, int y);
 
 		ImgVector<VECTOR_2D<double> >& ref_vector(void); // Get reference to ImgVector<VECTOR_2D<double>>
-		VECTOR_2D<double>& ref_vector(int x, int y); // Get reference to motion vector[y][x]
+		VECTOR_2D<double>& at_vector(int x, int y); // Get reference to motion vector[y][x]
 
 		ImgVector<double>& ref_image_compensated(void); // Get reference to the compensated image
-		double& ref_image_compensated(int x, int y); // Get reference to the compensated image
+		double& at_image_compensated(int x, int y); // Get reference to the compensated image
 		double& operator[](int n); // Get reference to compensated_image
 
 		void create_image_compensated(ImgVector<bool> *mask = nullptr);

@@ -69,7 +69,7 @@ MotionCompensation::MotionCompensation(int width, int height, const double *imag
 			int Y = (int)floor(y * v_height / height);
 			for (int x = 0; x < width; x++) {
 				int X = (int)floor(x * v_width / width);
-				_vector.ref(x, y) = vector[v_width * Y + X];
+				_vector.at(x, y) = vector[v_width * Y + X];
 			}
 		}
 		_image_compensated.reset(width, height);
@@ -101,7 +101,7 @@ MotionCompensation::MotionCompensation(const ImgVector<double> &image_prev, cons
 			int Y = (int)floor(y * vector.height() / _height);
 			for (int x = 0; x < _width; x++) {
 				int X = (int)floor(x * vector.width() / _width);
-				_vector.ref(x, y) = vector.get(X, Y);
+				_vector.at(x, y) = vector.get(X, Y);
 			}
 		}
 	}
@@ -140,7 +140,7 @@ MotionCompensation::MotionCompensation(const ImgVector<double> *image_prev, cons
 			int Y = (int)floor(y * vector->height() / _height);
 			for (int x = 0; x < _width; x++) {
 				int X = (int)floor(x * vector->width() / _width);
-				_vector.ref(x, y) = vector->get(X, Y);
+				_vector.at(x, y) = vector->get(X, Y);
 			}
 		}
 	}
@@ -227,7 +227,7 @@ MotionCompensation::set(int width, int height, const double *image_prev, const d
 		int Y = (int)floor(y * v_height / height);
 		for (int x = 0; x < width; x++) {
 			int X = (int)floor(x * v_width / width);
-			_vector.ref(x, y) = vector[v_width * Y + X];
+			_vector.at(x, y) = vector[v_width * Y + X];
 		}
 	}
 	_image_compensated.reset(_width, _height);
@@ -259,7 +259,7 @@ MotionCompensation::set(const ImgVector<double> &image_prev, const ImgVector<dou
 			int Y = (int)floor(y * vector.height() / _height);
 			for (int x = 0; x < _width; x++) {
 				int X = (int)floor(x * vector.width() / _width);
-				_vector.ref(x, y) = vector.get(X, Y);
+				_vector.at(x, y) = vector.get(X, Y);
 			}
 		}
 	}
@@ -304,7 +304,7 @@ MotionCompensation::set(const ImgVector<double> *image_prev, const ImgVector<dou
 			int Y = (int)floor(y * vector->height() / _height);
 			for (int x = 0; x < _width; x++) {
 				int X = (int)floor(x * vector->width() / _width);
-				_vector.ref(x, y) = vector->get(X, Y);
+				_vector.at(x, y) = vector->get(X, Y);
 			}
 		}
 	}
@@ -391,9 +391,9 @@ MotionCompensation::ref_vector(void) // Get reference to ImgVector<VECTOR_2D<dou
 }
 
 VECTOR_2D<double> &
-MotionCompensation::ref_vector(int x, int y) // Get reference to motion vector[y][x]
+MotionCompensation::at_vector(int x, int y) // Get reference to motion vector[y][x]
 {
-	return _vector.ref(x, y);
+	return _vector.at(x, y);
 }
 
 
@@ -407,7 +407,7 @@ MotionCompensation::ref_image_compensated(void)
 }
 
 double &
-MotionCompensation::ref_image_compensated(int x, int y)
+MotionCompensation::at_image_compensated(int x, int y)
 {
 	if (motion_compensated == false) {
 		this->create_image_compensated();

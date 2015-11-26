@@ -39,9 +39,9 @@ class ImgVector
 		T* data(void) const;
 
 		T& operator[](int n);
-		T& ref(int x, int y);
-		T& ref_repeat(int x, int y);
-		T& ref_mirror(int x, int y);
+		T& at(int x, int y);
+		T& at_repeat(int x, int y);
+		T& at_mirror(int x, int y);
 
 		// Get image intencity
 		T get(int n) const;

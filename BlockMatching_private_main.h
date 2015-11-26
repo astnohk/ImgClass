@@ -65,10 +65,10 @@ BlockMatching<T>::block_matching(const int search_range)
 				} else {
 					flat_blocks.push_back(VECTOR_2D<int>(X_b, Y_b));
 				}
-				_motion_vector.ref(X_b, Y_b) = 0;
+				_motion_vector.at(X_b, Y_b) = 0;
 				continue;
 			}
-			estimated.ref(X_b, Y_b) = true;
+			estimated.at(X_b, Y_b) = true;
 
 			VECTOR_2D<double> MV(.0, .0);
 			T SAD_min;
@@ -120,7 +120,7 @@ BlockMatching<T>::block_matching(const int search_range)
 					}
 				}
 			}
-			_motion_vector.ref(X_b, Y_b) = MV;
+			_motion_vector.at(X_b, Y_b) = MV;
 		}
 	}
 	// Set Vector to skipped pixels
@@ -135,25 +135,25 @@ BlockMatching<T>::block_matching(const int search_range)
 		// Compare 4 adjacent
 		if (estimated.get_mirror(X_b, Y_b - 1)
 		    && (MAD_tmp = this->MAD(x_b, y_b, x_b, y_b - _block_size, _block_size, _block_size, _image_prev, _image_prev)) < MAD_min) {
-			_motion_vector.ref(X_b, Y_b) = _motion_vector.get_mirror(X_b, Y_b - 1);
+			_motion_vector.at(X_b, Y_b) = _motion_vector.get_mirror(X_b, Y_b - 1);
 			MAD_min = MAD_tmp;
 		}
 		if (estimated.get_mirror(X_b - 1, Y_b)
 		    && (MAD_tmp = this->MAD(x_b, y_b, x_b - _block_size, y_b, _block_size, _block_size, _image_prev, _image_prev)) < MAD_min) {
-			_motion_vector.ref(X_b, Y_b) = _motion_vector.get_mirror(X_b - 1, Y_b);
+			_motion_vector.at(X_b, Y_b) = _motion_vector.get_mirror(X_b - 1, Y_b);
 			MAD_min = MAD_tmp;
 		}
 		if (estimated.get_mirror(X_b, Y_b + 1)
 		    && (MAD_tmp = this->MAD(x_b, y_b, x_b, y_b + _block_size, _block_size, _block_size, _image_prev, _image_prev)) < MAD_min) {
-			_motion_vector.ref(X_b, Y_b) = _motion_vector.get_mirror(X_b, Y_b + 1);
+			_motion_vector.at(X_b, Y_b) = _motion_vector.get_mirror(X_b, Y_b + 1);
 			MAD_min = MAD_tmp;
 		}
 		if (estimated.get_mirror(X_b + 1, Y_b)
 		    && (MAD_tmp = this->MAD(x_b, y_b, x_b + _block_size, y_b, _block_size, _block_size, _image_prev, _image_prev)) < MAD_min) {
-			_motion_vector.ref(X_b, Y_b) = _motion_vector.get_mirror(X_b + 1, Y_b);
+			_motion_vector.at(X_b, Y_b) = _motion_vector.get_mirror(X_b + 1, Y_b);
 			MAD_min = MAD_tmp;
 		}
-		estimated.ref(X_b, Y_b) = true;
+		estimated.at(X_b, Y_b) = true;
 	}
 	_MV_forward = false;
 }
@@ -166,10 +166,10 @@ BlockMatching<T>::grad_prev(const int top_left_x, const int top_left_y, const in
 
 	for (int y = 0; y < crop_height; y++) {
 		for (int x = 0; x < crop_width; x++) {
-			gradients->ref(x, y).x =
+			gradients->at(x, y).x =
 			    _image_prev.get_mirror(top_left_x + x + 1, top_left_y + y)
 			    - _image_prev.get_mirror(top_left_x + x, top_left_y + y);
-			gradients->ref(x, y).y =
+			gradients->at(x, y).y =
 			    _image_prev.get_mirror(top_left_x + x, top_left_y + y + 1)
 			    - _image_prev.get_mirror(top_left_x + x, top_left_y + y);
 		}
@@ -337,7 +337,7 @@ BlockMatching<T>::block_matching_subset(const int search_range)
 					}
 				}
 			}
-			_motion_vector.ref(X_b, Y_b) = MV;
+			_motion_vector.at(X_b, Y_b) = MV;
 		}
 	}
 	_MV_forward = false;

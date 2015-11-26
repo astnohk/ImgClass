@@ -101,11 +101,11 @@ BlockMatching<T>::ref(int x, int y)
 // ----- Get Vector Field data -----
 template <class T>
 VECTOR_2D<double>
-BlockMatching<T>::get(int x, int y)
+BlockMatching<T>::at(int x, int y)
 {
 	if (_motion_vector.isNULL()) {
 		this->block_matching();
 	}
-	return _motion_vector.get(x, y);
+	return _motion_vector.at(x, y);
 }
 

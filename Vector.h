@@ -45,6 +45,9 @@ struct VECTOR_2D
 
 		template<class Type> friend double norm(const VECTOR_2D<Type> &vector);
 		template<class Type> friend double arg(const VECTOR_2D<Type> &vector);
+		template<class Type> friend VECTOR_2D<Type> floor(const VECTOR_2D<Type> &vector);
+		template<class Type> friend VECTOR_2D<Type> round(const VECTOR_2D<Type> &vector);
+		template<class Type> friend VECTOR_2D<Type> ceil(const VECTOR_2D<Type> &vector);
 };
 
 
@@ -64,6 +67,9 @@ template<class Type, class Tval> VECTOR_2D<Type> operator/(VECTOR_2D<Type> lvect
 namespace Vector_2D {
 	template<class Type> double norm(const VECTOR_2D<Type>& vector);
 	template<class Type> double arg(const VECTOR_2D<Type>& vector);
+	template<class Type> VECTOR_2D<Type> floor(const VECTOR_2D<Type> &vector);
+	template<class Type> VECTOR_2D<Type> round(const VECTOR_2D<Type> &vector);
+	template<class Type> VECTOR_2D<Type> ceil(const VECTOR_2D<Type> &vector);
 }
 
 #include "Vector_private.h"

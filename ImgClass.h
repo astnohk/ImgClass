@@ -38,11 +38,11 @@ class ImgVector
 		// Data access
 		T* data(void) const;
 
+		// Reference to the pixel
 		T& operator[](int n);
 		T& at(int x, int y);
 		T& at_repeat(int x, int y);
 		T& at_mirror(int x, int y);
-
 		// Get image intencity
 		T get(int n) const;
 		T get(int x, int y) const;

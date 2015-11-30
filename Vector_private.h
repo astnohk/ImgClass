@@ -217,5 +217,32 @@ namespace Vector_2D {
 	{
 		return atan2(vector.y, vector.x);
 	}
+
+	template<class Type>
+	VECTOR_2D<Type>
+	floor(VECTOR_2D<Type> vector)
+	{
+		vector.x = floor(vector.x);
+		vector.y = floor(vector.y);
+		return vector;
+	}
+
+	template<class Type>
+	VECTOR_2D<Type>
+	round(VECTOR_2D<Type> vector)
+	{
+		vector.x = round(vector.x);
+		vector.y = round(vector.y);
+		return vector;
+	}
+
+	template<class Type>
+	VECTOR_2D<Type>
+	ceil(VECTOR_2D<Type> vector)
+	{
+		vector.x = ceil(vector.x);
+		vector.y = ceil(vector.y);
+		return vector;
+	}
 }
 

@@ -340,14 +340,13 @@ template <class T>
 T &
 ImgVector<T>::operator[](int n)
 {
-	assert(0 <= n && n < _width * _height);
 	return _data[n];
 }
 
 
 template <class T>
 T &
-ImgVector<T>::ref(int x, int y)
+ImgVector<T>::at(int x, int y)
 {
 	assert(0 <= x && x < _width && 0 <= y && y < _height);
 	return _data[_width * y + x];
@@ -356,7 +355,7 @@ ImgVector<T>::ref(int x, int y)
 
 template <class T>
 T &
-ImgVector<T>::ref_repeat(int x, int y)
+ImgVector<T>::at_repeat(int x, int y)
 {
 	int x_repeat, y_repeat;
 
@@ -376,7 +375,7 @@ ImgVector<T>::ref_repeat(int x, int y)
 
 template <class T>
 T &
-ImgVector<T>::ref_mirror(int x, int y)
+ImgVector<T>::at_mirror(int x, int y)
 {
 	int x_mirror, y_mirror;
 
@@ -687,9 +686,9 @@ ImgVector<T>::crop(int top_left_x, int top_left_y, int crop_width, int crop_heig
 		for (int x = 0; x < crop_height; x++) {
 			if (0 <= top_left_y + y && top_left_y + y < _height
 			    && 0 <= top_left_x + x && top_left_x + x < _width) {
-				tmp->ref(x, y) = _data[_width * (y + top_left_y) + x + top_left_x];
+				tmp->at(x, y) = _data[_width * (y + top_left_y) + x + top_left_x];
 			} else {
-				tmp->ref(x, y) = 0;
+				tmp->at(x, y) = 0;
 			}
 		}
 	}
@@ -847,7 +846,7 @@ ImgVector<T>::resize_bicubic(int W, int H, double min, double max, T (*Nearest_I
 			for (n = 0; n < L; n++) {
 				sum += conv[n] * this->get_mirror((int)floor(dx) + n - L_center, y);
 			}
-			Tmp.ref(x, y) = sum;
+			Tmp.at(x, y) = sum;
 		}
 	}
 	// Vertical convolution

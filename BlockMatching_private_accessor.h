@@ -100,7 +100,7 @@ BlockMatching<T>::at(int x, int y)
 
 // ----- Get Vector Field data -----
 template <class T>
-VECTOR_2D<double>
+const VECTOR_2D<double>
 BlockMatching<T>::get(int x, int y)
 {
 	if (_motion_vector.isNULL()) {

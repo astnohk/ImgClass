@@ -30,29 +30,33 @@ class MotionCompensation
 		MotionCompensation& set(int width, int height, const double *image_prev, const double *image_next, int v_width, int v_height, const VECTOR_2D<double> *vector);
 		MotionCompensation& set(const ImgVector<double> &image_prev, const ImgVector<double> &image_next, const ImgVector<VECTOR_2D<double> > &vector);
 		MotionCompensation& set(const ImgVector<double> *image_prev, const ImgVector<double> *image_next, const ImgVector<VECTOR_2D<double> > *vector);
-		ImgVector<double>& image_prev(int n);
-		ImgVector<double>& image_next(int n);
-		ImgVector<VECTOR_2D<double> >& vector(int n);
 
+		// Accessor
+		// * parameter
 		int width(void) const;
 		int height(void) const;
 
+		// * reference
+		const ImgVector<VECTOR_2D<double> >& ref_vector(void);
+		const ImgVector<double>& ref_image_compensated(void);
+
+		double& at_image_compensated(int x, int y);
+		double& operator[](int n); // Get reference to compensated_image
+
+		// * original image intensity
 		double get_image_prev(int n) const;
 		double get_image_prev(int x, int y) const;
 		double get_image_next(int n) const;
 		double get_image_next(int x, int y) const;
-		VECTOR_2D<double> get_vector(int n) const;
-		VECTOR_2D<double> get_vector(int x, int y) const;
+		// * vector
+		// returns with qualifier const to avoid to mistake get_vector() for at_vector()
+		const VECTOR_2D<double> get_vector(int n) const;
+		const VECTOR_2D<double> get_vector(int x, int y) const;
+		// * compensated image
 		double get_image_compensated(int n);
 		double get_image_compensated(int x, int y);
 
-		ImgVector<VECTOR_2D<double> >& ref_vector(void); // Get reference to ImgVector<VECTOR_2D<double>>
-		VECTOR_2D<double>& at_vector(int x, int y); // Get reference to motion vector[y][x]
-
-		ImgVector<double>& ref_image_compensated(void); // Get reference to the compensated image
-		double& at_image_compensated(int x, int y); // Get reference to the compensated image
-		double& operator[](int n); // Get reference to compensated_image
-
+		// Motion compensation methods
 		void create_image_compensated(ImgVector<bool> *mask = nullptr);
 		void create_image_compensated_forward(ImgVector<bool> *mask = nullptr);
 		void create_image_estimated(double estimate_frame, ImgVector<bool> *mask = nullptr);

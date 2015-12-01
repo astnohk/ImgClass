@@ -24,7 +24,6 @@ class CrossCorrelation
 		CrossCorrelation& operator=(const CrossCorrelation &copy);
 		int width(void);
 		int height(void);
-		double& operator[](int n);
 		double NCC(int x, int y, int window_width, int window_height);
 		double TruncatedNCC(int x, int y, int window_width, int window_height);
 };

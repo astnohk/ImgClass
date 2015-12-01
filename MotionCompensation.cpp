@@ -325,6 +325,43 @@ MotionCompensation::height(void) const
 	return _height;
 }
 
+// Reference
+const ImgVector<VECTOR_2D<double> > &
+MotionCompensation::ref_vector(void)
+{
+	return _vector;
+}
+
+const ImgVector<double> &
+MotionCompensation::ref_image_compensated(void)
+{
+	if (motion_compensated == false) {
+		this->create_image_compensated();
+	}
+	return _image_compensated;
+}
+
+
+double &
+MotionCompensation::at_image_compensated(int x, int y)
+{
+	if (motion_compensated == false) {
+		this->create_image_compensated();
+	}
+	return _image_compensated[_width * y + x];
+}
+
+double &
+MotionCompensation::operator[](int n) // Get reference to the compensated image[n]
+{
+	if (motion_compensated == false) {
+		this->create_image_compensated();
+	}
+	return _image_compensated[n];
+}
+
+
+// Get
 double
 MotionCompensation::get_image_prev(int n) const
 {
@@ -380,48 +417,6 @@ MotionCompensation::get_image_compensated(int x, int y)
 	printf("x %d, y %d, _width %d, _height %d\n", x, y, _width, _height);
 	assert(0 <= x && x < _width && 0 <= y && y < _height);
 	return _image_compensated.get(x, y);
-}
-
-
-// return Reference
-ImgVector<VECTOR_2D<double> > &
-MotionCompensation::ref_vector(void) // Get reference to ImgVector<VECTOR_2D<double> >
-{
-	return _vector;
-}
-
-VECTOR_2D<double> &
-MotionCompensation::at_vector(int x, int y) // Get reference to motion vector[y][x]
-{
-	return _vector.at(x, y);
-}
-
-
-ImgVector<double> &
-MotionCompensation::ref_image_compensated(void)
-{
-	if (motion_compensated == false) {
-		this->create_image_compensated();
-	}
-	return _image_compensated;
-}
-
-double &
-MotionCompensation::at_image_compensated(int x, int y)
-{
-	if (motion_compensated == false) {
-		this->create_image_compensated();
-	}
-	return _image_compensated[_width * y + x];
-}
-
-double &
-MotionCompensation::operator[](int n) // Get reference to the compensated image[n]
-{
-	if (motion_compensated == false) {
-		this->create_image_compensated();
-	}
-	return _image_compensated[n];
 }
 
 

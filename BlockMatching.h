@@ -52,7 +52,8 @@ class BlockMatching
 		VECTOR_2D<double>& at(int x, int y);
 
 		// Get data
-		VECTOR_2D<double> get(int x, int y); // NOT const because it will make new motion vector when it haven't done block matching
+		// returns const to avoid to mistake get() for at()
+		const VECTOR_2D<double> get(int x, int y); // NOT const method because it will make new motion vector when it haven't done block matching
 
 		T MAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height, const ImgVector<T>& img_prev, const ImgVector<T>& img_next);
 		// Block Matching methods

@@ -32,9 +32,11 @@ CrossCorrelation::CrossCorrelation(ImgStatistics &img0, ImgStatistics &img1)
 	}
 }
 
+
 CrossCorrelation::~CrossCorrelation(void)
 {
 }
+
 
 CrossCorrelation &
 CrossCorrelation::copy(const CrossCorrelation &copy)
@@ -60,6 +62,9 @@ CrossCorrelation::operator=(const CrossCorrelation &copy)
 	return *this;
 }
 
+
+
+
 int
 CrossCorrelation::width(void)
 {
@@ -71,6 +76,9 @@ CrossCorrelation::height(void)
 {
 	return _height;
 }
+
+
+
 
 double
 CrossCorrelation::NCC(int x, int y, int window_width, int window_height)

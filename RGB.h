@@ -11,19 +11,15 @@ namespace ImgClass {
 	template <class T>
 	class RGB
 	{
-		private:
-			T _red;
-			T _green;
-			T _blue;
 		public:
+			T R;
+			T G;
+			T B;
+
+			// Constructor
 			RGB(void);
 			RGB(const T& red, const T& green, const T& blue);
 			template<class RT> RGB(const RT& value);
-
-			// Data access
-			T R(void);
-			T G(void);
-			T B(void);
 
 			// Operators
 			template<class RT> RGB<T>& operator=(const RGB<RT>& value);

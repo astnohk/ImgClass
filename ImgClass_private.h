@@ -392,7 +392,7 @@ ImgVector<T>::at_mirror(int x, int y)
 
 
 template <class T>
-T
+const T
 ImgVector<T>::get(int n) const
 {
 	assert(0 <= n && n < _width * _height);
@@ -401,7 +401,7 @@ ImgVector<T>::get(int n) const
 
 
 template <class T>
-T
+const T
 ImgVector<T>::get(int x, int y) const
 {
 	assert(0 <= x && x < _width
@@ -411,7 +411,7 @@ ImgVector<T>::get(int x, int y) const
 
 
 template <class T>
-T
+const T
 ImgVector<T>::get_zeropad(int x, int y) const
 {
 	T zero = T();
@@ -426,7 +426,7 @@ ImgVector<T>::get_zeropad(int x, int y) const
 
 
 template <class T>
-T
+const T
 ImgVector<T>::get_repeat(int x, int y) const
 {
 	int x_repeat, y_repeat;
@@ -446,7 +446,7 @@ ImgVector<T>::get_repeat(int x, int y) const
 
 
 template <class T>
-T
+const T
 ImgVector<T>::get_mirror(int x, int y) const
 {
 	int x_mirror, y_mirror;
@@ -465,7 +465,7 @@ ImgVector<T>::get_mirror(int x, int y) const
 
 // Get continuous value interpolated by bicubic
 template <class T>
-T
+const T
 ImgVector<T>::get_zeropad(double x, double y, double B, double C) const
 {
 	double bicubic_x[4];
@@ -487,7 +487,7 @@ ImgVector<T>::get_zeropad(double x, double y, double B, double C) const
 
 
 template <class T>
-T
+const T
 ImgVector<T>::get_repeat(double x, double y, double B, double C) const
 {
 	double bicubic_x[4];
@@ -509,7 +509,7 @@ ImgVector<T>::get_repeat(double x, double y, double B, double C) const
 
 
 template <class T>
-T
+const T
 ImgVector<T>::get_mirror(double x, double y, double B, double C) const
 {
 	double bicubic_x[4];
@@ -533,7 +533,7 @@ ImgVector<T>::get_mirror(double x, double y, double B, double C) const
 
 
 template <class T>
-T
+const T
 ImgVector<T>::min(void) const
 {
 	if (_width <= 0 || _height <= 0) {
@@ -550,7 +550,7 @@ ImgVector<T>::min(void) const
 
 
 template <class T>
-T
+const T
 ImgVector<T>::max(void) const
 {
 	if (_width <= 0 || _height <= 0) {
@@ -567,7 +567,7 @@ ImgVector<T>::max(void) const
 
 
 template <class T>
-T
+const T
 ImgVector<T>::min(int top_left_x, int top_left_y, int crop_width, int crop_height) const
 {
 	if (_width <= 0 || _height <= 0) {
@@ -592,7 +592,7 @@ ImgVector<T>::min(int top_left_x, int top_left_y, int crop_width, int crop_heigh
 
 
 template <class T>
-T
+const T
 ImgVector<T>::max(int top_left_x, int top_left_y, int crop_width, int crop_height) const
 {
 	if (_width <= 0 || _height <= 0) {
@@ -620,7 +620,7 @@ ImgVector<T>::max(int top_left_x, int top_left_y, int crop_width, int crop_heigh
 
 // ----- Statistics -----
 template <class T>
-T
+const T
 ImgVector<T>::variance() const
 {
 	double N = double(_width * _height);
@@ -637,7 +637,7 @@ ImgVector<T>::variance() const
 }
 
 template <class T>
-T
+const T
 ImgVector<T>::variance(const int top_left_x, const int top_left_y, const int crop_width, const int crop_height) const
 {
 	double N = .0;

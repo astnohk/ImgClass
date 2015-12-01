@@ -43,25 +43,26 @@ class ImgVector
 		T& at(int x, int y);
 		T& at_repeat(int x, int y);
 		T& at_mirror(int x, int y);
+
 		// Get image intencity
-		T get(int n) const;
-		T get(int x, int y) const;
+		const T get(int n) const; // return const to avoid to mistake get() for at()
+		const T get(int x, int y) const;
 
-		T get_zeropad(int x, int y) const;
-		T get_repeat(int x, int y) const;
-		T get_mirror(int x, int y) const;
+		const T get_zeropad(int x, int y) const;
+		const T get_repeat(int x, int y) const;
+		const T get_mirror(int x, int y) const;
 
-		T get_zeropad(double x, double y, double B = 0.0, double C = (1.0 / 2.0)) const;
-		T get_repeat(double x, double y, double B = 0.0, double C = (1.0 / 2.0)) const;
-		T get_mirror(double x, double y, double B = 0.0, double C = (1.0 / 2.0)) const;
+		const T get_zeropad(double x, double y, double B = 0.0, double C = (1.0 / 2.0)) const;
+		const T get_repeat(double x, double y, double B = 0.0, double C = (1.0 / 2.0)) const;
+		const T get_mirror(double x, double y, double B = 0.0, double C = (1.0 / 2.0)) const;
 
-		T min(void) const;
-		T max(void) const;
-		T min(int top_left_x, int top_left_y, int crop_width, int crop_height) const;
-		T max(int top_left_x, int top_left_y, int crop_width, int crop_height) const;
+		const T min(void) const;
+		const T max(void) const;
+		const T min(int top_left_x, int top_left_y, int crop_width, int crop_height) const;
+		const T max(int top_left_x, int top_left_y, int crop_width, int crop_height) const;
 
-		T variance(void) const;
-		T variance(const int top_left_x, const int top_left_y, const int crop_width, const int crop_height) const;
+		const T variance(void) const;
+		const T variance(const int top_left_x, const int top_left_y, const int crop_width, const int crop_height) const;
 
 		// Cropping
 		ImgVector<T>* crop(int top_left_x, int top_left_y, int crop_width, int crop_height) const;

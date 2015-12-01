@@ -386,13 +386,13 @@ MotionCompensation::get_image_next(int x, int y) const
 	return _image_next.get(x, y);
 }
 
-VECTOR_2D<double>
+const VECTOR_2D<double>
 MotionCompensation::get_vector(int n) const
 {
 	return _vector.get(n);
 }
 
-VECTOR_2D<double>
+const VECTOR_2D<double>
 MotionCompensation::get_vector(int x, int y) const
 {
 	return _vector.get(x, y);

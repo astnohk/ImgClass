@@ -204,32 +204,32 @@ BlockMatching<T>::get_connected_region_list(ImgVector<int> region_map) // get co
 				tmp_list.push_back(std::list<VECTOR_2D<int> >(0)); // Add new region pixel list
 				VECTOR_2D<int> r(x, y);
 				tmp_list.back().push_back(r); // Add first element
-				for (std::list<VECTOR_2D<int> >::reverse_iterator rite = tmp_list.back().rbegin();
-				    rite != tmp_list.back().rend();
-				    ++rite) {
-					if (region_map.get_zeropad(rite->x + 1, rite->y) == num) {
-						region_map.at(rite->x + 1, rite->y) = 0;
-						r.x = rite->x + 1;
-						r.y = rite->y;
-						tmp_list.back().push_front(r);
+				for (std::list<VECTOR_2D<int> >::const_iterator ite = tmp_list.back().rbegin();
+				    ite != tmp_list.back().rend();
+				    ++ite) {
+					if (region_map.get_zeropad(ite->x + 1, ite->y) == num) {
+						region_map.at(ite->x + 1, ite->y) = 0;
+						r.x = ite->x + 1;
+						r.y = ite->y;
+						tmp_list.back().push_back(r);
 					}
-					if (region_map.get_zeropad(rite->x, rite->y + 1) == num) {
-						region_map.at(rite->x, rite->y + 1) = 0;
-						r.x = rite->x;
-						r.y = rite->y + 1;
-						tmp_list.back().push_front(r);
+					if (region_map.get_zeropad(ite->x, ite->y + 1) == num) {
+						region_map.at(ite->x, ite->y + 1) = 0;
+						r.x = ite->x;
+						r.y = ite->y + 1;
+						tmp_list.back().push_back(r);
 					}
-					if (region_map.get_zeropad(rite->x - 1, rite->y) == num) {
-						region_map.at(rite->x - 1, rite->y) = 0;
-						r.x = rite->x - 1;
-						r.y = rite->y;
-						tmp_list.back().push_front(r);
+					if (region_map.get_zeropad(ite->x - 1, ite->y) == num) {
+						region_map.at(ite->x - 1, ite->y) = 0;
+						r.x = ite->x - 1;
+						r.y = ite->y;
+						tmp_list.back().push_back(r);
 					}
-					if (region_map.get_zeropad(rite->x, rite->y + 1) == num) {
-						region_map.at(rite->x, rite->y + 1) = 0;
-						r.x = rite->x;
-						r.y = rite->y + 1;
-						tmp_list.back().push_front(r);
+					if (region_map.get_zeropad(ite->x, ite->y + 1) == num) {
+						region_map.at(ite->x, ite->y + 1) = 0;
+						r.x = ite->x;
+						r.y = ite->y + 1;
+						tmp_list.back().push_back(r);
 					}
 				}
 			}

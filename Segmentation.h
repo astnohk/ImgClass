@@ -1,6 +1,10 @@
 #include "ImgClass.h"
 #include "Vector.h"
 
+#if defined(_OPENMP)
+#include <omp.h>
+#endif
+
 
 
 #ifndef LIB_ImgClass_Segmentation
@@ -15,14 +19,15 @@ class Segmentation
 		double _kernel_spatial;
 		double _kernel_intensity;
 		ImgVector<T> _image;
+		ImgVector<VECTOR_2D<double> > _shift_vector;
 		ImgVector<int> _segments;
 
 	public:
 		// Constructor
 		Segmentation(void);
 		explicit Segmentation(const Segmentation<T>& segments); // Copy constructor
-		Segmentation(const ImgVector<T>* image, const double kernel_spatial_radius = 10.0, const double kernel_intensity_radius = 0.2);
-		Segmentation<T>& reset(const ImgVector<T>* image, const double kernel_spatial_radius = 10.0, const double kernel_intensity_radius = 0.2);
+		Segmentation(const ImgVector<T>* image, const double kernel_spatial_radius = 16.0, const double kernel_intensity_radius = 0.2);
+		Segmentation<T>& reset(const ImgVector<T>* image, const double kernel_spatial_radius = 16.0, const double kernel_intensity_radius = 0.2);
 		Segmentation<T>& copy(const Segmentation<T>* segments);
 		Segmentation<T>& copy(const Segmentation<T>& segments);
 		// Destructor
@@ -47,8 +52,8 @@ class Segmentation
 		int get_mirror(int x, int y) const;
 
 		// Mean Shift segmentation
-		void Segmentation_MeanShift(int Iter_Max = 64);
-		VECTOR_2D<double> MeanShift_Grayscale(const int x, const int y, int Iter_Max = 64);
+		void Segmentation_MeanShift(int Iter_Max = 128);
+		const VECTOR_2D<double> MeanShift_Grayscale(const int x, const int y, int Iter_Max);
 };
 
 #include "Segmentation_private.h"

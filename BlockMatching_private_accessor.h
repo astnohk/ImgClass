@@ -54,13 +54,6 @@ BlockMatching<T>::isNULL(void)
 	}
 }
 
-template <class T>
-bool
-BlockMatching<T>::isForward(void)
-{
-	return _MV_forward;
-}
-
 
 
 

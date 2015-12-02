@@ -17,10 +17,10 @@ template <class T>
 void
 BlockMatching<T>::block_matching(const int search_range)
 {
-	if (_cells_width > 0 && _cells_height > 0) {
-		block_matching_lattice(search_range);
-	} else {
+	if (_connected_regions.size() > 0) {
 		block_matching_arbitrary_shaped(search_range);
+	} else {
+		block_matching_lattice(search_range);
 	}
 }
 

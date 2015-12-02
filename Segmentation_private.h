@@ -222,32 +222,73 @@ template <class T>
 void
 Segmentation<T>::Segmentation_MeanShift(int Iter_Max)
 {
+	int num = 0;
+
 	if (_width <= 0 || _height <= 0) {
 		return;
 	}
+	ImgVector<int> decrease_color(_width, _height);
 #pragma omp parallel for schedule(dynamic)
 	for (int y = 0; y < _height; y++) {
 		for (int x = 0; x < _width; x++) {
 			_shift_vector.at(x, y) = MeanShift_Grayscale(x, y, Iter_Max);
-			_segments.at(x, y) = 255 * _image.get_zeropad((int)round(_shift_vector.get(x, y).x), (int)round(_shift_vector.get(x, y).y));
+			decrease_color.at(x, y) = 1 + int(255.0 * _image.get_zeropad((int)round(_shift_vector.get(x, y).x), (int)round(_shift_vector.get(x, y).y)));
+		}
+	}
+	for (int y = 0; y < _height; y++) {
+		for (int x = 0; x < _width; x++) {
+			if (decrease_color.get(x, y) > 0) {
+				int color = decrease_color.get(x, y);
+				VECTOR_2D<int> r(x, y);
+				std::list<VECTOR_2D<int> > pel_list;
+				pel_list.assign(1, r);
+				for (std::list<VECTOR_2D<int> >::iterator ite = pel_list.begin();
+				    ite != pel_list.end();
+				    ++ite) {
+					if (decrease_color.get_zeropad(ite->x + 1, ite->y) == color) {
+						r.x = ite->x + 1;
+						r.y = ite->y;
+						decrease_color.at(r.x, r.y) = 0;
+						pel_list.push_back(r);
+					}
+					if (decrease_color.get_zeropad(ite->x, ite->y + 1) == color) {
+						r.x = ite->x;
+						r.y = ite->y + 1;
+						decrease_color.at(r.x, r.y) = 0;
+						pel_list.push_back(r);
+					}
+					if (decrease_color.get_zeropad(ite->x - 1, ite->y) == color) {
+						r.x = ite->x - 1;
+						r.y = ite->y;
+						decrease_color.at(r.x, r.y) = 0;
+						pel_list.push_back(r);
+					}
+					if (decrease_color.get_zeropad(ite->x, ite->y - 1) == color) {
+						r.x = ite->x;
+						r.y = ite->y - 1;
+						decrease_color.at(r.x, r.y) = 0;
+						pel_list.push_back(r);
+					}
+				}
+				for (std::list<VECTOR_2D<int> >::iterator ite = pel_list.begin();
+				    ite != pel_list.end();
+				    ++ite) {
+					_segments.at(ite->x, ite->y) = num;
+				}
+				num++;
+			}
 		}
 	}
 	// Output vectors
 	FILE *fp;
 	fp = fopen("segment_vector.dat", "w");
 	fprintf(fp, "%d %d\n", _width, _height);
-	for (int y = 0; y < _height; y++)
-		for (int x = 0; x < _width; x++)
-			_segments.at(x, y) = 0;
 	for (int y = 0; y < _height; y++) {
 		for (int x = 0; x < _width; x++) {
 			_shift_vector.at(x, y).x -= x;
 			_shift_vector.at(x, y).y -= y;
 			fwrite(&(_shift_vector.get(x, y).x), sizeof(double), 1, fp);
 			fwrite(&(_shift_vector.get(x, y).y), sizeof(double), 1, fp);
-			if (0 <= (int)round(_shift_vector.get(x, y).x) && (int)round(_shift_vector.get(x, y).x) < _width
-			    && 0 <= (int)round(_shift_vector.get(x, y).y) && (int)round(_shift_vector.get(x, y).y) < _height)
-				_segments.at(x + (int)round(_shift_vector.get(x, y).x), y + (int)round(_shift_vector.get(x, y).y)) = 255 * _image.get_zeropad(x, y);
 		}
 	}
 	fclose(fp);

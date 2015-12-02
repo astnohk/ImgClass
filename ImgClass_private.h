@@ -112,11 +112,27 @@ ImgVector<T>::ImgVector(int W, int H, const T *array)
 }
 
 
+
+
 template <class T>
 ImgVector<T>::~ImgVector(void)
 {
 	delete[] _data;
 }
+
+
+
+
+template <class T>
+ImgVector<T>::clear(void)
+{
+	delete[] _data;
+	_data = nullptr;
+	_width = 0;
+	_height = 0;
+}
+
+
 
 
 template <class T>
@@ -196,6 +212,8 @@ ImgVector<T>::reset(int W, int H, const T *array)
 }
 
 
+
+
 template <class T>
 ImgVector<T> &
 ImgVector<T>::copy(const ImgVector<T> &vector)
@@ -272,19 +290,6 @@ ImgVector<T>::operator=(const ImgVector<T> &vector)
 		}
 	}
 	return *this;
-}
-
-
-template <class T>
-void
-ImgVector<T>::set(int x, int y, const T &value)
-{
-	if (x < 0 || _width <= x) {
-		throw std::out_of_range("ImgVector<T>::set(int, int, const T&) : int x");
-	} else if (y < 0 || _height <= y) {
-		throw std::out_of_range("ImgVector<T>::set(int, int, const T&) : int y");
-	}
-	_data[_width * y + x] = value;
 }
 
 

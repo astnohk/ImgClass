@@ -45,7 +45,7 @@ BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<
 	_block_size = BlockSize;
 	_image_prev.copy(image_prev);
 	_image_next.copy(image_next);
-	_motion_vector.reset(0, 0);
+	_motion_vector.clear();
 	_connected_regions.clear();
 
 	_cells_width = (int)ceil((double)_width / BlockSize);
@@ -79,10 +79,11 @@ BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<
 
 	_width = image_prev.width();
 	_height = image_prev.height();
-	_block_size = BlockSize;
+	_cells_width = _width;
+	_cells_height = _height;
 	_image_prev.copy(image_prev);
 	_image_next.copy(image_next);
-	_motion_vector.reset(0, 0);
+	_motion_vector.clear();
 	// Extract connected regions from region_map
 	get_connected_region_list(region_map);
 }
@@ -140,7 +141,7 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& imag
 	_block_size = BlockSize;
 	_image_prev.copy(image_prev);
 	_image_next.copy(image_next);
-	_motion_vector.reset(0, 0);
+	_motion_vector.clear();
 	_connected_regions.clear();
 
 	_cells_width = (int)ceil((double)_width / BlockSize);
@@ -170,10 +171,11 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& imag
 
 	_width = image_prev.width();
 	_height = image_prev.height();
-	_block_size = BlockSize;
+	_cells_width = _width;
+	_cells_height = _height;
 	_image_prev.copy(image_prev);
 	_image_next.copy(image_next);
-	_motion_vector.reset(0, 0);
+	_motion_vector.clear();
 	// Extract connected regions from region_map
 	get_connected_region_list(region_map);
 }
@@ -202,7 +204,7 @@ BlockMatching<T>::get_connected_region_list(ImgVector<int> region_map) // get co
 				tmp_list.push_back(std::list<VECTOR_2D<int> >(0)); // Add new region pixel list
 				VECTOR_2D<int> r(x, y);
 				tmp_list.back().push_back(r); // Add first element
-				for (std::list<VECTOR_2D<int> >::iterator rite = tmp_list.back().rbegin();
+				for (std::list<VECTOR_2D<int> >::reverse_iterator rite = tmp_list.back().rbegin();
 				    rite != tmp_list.back().rend();
 				    ++rite) {
 					if (region_map.get_zeropad(rite->x + 1, rite->y) == num) {
@@ -234,10 +236,9 @@ BlockMatching<T>::get_connected_region_list(ImgVector<int> region_map) // get co
 		}
 	}
 	_connected_regions.resize(tmp_list.size());
-	std::list<std::list<VECTOR_2D<int> > > ite = tmp_list.begin();
-	for (int i = 0; i < _connected_regions.size(); i++) {
-		_connected_regions[i].assign(ite.begin(), ite.end());
-		++ite;
+	std::list<std::list<VECTOR_2D<int> > >::iterator ite = tmp_list.begin();
+	for (int i = 0; i < _connected_regions.size(); ++ite, i++) {
+		_connected_regions[i].assign(ite->begin(), ite->end());
 	}
 }
 

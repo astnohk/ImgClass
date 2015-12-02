@@ -39,8 +39,6 @@ class BlockMatching
 		void reset(const ImgVector<T>& image_prev, const ImgVector<T>& image_next, const int BlockSize);
 		void reset(const ImgVector<T>& image_prev, const ImgVector<T>& image_next, const ImgVector<int>& region_map);
 
-		void get_connected_region_list(ImgVector<int> region_map); // get copy of region_map to modify
-
 		// Get state
 		int width(void) const;
 		int height(void) const;
@@ -58,23 +56,31 @@ class BlockMatching
 		// returns const to avoid to mistake get() for at()
 		const VECTOR_2D<double> get(int x, int y); // NOT const method because it will make new motion vector when it haven't done block matching
 
-		T MAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height, const ImgVector<T>& img_prev, const ImgVector<T>& img_next);
 		// Block Matching methods
 		// Search in the range of [-floor(search_range / 2), floor(search_range / 2)]
 		void block_matching(const int search_range = 41);
-		void block_matching_subset(const ImgVector<int>* region_map, const int search_range = 41);
+
+	protected:
+		// Extract connected region from region_map
+		void get_connected_region_list(ImgVector<int> region_map); // get copy of region_map to modify
+
+		// Main method of block_matching
+		void block_matching_lattice(const int search_range);
+		void block_matching_arbitrary_shaped(const int search_range);
 		// Interpolate skipped Motion Vectors
 		void vector_interpolation(const std::list<VECTOR_2D<int> >& flat_blocks, ImgVector<bool>* estimated);
-
+		const T MAD(const int x_l, const int y_l, const int x_r, const int y_r, const int block_width, const int block_height, const ImgVector<T>& limage, const ImgVector<T>& rimage);
+		// Get gradients
 		ImgVector<VECTOR_2D<double> >* grad_prev(const int top_left_x, const int top_left_y, const int crop_width, const int crop_height);
 
-		const T SAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
-		const T MAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
-		const T NCC(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
-		const T ZNCC(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
-		// Masked one
-		const T MAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height, const ImgVector<bool>& mask);
-		const T ZNCC(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height, const ImgVector<bool>& mask);
+		// Correlation function
+		T SAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
+		T MAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
+		T NCC(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
+		T ZNCC(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
+		// Arbitrary shaped correlation function
+		T MAD_region(const int x_diff_prev, const int y_diff_prev, const std::list<VECTOR_2D<int> >& region);
+		T ZNCC_region(const int x_diff_prev, const int y_diff_prev, const std::list<VECTOR_2D<int> >& region);
 };
 
 #include "BlockMatching_private_initializer.h"

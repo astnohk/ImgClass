@@ -40,7 +40,6 @@ ImgVector<T>::ImgVector(const ImgVector<T> &target)
 	}
 }
 
-
 template <class T>
 ImgVector<T>::ImgVector(int W, int H)
 {
@@ -60,7 +59,6 @@ ImgVector<T>::ImgVector(int W, int H)
 		_height = H;
 	}
 }
-
 
 template <class T>
 ImgVector<T>::ImgVector(int W, int H, const T &value)
@@ -84,7 +82,6 @@ ImgVector<T>::ImgVector(int W, int H, const T &value)
 		}
 	}
 }
-
 
 template <class T>
 ImgVector<T>::ImgVector(int W, int H, const T *array)
@@ -112,8 +109,6 @@ ImgVector<T>::ImgVector(int W, int H, const T *array)
 }
 
 
-
-
 template <class T>
 ImgVector<T>::~ImgVector(void)
 {
@@ -121,9 +116,8 @@ ImgVector<T>::~ImgVector(void)
 }
 
 
-
-
 template <class T>
+void
 ImgVector<T>::clear(void)
 {
 	delete[] _data;
@@ -131,8 +125,6 @@ ImgVector<T>::clear(void)
 	_width = 0;
 	_height = 0;
 }
-
-
 
 
 template <class T>
@@ -156,7 +148,6 @@ ImgVector<T>::reset(int W, int H)
 		_height = H;
 	}
 }
-
 
 template <class T>
 void
@@ -182,7 +173,6 @@ ImgVector<T>::reset(int W, int H, const T &value)
 		}
 	}
 }
-
 
 template <class T>
 void
@@ -210,8 +200,6 @@ ImgVector<T>::reset(int W, int H, const T *array)
 		}
 	}
 }
-
-
 
 
 template <class T>
@@ -291,8 +279,6 @@ ImgVector<T>::operator=(const ImgVector<T> &vector)
 	}
 	return *this;
 }
-
-
 
 
 template <class T>

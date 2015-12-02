@@ -439,7 +439,7 @@ MotionCompensation::create_image_compensated(ImgVector<bool> *mask)
 		for (int y = 0; y < _height; y++) {
 			for (int x = 0; x < _width; x++) {
 				VECTOR_2D<double> v = _vector.get(x, y);
-				_image_compensated.set(x, y, _image_prev.get_zeropad(x + v.x, y + v.y));
+				_image_compensated.at(x, y) = _image_prev.get_zeropad(x + v.x, y + v.y);
 			}
 		}
 		motion_compensated = true;
@@ -451,7 +451,7 @@ MotionCompensation::create_image_compensated(ImgVector<bool> *mask)
 					continue;
 				}
 				VECTOR_2D<double> v = _vector.get(x, y);
-				_image_compensated.set(x, y, _image_prev.get_zeropad(x + v.x, y + v.y));
+				_image_compensated.at(x, y) = _image_prev.get_zeropad(x + v.x, y + v.y);
 			}
 		}
 		motion_compensated = true;
@@ -476,7 +476,7 @@ MotionCompensation::create_image_compensated_forward(ImgVector<bool> *mask)
 		for (int y = 0; y < _height; y++) {
 			for (int x = 0; x < _width; x++) {
 				VECTOR_2D<double> v = _vector.get(x, y);
-				_image_compensated.set(x, y, _image_prev.get_zeropad(x + v.x, y + v.y));
+				_image_compensated.at(x, y) = _image_prev.get_zeropad(x + v.x, y + v.y);
 			}
 		}
 		motion_compensated = true;
@@ -488,7 +488,7 @@ MotionCompensation::create_image_compensated_forward(ImgVector<bool> *mask)
 					continue;
 				}
 				VECTOR_2D<double> v = _vector.get(x, y);
-				_image_compensated.set(x, y, _image_prev.get_zeropad(x + v.x, y + v.y));
+				_image_compensated.at(x, y) = _image_prev.get_zeropad(x + v.x, y + v.y);
 			}
 		}
 		motion_compensated = true;
@@ -509,7 +509,7 @@ MotionCompensation::create_image_estimated(double estimate_frame, ImgVector<bool
 		for (int y = 0; y < _height; y++) {
 			for (int x = 0; x < _width; x++) {
 				VECTOR_2D<double> v = estimate_frame * _vector.get(x, y);
-				_image_compensated.set(x, y, _image_prev.get_zeropad(x + v.x, y + v.y));
+				_image_compensated.at(x, y) = _image_prev.get_zeropad(x + v.x, y + v.y);
 			}
 		}
 		motion_compensated = true;
@@ -521,7 +521,7 @@ MotionCompensation::create_image_estimated(double estimate_frame, ImgVector<bool
 					continue;
 				}
 				VECTOR_2D<double> v = estimate_frame * _vector.get(x, y);
-				_image_compensated.set(x, y, _image_prev.get_zeropad(x + v.x, y + v.y));
+				_image_compensated.at(x, y) = _image_prev.get_zeropad(x + v.x, y + v.y);
 			}
 		}
 		motion_compensated = true;

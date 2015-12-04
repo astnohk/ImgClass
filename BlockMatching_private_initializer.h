@@ -84,6 +84,7 @@ BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<
 
 	_width = image_prev.width();
 	_height = image_prev.height();
+	_block_size = 1;
 	_cells_width = _width;
 	_cells_height = _height;
 	_image_prev.copy(image_prev);
@@ -176,6 +177,7 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& imag
 
 	_width = image_prev.width();
 	_height = image_prev.height();
+	_block_size = 1;
 	_cells_width = _width;
 	_cells_height = _height;
 	_image_prev.copy(image_prev);

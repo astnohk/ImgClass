@@ -220,62 +220,75 @@ Segmentation<T>::get_mirror(int x, int y) const
 
 template <class T>
 void
-Segmentation<T>::Segmentation_MeanShift(int Iter_Max)
+Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int Min_Number_of_Pixels)
 {
-	int num = 0;
+	const double Gray_Max = 255;
+	const VECTOR_2D<int> adjacent[4] = {(VECTOR_2D<int>){1, 0}, (VECTOR_2D<int>){0, 1}, (VECTOR_2D<int>){-1, 0}, (VECTOR_2D<int>){0, -1}};
+	std::list<std::list<VECTOR_2D<int> > > regions;
+	ImgVector<int> decrease_color(_width, _height);
 
 	if (_width <= 0 || _height <= 0) {
 		return;
 	}
-	ImgVector<int> decrease_color(_width, _height);
 #pragma omp parallel for schedule(dynamic)
 	for (int y = 0; y < _height; y++) {
 		for (int x = 0; x < _width; x++) {
 			_shift_vector.at(x, y) = MeanShift_Grayscale(x, y, Iter_Max);
-			decrease_color.at(x, y) = 1 + int(255.0 * _image.get_zeropad((int)round(_shift_vector.get(x, y).x), (int)round(_shift_vector.get(x, y).y)));
+			decrease_color.at(x, y) = 1 + int(Gray_Max * _image.get_zeropad((int)round(_shift_vector.get(x, y).x), (int)round(_shift_vector.get(x, y).y)));
 		}
 	}
+	int num = 1;
 	for (int y = 0; y < _height; y++) {
 		for (int x = 0; x < _width; x++) {
 			if (decrease_color.get(x, y) > 0) {
 				int color = decrease_color.get(x, y);
 				VECTOR_2D<int> r(x, y);
-				std::list<VECTOR_2D<int> > pel_list;
-				pel_list.assign(1, r);
-				for (std::list<VECTOR_2D<int> >::iterator ite = pel_list.begin();
-				    ite != pel_list.end();
+				regions.push_back(std::list<VECTOR_2D<int> >(1, r));
+				for (std::list<VECTOR_2D<int> >::iterator ite = regions.back().begin();
+				    ite != regions.back().end();
 				    ++ite) {
-					if (decrease_color.get_zeropad(ite->x + 1, ite->y) == color) {
-						r.x = ite->x + 1;
-						r.y = ite->y;
-						decrease_color.at(r.x, r.y) = 0;
-						pel_list.push_back(r);
-					}
-					if (decrease_color.get_zeropad(ite->x, ite->y + 1) == color) {
-						r.x = ite->x;
-						r.y = ite->y + 1;
-						decrease_color.at(r.x, r.y) = 0;
-						pel_list.push_back(r);
-					}
-					if (decrease_color.get_zeropad(ite->x - 1, ite->y) == color) {
-						r.x = ite->x - 1;
-						r.y = ite->y;
-						decrease_color.at(r.x, r.y) = 0;
-						pel_list.push_back(r);
-					}
-					if (decrease_color.get_zeropad(ite->x, ite->y - 1) == color) {
-						r.x = ite->x;
-						r.y = ite->y - 1;
-						decrease_color.at(r.x, r.y) = 0;
-						pel_list.push_back(r);
+					for (int k = 0; k < 4; k++) { // Search 4-adjacent
+						if (decrease_color.get_zeropad(ite->x + adjacent[k].x, ite->y + adjacent[k].y) == color) {
+							r = (VECTOR_2D<int>){ite->x + adjacent[k].x, ite->y + adjacent[k].y};
+							decrease_color.at(r.x, r.y) *= -1; // negative value indicates already checked
+							regions.back().push_back(r);
+						}
 					}
 				}
-				for (std::list<VECTOR_2D<int> >::iterator ite = pel_list.begin();
-				    ite != pel_list.end();
+				for (std::list<VECTOR_2D<int> >::iterator ite = regions.back().begin();
+				    ite != regions.back().end();
 				    ++ite) {
 					_segments.at(ite->x, ite->y) = num;
 				}
 				num++;
+			}
+		}
+	}
+	// Eliminate small regios
+	decrease_color *= -1; // negative all pixels to restore original intensity
+	num = 1;
+	for (std::list<std::list<VECTOR_2D<int> > >::iterator ite_region = regions.begin();
+	    ite_region != regions.end();
+	    num++, ++ite_region) {
+		if (ite_region->size() < Min_Number_of_Pixels) {
+			while (ite_region->size() > 0) { // Interpolate small region with number of its neighborhood 
+				std::list<VECTOR_2D<int> >::iterator ite = ite_region->begin();
+				while (ite != ite_region->end()) {
+					int color = decrease_color.get(ite->x, ite->y);
+					int min = Gray_Max;
+					for (int k = 0; k < 4; k++) {
+						if (_segments.get_zeropad(ite->x + adjacent[k].x, ite->y + adjacent[k].y) != num
+						    && fabs(color - decrease_color.get_zeropad(ite->x + adjacent[k].x, ite->y + adjacent[k].y)) < min) {
+							min = fabs(color - decrease_color.get_zeropad(ite->x + adjacent[k].x, ite->y + adjacent[k].y));
+							_segments.at(ite->x, ite->y) = _segments.get_zeropad(ite->x + adjacent[k].x, ite->y + adjacent[k].y);
+						}
+					}
+					if (_segments.get(ite->x, ite->y) != num) {
+						ite = ite_region->erase(ite); // remove from the list
+					} else {
+						++ite;
+					}
+				}
 			}
 		}
 	}

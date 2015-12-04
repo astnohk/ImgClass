@@ -81,6 +81,12 @@ class ImgVector
 		void resize_bicubic(int W, int H, double min = 0.0, double max = 0.0, T (*Nearest_Integer_Method)(double &d) = nullptr, double B = (0.0 / 3.0), double C = (1.0 / 2.0));
 
 		double cubic(double x, double B, double C) const;
+
+		// Operators
+		ImgVector<T>& operator+=(const T& val);
+		ImgVector<T>& operator-=(const T& val);
+		ImgVector<T>& operator*=(const T& val);
+		ImgVector<T>& operator/=(const T& val);
 };
 
 #include "ImgClass_private.h"

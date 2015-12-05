@@ -25,11 +25,13 @@ class Segmentation
 	public:
 		// Constructor
 		Segmentation(void);
+		Segmentation(const ImgVector<T>& image, const double kernel_spatial_radius = 16.0, const double kernel_intensity_radius = 0.2);
 		explicit Segmentation(const Segmentation<T>& segments); // Copy constructor
-		Segmentation(const ImgVector<T>* image, const double kernel_spatial_radius = 16.0, const double kernel_intensity_radius = 0.2);
-		Segmentation<T>& reset(const ImgVector<T>* image, const double kernel_spatial_radius = 16.0, const double kernel_intensity_radius = 0.2);
-		Segmentation<T>& copy(const Segmentation<T>* segments);
+
+		Segmentation<T>& reset(const ImgVector<T>& image, const double kernel_spatial_radius = 16.0, const double kernel_intensity_radius = 0.2);
+
 		Segmentation<T>& copy(const Segmentation<T>& segments);
+
 		// Destructor
 		~Segmentation(void);
 
@@ -53,7 +55,7 @@ class Segmentation
 
 		// Mean Shift segmentation
 		void Segmentation_MeanShift(const int Iter_Max = 64, const unsigned int Min_Number_of_Pixels = 16);
-		const VECTOR_2D<double> MeanShift_Grayscale(const int x, const int y, int Iter_Max);
+		const VECTOR_2D<double> MeanShift_Grayscale(const int x, const int y, std::vector<VECTOR_2D<int> >& pel_list, int Iter_Max);
 };
 
 #include "Segmentation_private.h"

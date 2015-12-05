@@ -22,6 +22,26 @@ Segmentation<T>::Segmentation(void)
 }
 
 template <class T>
+Segmentation<T>::Segmentation(const ImgVector<T>& image, const double kernel_spatial_radius, const double kernel_intensity_radius)
+{
+	_image.copy(image);
+	if (_image.max() > 1.0) {
+		// Normalize
+		_image.contrast_stretching(0.0, 1.0);
+	}
+	_width = _image.width();
+	_height = _image.height();
+	_kernel_spatial = kernel_spatial_radius;
+	_kernel_intensity = kernel_intensity_radius;
+
+	_shift_vector.reset(_width, _height);
+	_segments.reset(_width, _height);
+
+	// Initial Segmentation
+	Segmentation_MeanShift();
+}
+
+template <class T>
 Segmentation<T>::Segmentation(const Segmentation<T>& segments) // Copy constructor
 {
 	_width = segments._width;
@@ -34,30 +54,10 @@ Segmentation<T>::Segmentation(const Segmentation<T>& segments) // Copy construct
 	_segments.copy(segments._segments);
 }
 
-template <class T>
-Segmentation<T>::Segmentation(const ImgVector<T>* image, const double kernel_spatial_radius, const double kernel_intensity_radius)
-{
-	_image.copy(image);
-	if (_image.max() > 1.0) {
-		// Normalize
-		_image.contrast_stretching(0.0, 1.0);
-	}
-	_width = _image.width();
-	_height = _image.height();
-	_kernel_spatial = kernel_spatial_radius;
-	_kernel_intensity = kernel_intensity_radius;
-
-	_shift_vector.reset(_width, _height);
-	_segments.reset(_width, _height);
-
-	// Initial Segmentation
-	Segmentation_MeanShift();
-}
-
 
 template <class T>
 Segmentation<T> &
-Segmentation<T>::reset(const ImgVector<T>* image, const double kernel_spatial_radius, const double kernel_intensity_radius)
+Segmentation<T>::reset(const ImgVector<T>& image, const double kernel_spatial_radius, const double kernel_intensity_radius)
 {
 	_image.copy(image);
 	if (_image.max() > 1.0) {
@@ -77,20 +77,6 @@ Segmentation<T>::reset(const ImgVector<T>* image, const double kernel_spatial_ra
 	return *this;
 }
 
-template <class T>
-Segmentation<T> &
-Segmentation<T>::copy(const Segmentation<T>* segments)
-{
-	_width = segments->_width;
-	_height = segments->_height;
-	_kernel_spatial = segments->_kernel_spatial;
-	_kernel_intensity = segments->_kernel_intensity;
-
-	_image.copy(segments->_image);
-	_shift_vector.copy(segments->_shift_vector);
-	_segments.copy(segments->_segments);
-	return *this;
-}
 
 template <class T>
 Segmentation<T> &
@@ -224,26 +210,41 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 {
 	const double Gray_Max = 255;
 	const VECTOR_2D<int> adjacent[4] = {(VECTOR_2D<int>){1, 0}, (VECTOR_2D<int>){0, 1}, (VECTOR_2D<int>){-1, 0}, (VECTOR_2D<int>){0, -1}};
-	std::list<std::list<VECTOR_2D<int> > > regions;
+	std::vector<VECTOR_2D<int> > pel_list((2 * _kernel_spatial + 1) * (2 * _kernel_spatial + 1));
+	std::list<std::list<VECTOR_2D<int> > > regions(0);
 	ImgVector<int> decrease_color(_width, _height);
 
 	if (_width <= 0 || _height <= 0) {
 		return;
 	}
+	// Make pixel list
+	int num = 0;
+	for (int m = -_kernel_spatial; m <= _kernel_spatial; m++) {
+		for (int n = -_kernel_spatial; n <= _kernel_spatial; n++) {
+			if (n * n + m * m < _kernel_spatial * _kernel_spatial) {
+				pel_list[num] = (VECTOR_2D<int>){n, m};
+				num++;
+			}
+		}
+	}
+	pel_list.resize(num);
+	// Mean Shift method
 #pragma omp parallel for schedule(dynamic)
 	for (int y = 0; y < _height; y++) {
 		for (int x = 0; x < _width; x++) {
-			_shift_vector.at(x, y) = MeanShift_Grayscale(x, y, Iter_Max);
+			_shift_vector.at(x, y) = MeanShift_Grayscale(x, y, pel_list, Iter_Max);
 			decrease_color.at(x, y) = 1 + int(Gray_Max * _image.get_zeropad((int)round(_shift_vector.get(x, y).x), (int)round(_shift_vector.get(x, y).y)));
 		}
 	}
-	int num = 1;
+	// Collect connected region
+	num = 1;
 	for (int y = 0; y < _height; y++) {
 		for (int x = 0; x < _width; x++) {
 			if (decrease_color.get(x, y) > 0) {
 				int color = decrease_color.get(x, y);
 				VECTOR_2D<int> r(x, y);
 				regions.push_back(std::list<VECTOR_2D<int> >(1, r));
+				decrease_color.at(x, y) *= -1; // negative value indicates already checked
 				for (std::list<VECTOR_2D<int> >::iterator ite = regions.back().begin();
 				    ite != regions.back().end();
 				    ++ite) {
@@ -264,31 +265,47 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 			}
 		}
 	}
-	// Eliminate small regios
-	decrease_color *= -1; // negative all pixels to restore original intensity
-	num = 1;
+	// Check small regions
+	std::list<VECTOR_2D<int> > small_region_coordinate;
 	for (std::list<std::list<VECTOR_2D<int> > >::iterator ite_region = regions.begin();
 	    ite_region != regions.end();
 	    num++, ++ite_region) {
 		if (ite_region->size() < Min_Number_of_Pixels) {
-			while (ite_region->size() > 0) { // Interpolate small region with number of its neighborhood 
-				std::list<VECTOR_2D<int> >::iterator ite = ite_region->begin();
-				while (ite != ite_region->end()) {
-					int color = decrease_color.get(ite->x, ite->y);
-					int min = Gray_Max;
-					for (int k = 0; k < 4; k++) {
-						if (_segments.get_zeropad(ite->x + adjacent[k].x, ite->y + adjacent[k].y) != num
-						    && fabs(color - decrease_color.get_zeropad(ite->x + adjacent[k].x, ite->y + adjacent[k].y)) < min) {
-							min = fabs(color - decrease_color.get_zeropad(ite->x + adjacent[k].x, ite->y + adjacent[k].y));
-							_segments.at(ite->x, ite->y) = _segments.get_zeropad(ite->x + adjacent[k].x, ite->y + adjacent[k].y);
-						}
-					}
-					if (_segments.get(ite->x, ite->y) != num) {
-						ite = ite_region->erase(ite); // remove from the list
-					} else {
-						++ite;
-					}
+			for (std::list<VECTOR_2D<int> >::iterator ite = ite_region->begin();
+			    ite != ite_region->end();
+			    ++ite) {
+				_segments.at(ite->x, ite->y) = 0;
+				small_region_coordinate.push_back(*ite);
+			}
+		}
+	}
+	// Eliminate small regions
+	decrease_color *= -1; // negative all pixels to restore original intensity
+	num = 1;
+	while (small_region_coordinate.size() > 0) { // Interpolate small region with of its neighborhood
+		for (std::list<VECTOR_2D<int> >::iterator ite = small_region_coordinate.begin();
+		    ite != small_region_coordinate.end();
+		    num++, ++ite) {
+			int color = decrease_color.get(ite->x, ite->y);
+			int min = Gray_Max;
+			bool check = false;
+			for (int k = 0; k < 4; k++) {
+				VECTOR_2D<int> r(ite->x + adjacent[k].x, ite->y + adjacent[k].y);
+				if (_segments.get_zeropad(r.x, r.y) > 0
+				    && _segments.get_zeropad(r.x, r.y) != num
+				    && abs(color - decrease_color.get_zeropad(r.x, r.y)) < min) {
+					check = true;
+					min = fabs(color - decrease_color.get(r.x, r.y));
+					decrease_color.at(ite->x, ite->y) = decrease_color.get(r.x, r.y);
+					_segments.at(ite->x, ite->y) = _segments.get(r.x, r.y);
 				}
+			}
+			if (check) {
+				// remove from the list
+				ite = small_region_coordinate.erase(ite);
+			} else {
+				// left current pixel and increment iterator
+				++ite;
 			}
 		}
 	}
@@ -300,8 +317,8 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 		for (int x = 0; x < _width; x++) {
 			_shift_vector.at(x, y).x -= x;
 			_shift_vector.at(x, y).y -= y;
-			fwrite(&(_shift_vector.get(x, y).x), sizeof(double), 1, fp);
-			fwrite(&(_shift_vector.get(x, y).y), sizeof(double), 1, fp);
+			fwrite(&(_shift_vector.at(x, y).x), sizeof(double), 1, fp);
+			fwrite(&(_shift_vector.at(x, y).y), sizeof(double), 1, fp);
 		}
 	}
 	fclose(fp);
@@ -315,21 +332,11 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
  */
 template <class T>
 const VECTOR_2D<double>
-Segmentation<T>::MeanShift_Grayscale(const int x, const int y, int Iter_Max)
+Segmentation<T>::MeanShift_Grayscale(const int x, const int y, std::vector<VECTOR_2D<int> >& pel_list, int Iter_Max)
 {
 	VECTOR_2D<double> u;
 	T intensity;
-	std::list<VECTOR_2D<int> > pel_list;
 
-	// Make pixel list
-	for (int m = -_kernel_spatial; m <= _kernel_spatial; m++) {
-		for (int n = -_kernel_spatial; n <= _kernel_spatial; n++) {
-			if (sqrt(n * n + m * m) < _kernel_spatial) {
-				VECTOR_2D<int> r(n, m);
-				pel_list.push_back(r);
-			}
-		}
-	}
 	// Initialize
 	u.x = x;
 	u.y = y;
@@ -341,8 +348,8 @@ Segmentation<T>::MeanShift_Grayscale(const int x, const int y, int Iter_Max)
 		VECTOR_2D<double> sum_d(0.0, 0.0);
 		VECTOR_2D<double> d_tmp;
 
-		for (std::list<VECTOR_2D<int> >::iterator ite = pel_list.begin(); ite != pel_list.end(); ++ite) {
-			VECTOR_2D<double> r(u.x + ite->x, u.y + ite->y);
+		for (unsigned int n = 0; n < pel_list.size(); n++) {
+			VECTOR_2D<double> r(u.x + pel_list[n].x, u.y + pel_list[n].y);
 
 			if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height) {
 				double intensity_diff = _image.get(r.x, r.y) - intensity;
@@ -351,8 +358,8 @@ Segmentation<T>::MeanShift_Grayscale(const int x, const int y, int Iter_Max)
 					double coeff = (fabs(intensity_diff / _kernel_intensity) - 1.0) * (fabs(intensity_diff / _kernel_intensity) - 1.0);
 					N += coeff;
 					sum_intensity_diff += intensity_diff * coeff;
-					sum_d.x += ite->x * coeff;
-					sum_d.y += ite->y * coeff;
+					sum_d.x += pel_list[n].x * coeff;
+					sum_d.y += pel_list[n].y * coeff;
 				}
 			}
 		}

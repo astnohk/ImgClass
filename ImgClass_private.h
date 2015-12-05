@@ -41,27 +41,7 @@ ImgVector<T>::ImgVector(const ImgVector<T> &target)
 }
 
 template <class T>
-ImgVector<T>::ImgVector(int W, int H)
-{
-	_data = nullptr;
-	_width = 0;
-	_height = 0;
-	if (W > 0 && H > 0) {
-		try {
-			_data = new T[W * H]();
-		}
-		catch (const std::bad_alloc &bad) {
-			std::cerr << "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory" << std::endl;
-			_data = nullptr;
-			throw;
-		}
-		_width = W;
-		_height = H;
-	}
-}
-
-template <class T>
-ImgVector<T>::ImgVector(int W, int H, const T &value)
+ImgVector<T>::ImgVector(int W, int H, const T& value)
 {
 	_data = nullptr;
 	_width = 0;
@@ -84,7 +64,7 @@ ImgVector<T>::ImgVector(int W, int H, const T &value)
 }
 
 template <class T>
-ImgVector<T>::ImgVector(int W, int H, const T *array)
+ImgVector<T>::ImgVector(int W, int H, const T* array)
 {
 	_data = nullptr;
 	_width = 0;
@@ -129,29 +109,7 @@ ImgVector<T>::clear(void)
 
 template <class T>
 void
-ImgVector<T>::reset(int W, int H)
-{
-	delete[] _data;
-	_data = nullptr;
-	_width = 0;
-	_height = 0;
-	if (W > 0 && H > 0) {
-		try {
-			_data = new T[W * H]();
-		}
-		catch (const std::bad_alloc &bad) {
-			std::cerr << "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory" << std::endl;
-			_data = nullptr;
-			throw;
-		}
-		_width = W;
-		_height = H;
-	}
-}
-
-template <class T>
-void
-ImgVector<T>::reset(int W, int H, const T &value)
+ImgVector<T>::reset(int W, int H, const T& value)
 {
 	delete[] _data;
 	_data = nullptr;
@@ -176,7 +134,7 @@ ImgVector<T>::reset(int W, int H, const T &value)
 
 template <class T>
 void
-ImgVector<T>::reset(int W, int H, const T *array)
+ImgVector<T>::reset(int W, int H, const T* array)
 {
 	delete[] _data;
 	_data = nullptr;
@@ -204,7 +162,7 @@ ImgVector<T>::reset(int W, int H, const T *array)
 
 template <class T>
 ImgVector<T> &
-ImgVector<T>::copy(const ImgVector<T> &vector)
+ImgVector<T>::copy(const ImgVector<T>& vector)
 {
 	if (this != &vector
 	    && vector._width > 0 && vector._height > 0) {
@@ -230,33 +188,7 @@ ImgVector<T>::copy(const ImgVector<T> &vector)
 
 template <class T>
 ImgVector<T> &
-ImgVector<T>::copy(const ImgVector<T> *vector)
-{
-	if (vector != nullptr && this != vector
-	    && vector->_width > 0 && vector->_height > 0) {
-		T *tmp_data = nullptr;
-		try {
-			tmp_data = new T[vector->_width * vector->_height]();
-		}
-		catch (const std::bad_alloc &bad) {
-			std::cerr << "ImgVector::copy(const ImgVector<T>*) : Cannot Allocate Memory" << std::endl;
-			throw;
-			return *this;
-		}
-		_width = vector->_width;
-		_height = vector->_height;
-		delete _data;
-		_data = tmp_data;
-		for (int i = 0; i < _width * _height; i++) {
-			_data[i] = vector->_data[i];
-		}
-	}
-	return *this;
-}
-
-template <class T>
-ImgVector<T> &
-ImgVector<T>::operator=(const ImgVector<T> &vector)
+ImgVector<T>::operator=(const ImgVector<T>& vector)
 {
 	if (this != &vector
 	    && vector._width > 0 && vector._height > 0) {
@@ -279,6 +211,8 @@ ImgVector<T>::operator=(const ImgVector<T> &vector)
 	}
 	return *this;
 }
+
+
 
 
 template <class T>
@@ -334,7 +268,6 @@ ImgVector<T>::operator[](int n)
 	return _data[n];
 }
 
-
 template <class T>
 T &
 ImgVector<T>::at(int x, int y)
@@ -342,7 +275,6 @@ ImgVector<T>::at(int x, int y)
 	assert(0 <= x && x < _width && 0 <= y && y < _height);
 	return _data[_width * y + x];
 }
-
 
 template <class T>
 T &
@@ -362,7 +294,6 @@ ImgVector<T>::at_repeat(int x, int y)
 	}
 	return _data[_width * y_repeat + x_repeat];
 }
-
 
 template <class T>
 T &
@@ -390,16 +321,13 @@ ImgVector<T>::get(int n) const
 	return _data[n];
 }
 
-
 template <class T>
 const T
 ImgVector<T>::get(int x, int y) const
 {
-	assert(0 <= x && x < _width
-	    && 0 <= y && y < _height);
+	assert(0 <= x && x < _width && 0 <= y && y < _height);
 	return _data[_width * y + x];
 }
-
 
 template <class T>
 const T
@@ -407,14 +335,12 @@ ImgVector<T>::get_zeropad(int x, int y) const
 {
 	T zero = T();
 
-	if (x < 0 || _width <= x
-	    || y < 0 || _height <= y) {
+	if (x < 0 || _width <= x || y < 0 || _height <= y) {
 		return zero;
 	} else {
 		return _data[_width * y + x];
 	}
 }
-
 
 template <class T>
 const T
@@ -435,7 +361,6 @@ ImgVector<T>::get_repeat(int x, int y) const
 	return _data[_width * y_repeat + x_repeat];
 }
 
-
 template <class T>
 const T
 ImgVector<T>::get_mirror(int x, int y) const
@@ -454,7 +379,9 @@ ImgVector<T>::get_mirror(int x, int y) const
 }
 
 
-// Get continuous value interpolated by bicubic
+
+
+// Get continuous function interpolated by bicubic
 template <class T>
 const T
 ImgVector<T>::get_zeropad(double x, double y, double B, double C) const
@@ -476,7 +403,6 @@ ImgVector<T>::get_zeropad(double x, double y, double B, double C) const
 	return value;
 }
 
-
 template <class T>
 const T
 ImgVector<T>::get_repeat(double x, double y, double B, double C) const
@@ -497,7 +423,6 @@ ImgVector<T>::get_repeat(double x, double y, double B, double C) const
 	}
 	return value;
 }
-
 
 template <class T>
 const T
@@ -539,7 +464,6 @@ ImgVector<T>::min(void) const
 	return min;
 }
 
-
 template <class T>
 const T
 ImgVector<T>::max(void) const
@@ -580,7 +504,6 @@ ImgVector<T>::min(int top_left_x, int top_left_y, int crop_width, int crop_heigh
 	}
 	return min;
 }
-
 
 template <class T>
 const T

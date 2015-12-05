@@ -16,22 +16,18 @@ class ImgVector
 		int _height;
 	public:
 		ImgVector(void);
+		ImgVector(int W, int H, const T& value = T());
+		ImgVector(int W, int H, const T* array);
 		ImgVector(const ImgVector<T> &copy); // Copy constructor
-		ImgVector(int W, int H);
-		ImgVector(int W, int H, const T &value);
-		ImgVector(int W, int H, const T *array);
 
 		virtual ~ImgVector(void);
 
 		void clear(void);
+		void reset(int W, int H, const T& value = T());
+		void reset(int W, int H, const T* array);
 
-		void reset(int W, int H);
-		void reset(int W, int H, const T &value);
-		void reset(int W, int H, const T *array);
-
-		ImgVector<T>& copy(const ImgVector<T> &vector);
-		ImgVector<T>& copy(const ImgVector<T> *vector);
-		ImgVector<T>& operator=(const ImgVector<T> &vector);
+		ImgVector<T>& copy(const ImgVector<T>& vector);
+		ImgVector<T>& operator=(const ImgVector<T>& vector);
 
 		// Properties
 		int width(void) const;

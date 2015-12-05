@@ -129,10 +129,10 @@ MotionCompensation::MotionCompensation(const ImgVector<double> *image_prev, cons
 	}
 	_width = image_prev->width();
 	_height = image_prev->height();
-	_image_prev.copy(image_prev);
-	_image_next.copy(image_next);
+	_image_prev.copy(*image_prev);
+	_image_next.copy(*image_next);
 	if (vector->width() == _width && vector->height() == _height) {
-		_vector.copy(vector);
+		_vector.copy(*vector);
 	} else {
 		// Projection of small vector field to the scaled plane which has same range of images
 		_vector.reset(_width, _height);
@@ -293,10 +293,10 @@ MotionCompensation::set(const ImgVector<double> *image_prev, const ImgVector<dou
 	motion_compensated = false;
 	_width = image_prev->width();
 	_height = image_prev->height();
-	_image_prev.copy(image_prev);
-	_image_next.copy(image_next);
+	_image_prev.copy(*image_prev);
+	_image_next.copy(*image_next);
 	if (vector->width() == _width && vector->height() == _height) {
-		_vector.copy(vector);
+		_vector.copy(*vector);
 	} else {
 		// Projection of small vector field to the scaled plane which has same range of images
 		_vector.reset(_width, _height);

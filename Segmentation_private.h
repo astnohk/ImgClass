@@ -208,7 +208,7 @@ template <class T>
 void
 Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int Min_Number_of_Pixels)
 {
-	const double Gray_Max = 255;
+	const double Decreased_Gray_Max = 63; // 1 / 4 quantize
 	const VECTOR_2D<int> adjacent[4] = {(VECTOR_2D<int>){1, 0}, (VECTOR_2D<int>){0, 1}, (VECTOR_2D<int>){-1, 0}, (VECTOR_2D<int>){0, -1}};
 	std::vector<VECTOR_2D<int> > pel_list((2 * _kernel_spatial + 1) * (2 * _kernel_spatial + 1));
 	std::list<std::list<VECTOR_2D<int> > > regions(0);
@@ -233,7 +233,7 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 	for (int y = 0; y < _height; y++) {
 		for (int x = 0; x < _width; x++) {
 			_shift_vector.at(x, y) = MeanShift_Grayscale(x, y, pel_list, Iter_Max);
-			decrease_color.at(x, y) = 1 + int(Gray_Max * _image.get_zeropad((int)round(_shift_vector.get(x, y).x), (int)round(_shift_vector.get(x, y).y)));
+			decrease_color.at(x, y) = 1 + int(Decreased_Gray_Max * _image.get_zeropad((int)round(_shift_vector.get(x, y).x), (int)round(_shift_vector.get(x, y).y)));
 		}
 	}
 	// Collect connected region
@@ -279,6 +279,7 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 			}
 		}
 	}
+	/*
 	// Eliminate small regions
 	decrease_color *= -1; // negative all pixels to restore original intensity
 	num = 1;
@@ -287,7 +288,7 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 		    ite != small_region_coordinate.end();
 		    num++, ++ite) {
 			int color = decrease_color.get(ite->x, ite->y);
-			int min = Gray_Max;
+			int min = Decreased_Gray_Max;
 			bool check = false;
 			for (int k = 0; k < 4; k++) {
 				VECTOR_2D<int> r(ite->x + adjacent[k].x, ite->y + adjacent[k].y);
@@ -308,20 +309,25 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 				++ite;
 			}
 		}
-	}
+	}*/
 	// Output vectors
 	FILE *fp;
+	FILE *fp_img;
 	fp = fopen("segment_vector.dat", "w");
+	fp_img = fopen("segments_color.pgm", "w");
 	fprintf(fp, "%d %d\n", _width, _height);
+	fprintf(fp_img, "P2\n%d %d\n%d\n", _width, _height, 255);
 	for (int y = 0; y < _height; y++) {
 		for (int x = 0; x < _width; x++) {
 			_shift_vector.at(x, y).x -= x;
 			_shift_vector.at(x, y).y -= y;
 			fwrite(&(_shift_vector.at(x, y).x), sizeof(double), 1, fp);
 			fwrite(&(_shift_vector.at(x, y).y), sizeof(double), 1, fp);
+			fprintf(fp_img, "%d ", decrease_color.get(x, y));
 		}
 	}
 	fclose(fp);
+	fclose(fp_img);
 }
 
 /*

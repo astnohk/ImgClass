@@ -54,7 +54,7 @@ class Segmentation
 		int get_mirror(int x, int y) const;
 
 		// Mean Shift segmentation
-		void Segmentation_MeanShift(const int Iter_Max = 64, const unsigned int Min_Number_of_Pixels = 16);
+		void Segmentation_MeanShift(const int Iter_Max = 64, const unsigned int Min_Number_of_Pixels = 25);
 		const VECTOR_2D<double> MeanShift_Grayscale(const int x, const int y, std::vector<VECTOR_2D<int> >& pel_list, int Iter_Max);
 };
 

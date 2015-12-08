@@ -12,6 +12,7 @@ BlockMatching<T>::BlockMatching(void)
 {
 	_width = 0;
 	_height = 0;
+	_max_intensity = 0;
 	_block_size = 0;
 	_cells_width = 0;
 	_cells_height = 0;
@@ -21,10 +22,11 @@ BlockMatching<T>::BlockMatching(void)
 
 
 template <class T>
-BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<T>& image_next, const int BlockSize)
+BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<T>& image_next, const int BlockSize, const bool dense)
 {
 	_width = 0;
 	_height = 0;
+	_max_intensity = 0;
 	_block_size = 0;
 	_cells_width = 0;
 	_cells_height = 0;
@@ -47,14 +49,20 @@ BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<
 
 	_width = image_prev.width();
 	_height = image_prev.height();
-	_block_size = BlockSize;
 	_image_prev.copy(image_prev);
 	_image_next.copy(image_next);
+	_max_intensity = std::max(image_prev.max(), image_next.max());
 	_motion_vector.clear();
 	_connected_regions.clear();
 
-	_cells_width = (int)ceil((double)_width / BlockSize);
-	_cells_height = (int)ceil((double)_height / BlockSize);
+	_block_size = BlockSize;
+	if (dense) {
+		_cells_width = _width;
+		_cells_height = _height;
+	} else {
+		_cells_width = (int)ceil((double)_width / BlockSize);
+		_cells_height = (int)ceil((double)_height / BlockSize);
+	}
 }
 
 template <class T>
@@ -62,6 +70,7 @@ BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<
 {
 	_width = 0;
 	_height = 0;
+	_max_intensity = 0;
 	_block_size = 0;
 	_cells_width = 0;
 	_cells_height = 0;
@@ -89,6 +98,7 @@ BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<
 	_cells_height = _height;
 	_image_prev.copy(image_prev);
 	_image_next.copy(image_next);
+	_max_intensity = std::max(image_prev.max(), image_next.max());
 	_motion_vector.clear();
 	// Extract connected regions from region_map
 	get_connected_region_list(region_map);
@@ -102,6 +112,7 @@ BlockMatching<T>::BlockMatching(const BlockMatching& copy)
 {
 	_width = copy._width;
 	_height = copy._height;
+	_max_intensity = copy._max_intensity;
 	_block_size = copy._block_size;
 	_cells_width = copy._cells_width;
 	_cells_height = copy._cells_height;
@@ -125,10 +136,11 @@ BlockMatching<T>::~BlockMatching(void)
 
 template <class T>
 void
-BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& image_next, const int BlockSize)
+BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& image_next, const int BlockSize, const bool dense)
 {
 	_width = 0;
 	_height = 0;
+	_max_intensity = 0;
 	_block_size = 0;
 	_cells_width = 0;
 	_cells_height = 0;
@@ -148,11 +160,17 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& imag
 	_block_size = BlockSize;
 	_image_prev.copy(image_prev);
 	_image_next.copy(image_next);
+	_max_intensity = std::max(image_prev.max(), image_next.max());
 	_motion_vector.clear();
 	_connected_regions.clear();
 
-	_cells_width = (int)ceil((double)_width / BlockSize);
-	_cells_height = (int)ceil((double)_height / BlockSize);
+	if (dense) {
+		_cells_width = _width;
+		_cells_height = _height;
+	} else {
+		_cells_width = (int)ceil((double)_width / BlockSize);
+		_cells_height = (int)ceil((double)_height / BlockSize);
+	}
 }
 
 template <class T>
@@ -161,6 +179,7 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& imag
 {
 	_width = 0;
 	_height = 0;
+	_max_intensity = 0;
 	_block_size = 0;
 	_cells_width = 0;
 	_cells_height = 0;
@@ -182,6 +201,7 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& imag
 	_cells_height = _height;
 	_image_prev.copy(image_prev);
 	_image_next.copy(image_next);
+	_max_intensity = std::max(image_prev.max(), image_next.max());
 	_motion_vector.clear();
 	// Extract connected regions from region_map
 	get_connected_region_list(region_map);

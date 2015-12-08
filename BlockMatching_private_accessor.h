@@ -31,14 +31,14 @@ BlockMatching<T>::block_size(void) const
 
 template <class T>
 int
-BlockMatching<T>::vector_width(void) const
+BlockMatching<T>::vector_field_width(void) const
 {
 	return _cells_width;
 }
 
 template <class T>
 int
-BlockMatching<T>::vector_height(void) const
+BlockMatching<T>::vector_field_height(void) const
 {
 	return _cells_height;
 }
@@ -80,12 +80,26 @@ BlockMatching<T>::operator[](int n)
 
 template <class T>
 VECTOR_2D<double>&
+BlockMatching<T>::at_block(int x, int y)
+{
+	if (_motion_vector.isNULL()) {
+		this->block_matching();
+	}
+	assert(0 <= x && x < _cells_width
+	    && 0 <= y && y < _cells_height);
+	return _motion_vector.at(x, y);
+}
+
+template <class T>
+VECTOR_2D<double>&
 BlockMatching<T>::at(int x, int y)
 {
 	if (_motion_vector.isNULL()) {
 		this->block_matching();
 	}
-	return _motion_vector.at(x, y);
+	assert(0 <= x && x < _width
+	    && 0 <= y && y < _height);
+	return _motion_vector.at((int)floor(x / _block_size), (int)floor(y / _block_size));
 }
 
 
@@ -94,11 +108,25 @@ BlockMatching<T>::at(int x, int y)
 // ----- Get Vector Field data -----
 template <class T>
 const VECTOR_2D<double>
+BlockMatching<T>::get_block(int x, int y)
+{
+	if (_motion_vector.isNULL()) {
+		this->block_matching();
+	}
+	assert(0 <= x && x < _cells_width
+	    && 0 <= y && y < _cells_height);
+	return _motion_vector.at(x, y);
+}
+
+template <class T>
+const VECTOR_2D<double>
 BlockMatching<T>::get(int x, int y)
 {
 	if (_motion_vector.isNULL()) {
 		this->block_matching();
 	}
-	return _motion_vector.at(x, y);
+	assert(0 <= x && x < _width
+	    && 0 <= y && y < _height);
+	return _motion_vector.at((int)floor(x / _block_size), (int)floor(y / _block_size));
 }
 

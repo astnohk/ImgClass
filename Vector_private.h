@@ -35,7 +35,18 @@ VECTOR_2D<T>::reset(const T& init_x, const T& init_y)
 
 
 // ----- Operators -----
-template<class T>
+template <class T>
+template <class RT>
+VECTOR_2D<T>::operator VECTOR_2D<RT>() const
+{
+	VECTOR_2D<RT> v;
+	v.x = RT(x);
+	v.y = RT(y);
+	return v;
+}
+
+
+template <class T>
 VECTOR_2D<T> &
 VECTOR_2D<T>::operator=(const VECTOR_2D<T>& vector)
 {
@@ -44,8 +55,8 @@ VECTOR_2D<T>::operator=(const VECTOR_2D<T>& vector)
 	return *this;
 }
 
-template<class T>
-template<class Tval>
+template <class T>
+template <class Tval>
 VECTOR_2D<T> &
 VECTOR_2D<T>::operator=(const Tval& value)
 {
@@ -126,14 +137,14 @@ VECTOR_2D<T>::operator!=(const VECTOR_2D<T>& vector)
 //
 // ----- Global operators -----
 //
-template<class Type>
+template <class Type>
 VECTOR_2D<Type>
 operator+(const VECTOR_2D<Type> vector)
 {
 	return vector;
 }
 
-template<class Type>
+template <class Type>
 VECTOR_2D<Type>
 operator-(VECTOR_2D<Type> vector)
 {
@@ -204,21 +215,21 @@ operator/(VECTOR_2D<Type> lvector, const Tval& rvalue)
 
 
 namespace Vector_2D {
-	template<class Type>
+	template <class Type>
 	double
 	norm(const VECTOR_2D<Type> &vector)
 	{
 		return sqrt((double)vector.x * vector.x + vector.y * vector.y);
 	}
 
-	template<class Type>
+	template <class Type>
 	double
 	arg(const VECTOR_2D<Type> &vector)
 	{
 		return atan2(vector.y, vector.x);
 	}
 
-	template<class Type>
+	template <class Type>
 	VECTOR_2D<Type>
 	floor(VECTOR_2D<Type> vector)
 	{
@@ -227,7 +238,7 @@ namespace Vector_2D {
 		return vector;
 	}
 
-	template<class Type>
+	template <class Type>
 	VECTOR_2D<Type>
 	round(VECTOR_2D<Type> vector)
 	{
@@ -236,7 +247,7 @@ namespace Vector_2D {
 		return vector;
 	}
 
-	template<class Type>
+	template <class Type>
 	VECTOR_2D<Type>
 	ceil(VECTOR_2D<Type> vector)
 	{

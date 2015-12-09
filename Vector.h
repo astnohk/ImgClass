@@ -15,6 +15,8 @@ struct VECTOR_2D
 		void reset(const T& init_x, const T& init_y);
 
 		// Operators
+		template<class RT> operator VECTOR_2D<RT>() const;
+
 		VECTOR_2D<T>& operator=(const VECTOR_2D<T>& vector);
 		template<class Tval> VECTOR_2D<T>& operator=(const Tval& value);
 

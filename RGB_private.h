@@ -201,9 +201,9 @@ template <class Type>
 ImgClass::RGB<Type> &
 operator-(const Type& lvalue, ImgClass::RGB<Type> rcolor)
 {
-	rcolor.R -= lvalue;
-	rcolor.G -= lvalue;
-	rcolor.B -= lvalue;
+	rcolor.R = lvalue - rcolor.R;
+	rcolor.G = lvalue - rcolor.G;
+	rcolor.B = lvalue - rcolor.B;
 	return rcolor;
 }
 

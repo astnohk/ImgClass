@@ -217,9 +217,10 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& imag
  */
 template <class T>
 void
-BlockMatching<T>::get_connected_region_list(ImgVector<int> region_map) // get copy of region_map
+BlockMatching<T>::get_connected_region_list(const ImgVector<int>& region_map_original) // get copy of region_map
 {
 	std::list<std::list<VECTOR_2D<int> > > tmp_list;
+	ImgVector<int> region_map(region_map_original);
 	// Clear the vector
 	_connected_regions.clear();
 

@@ -311,7 +311,7 @@ void
 BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range)
 {
 	const double coeff_SAD = 1.0;
-	const double coeff_ZNCC = 10.0;
+	const double coeff_ZNCC = 5.0;
 	double (BlockMatching<T>::*SAD_func)(const int, const int, const std::list<VECTOR_2D<int> >&) = &BlockMatching<T>::MAD_region;
 	double (BlockMatching<T>::*NCC_func)(const int, const int, const std::list<VECTOR_2D<int> >&) = &BlockMatching<T>::ZNCC_region;
 

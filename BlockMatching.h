@@ -1,10 +1,10 @@
+#ifndef LIB_ImgClass_BlockMatching
+#define LIB_ImgClass_BlockMatching
+
 #ifndef nullptr
 #define nullptr 0
 #endif
 
-
-#ifndef LIB_ImgClass_BlockMatching
-#define LIB_ImgClass_BlockMatching
 
 #include <list>
 #include <vector>
@@ -32,7 +32,7 @@ class BlockMatching
 	public:
 		// Constructors
 		BlockMatching(void);
-		BlockMatching(const BlockMatching& copy);
+		explicit BlockMatching(const BlockMatching& copy);
 		BlockMatching(const ImgVector<T>& image_prev, const ImgVector<T>& image_next, const int BlockSize, const bool dense = false);
 		BlockMatching(const ImgVector<T>& image_prev, const ImgVector<T>& image_next, const ImgVector<int>& region_map);
 		virtual ~BlockMatching(void);
@@ -65,7 +65,7 @@ class BlockMatching
 
 	protected:
 		// Extract connected region from region_map
-		void get_connected_region_list(ImgVector<int> region_map); // get copy of region_map to modify
+		void get_connected_region_list(const ImgVector<int>& region_map_original); // get copy of region_map to modify
 
 		// Main method of block_matching
 		void block_matching_lattice(const int search_range);

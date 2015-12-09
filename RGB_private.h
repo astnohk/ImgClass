@@ -19,8 +19,15 @@ namespace ImgClass {
 	}
 
 	template <class T>
-	template <class RT>
-	RGB<T>::RGB(const RT& value)
+	RGB<T>::RGB(const RGB<T>& color)
+	{
+		R = color.R;
+		G = color.G;
+		B = color.B;
+	}
+
+	template <class T>
+	RGB<T>::RGB(const T& value)
 	{
 		R = value;
 		G = value;
@@ -32,95 +39,132 @@ namespace ImgClass {
 
 	// Operators
 	template <class T>
-	template <class RT>
-	RGB<T> &
-	RGB<T>::operator=(const RT& value)
+	template <class ConvertType>
+	RGB<T>::operator RGB<ConvertType>() const
 	{
-		R = value;
-		G = value;
-		B = value;
+		RGB<ConvertType> color;
+
+		color.R = ConvertType(color.R);
+		color.G = ConvertType(color.G);
+		color.B = ConvertType(color.B);
+
+		return color;
 	}
+
+	template <class T>
+	template <class ConvertType>
+	RGB<T>::operator ConvertType() const
+	{
+		const double yuv_y_red = 0.299;
+		const double yuv_y_green = 0.587;
+		const double yuv_y_blue = 0.114;
+
+		return ConvertType(yuv_y_red * R
+		    + yuv_y_green * G
+		    + yuv_y_blue * B);
+	}
+
 
 	template <class T>
 	template <class RT>
 	RGB<T> &
-	RGB<T>::operator=(const RGB<RT>& color)
+	RGB<T>::operator=(const RGB<RT>& rcolor)
 	{
-		R = color.R;
-		G = color.G;
-		B = color.B;
+		R = T(rcolor.R);
+		G = T(rcolor.G);
+		B = T(rcolor.B);
+		return *this;
 	}
 
 	template <class T>
 	RGB<T> &
-	RGB<T>::operator+=(const RGB<T>& color)
+	RGB<T>::operator=(const T& rvalue)
 	{
-		R += color.R;
-		G += color.G;
-		B += color.B;
+		R = rvalue;
+		G = rvalue;
+		B = rvalue;
+		return *this;
+	}
+
+
+	template <class T>
+	RGB<T> &
+	RGB<T>::operator+=(const RGB<T>& rcolor)
+	{
+		R += rcolor.R;
+		G += rcolor.G;
+		B += rcolor.B;
+		return *this;
 	}
 
 	template <class T>
 	RGB<T> &
-	RGB<T>::operator+=(const T& value)
+	RGB<T>::operator+=(const T& rvalue)
 	{
-		R += value;
-		G += value;
-		B += value;
+		R += rvalue;
+		G += rvalue;
+		B += rvalue;
+		return *this;
 	}
 
 	template <class T>
 	RGB<T> &
-	RGB<T>::operator-=(const RGB<T>& color)
+	RGB<T>::operator-=(const RGB<T>& rcolor)
 	{
-		R -= color.R;
-		G -= color.G;
-		B -= color.B;
+		R -= rcolor.R;
+		G -= rcolor.G;
+		B -= rcolor.B;
+		return *this;
 	}
 
 	template <class T>
 	RGB<T> &
-	RGB<T>::operator-=(const T& value)
+	RGB<T>::operator-=(const T& rvalue)
 	{
-		R -= value;
-		G -= value;
-		B -= value;
+		R -= rvalue;
+		G -= rvalue;
+		B -= rvalue;
+		return *this;
 	}
 
 	template <class T>
 	RGB<T> &
-	RGB<T>::operator*=(const RGB<T>& color)
+	RGB<T>::operator*=(const RGB<T>& rcolor)
 	{
-		R *= color.R;
-		G *= color.G;
-		B *= color.B;
+		R *= rcolor.R;
+		G *= rcolor.G;
+		B *= rcolor.B;
+		return *this;
 	}
 
 	template <class T>
 	RGB<T> &
-	RGB<T>::operator*=(const T& value)
+	RGB<T>::operator*=(const T& rvalue)
 	{
-		R *= value;
-		G *= value;
-		B *= value;
+		R *= rvalue;
+		G *= rvalue;
+		B *= rvalue;
+		return *this;
 	}
 
 	template <class T>
 	RGB<T> &
-	RGB<T>::operator/=(const RGB<T>& color)
+	RGB<T>::operator/=(const RGB<T>& rcolor)
 	{
-		R /= color.R;
-		G /= color.G;
-		B /= color.B;
+		R /= rcolor.R;
+		G /= rcolor.G;
+		B /= rcolor.B;
+		return *this;
 	}
 
 	template <class T>
 	RGB<T> &
-	RGB<T>::operator/=(const T& value)
+	RGB<T>::operator/=(const T& rvalue)
 	{
-		R /= value;
-		G /= value;
-		B /= value;
+		R /= rvalue;
+		G /= rvalue;
+		B /= rvalue;
+		return *this;
 	}
 }
 
@@ -130,14 +174,14 @@ namespace ImgClass {
 // Arithmetic
 
 template <class Type>
-ImgClass::RGB<Type> &
+const ImgClass::RGB<Type>
 operator+(ImgClass::RGB<Type> color)
 {
 	return color;
 }
 
 template <class Type>
-ImgClass::RGB<Type> &
+const ImgClass::RGB<Type>
 operator-(ImgClass::RGB<Type> color)
 {
 	color.R = -color.R;
@@ -148,7 +192,7 @@ operator-(ImgClass::RGB<Type> color)
 
 
 template <class Type>
-ImgClass::RGB<Type> &
+const ImgClass::RGB<Type>
 operator+(ImgClass::RGB<Type> lcolor, const ImgClass::RGB<Type>& rcolor)
 {
 	lcolor.R += rcolor.R;
@@ -158,7 +202,7 @@ operator+(ImgClass::RGB<Type> lcolor, const ImgClass::RGB<Type>& rcolor)
 }
 
 template <class Type>
-ImgClass::RGB<Type> &
+const ImgClass::RGB<Type>
 operator+(ImgClass::RGB<Type> lcolor, const Type& rvalue)
 {
 	lcolor.R += rvalue;
@@ -168,7 +212,7 @@ operator+(ImgClass::RGB<Type> lcolor, const Type& rvalue)
 }
 
 template <class Type>
-ImgClass::RGB<Type> &
+const ImgClass::RGB<Type>
 operator+(const Type& lvalue, ImgClass::RGB<Type> rcolor)
 {
 	rcolor.R += lvalue;
@@ -178,7 +222,7 @@ operator+(const Type& lvalue, ImgClass::RGB<Type> rcolor)
 }
 
 template <class Type>
-ImgClass::RGB<Type> &
+const ImgClass::RGB<Type>
 operator-(ImgClass::RGB<Type> lcolor, const ImgClass::RGB<Type>& rcolor)
 {
 	lcolor.R -= rcolor.R;
@@ -188,7 +232,7 @@ operator-(ImgClass::RGB<Type> lcolor, const ImgClass::RGB<Type>& rcolor)
 }
 
 template <class Type>
-ImgClass::RGB<Type> &
+const ImgClass::RGB<Type>
 operator-(ImgClass::RGB<Type> lcolor, const Type& rvalue)
 {
 	lcolor.R -= rvalue;
@@ -198,7 +242,7 @@ operator-(ImgClass::RGB<Type> lcolor, const Type& rvalue)
 }
 
 template <class Type>
-ImgClass::RGB<Type> &
+const ImgClass::RGB<Type>
 operator-(const Type& lvalue, ImgClass::RGB<Type> rcolor)
 {
 	rcolor.R = lvalue - rcolor.R;
@@ -208,7 +252,7 @@ operator-(const Type& lvalue, ImgClass::RGB<Type> rcolor)
 }
 
 template <class Type>
-ImgClass::RGB<Type> &
+const ImgClass::RGB<Type>
 operator*(ImgClass::RGB<Type> lcolor, const ImgClass::RGB<Type>& rcolor)
 {
 	lcolor.R *= rcolor.R;
@@ -218,7 +262,7 @@ operator*(ImgClass::RGB<Type> lcolor, const ImgClass::RGB<Type>& rcolor)
 }
 
 template <class Type>
-ImgClass::RGB<Type> &
+const ImgClass::RGB<Type>
 operator*(ImgClass::RGB<Type> lcolor, const Type& rvalue)
 {
 	lcolor.R *= rvalue;
@@ -228,7 +272,7 @@ operator*(ImgClass::RGB<Type> lcolor, const Type& rvalue)
 }
 
 template <class Type>
-ImgClass::RGB<Type> &
+const ImgClass::RGB<Type>
 operator*(const Type& lvalue, ImgClass::RGB<Type> rcolor)
 {
 	rcolor.R *= lvalue;
@@ -238,7 +282,7 @@ operator*(const Type& lvalue, ImgClass::RGB<Type> rcolor)
 }
 
 template <class Type>
-ImgClass::RGB<Type> &
+const ImgClass::RGB<Type>
 operator/(ImgClass::RGB<Type> lcolor, const ImgClass::RGB<Type>& rcolor)
 {
 	lcolor.R /= rcolor.R;
@@ -248,7 +292,7 @@ operator/(ImgClass::RGB<Type> lcolor, const ImgClass::RGB<Type>& rcolor)
 }
 
 template <class Type>
-ImgClass::RGB<Type> &
+const ImgClass::RGB<Type>
 operator/(ImgClass::RGB<Type> lcolor, const Type& rvalue)
 {
 	lcolor.R /= rvalue;
@@ -258,7 +302,7 @@ operator/(ImgClass::RGB<Type> lcolor, const Type& rvalue)
 }
 
 template <class Type>
-ImgClass::RGB<Type> &
+const ImgClass::RGB<Type>
 operator/(const Type& lvalue, ImgClass::RGB<Type> rcolor)
 {
 	rcolor.R = lvalue / rcolor.R;

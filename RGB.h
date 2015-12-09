@@ -1,9 +1,3 @@
-#ifndef nullptr
-#define nullptr 0
-#endif
-
-
-
 #ifndef LIB_ImgClass_RGB
 #define LIB_ImgClass_RGB
 
@@ -19,44 +13,48 @@ namespace ImgClass {
 			// Constructor
 			RGB(void);
 			RGB(const T& red, const T& green, const T& blue);
-			template<class RT> RGB(const RT& value);
+			RGB(const RGB<T>& color); // Copy constructor
+			explicit RGB(const T& value);
 
 			// Operators
-			template<class RT> RGB<T>& operator=(const RGB<RT>& value);
-			template<class RT> RGB<T>& operator=(const RT& value);
+			template<class ConvertType> operator RGB<ConvertType>() const;
+			template<class ConvertType> operator ConvertType() const; // return intensity with YUV coefficient
 
-			RGB<T>& operator+=(const RGB<T>& color);
-			RGB<T>& operator+=(const T& value);
+			template<class RT> RGB<T>& operator=(const RGB<RT>& rvalue);
+			RGB<T>& operator=(const T& rvalue);
 
-			RGB<T>& operator-=(const RGB<T>& color);
-			RGB<T>& operator-=(const T& value);
+			RGB<T>& operator+=(const RGB<T>& rcolor);
+			RGB<T>& operator+=(const T& rvalue);
 
-			RGB<T>& operator*=(const RGB<T>& color);
-			RGB<T>& operator*=(const T& value);
+			RGB<T>& operator-=(const RGB<T>& rcolor);
+			RGB<T>& operator-=(const T& rvalue);
 
-			RGB<T>& operator/=(const RGB<T>& color);
-			RGB<T>& operator/=(const T& value);
+			RGB<T>& operator*=(const RGB<T>& rcolor);
+			RGB<T>& operator*=(const T& rvalue);
+
+			RGB<T>& operator/=(const RGB<T>& rcolor);
+			RGB<T>& operator/=(const T& rvalue);
 
 			// friend Global Operators
 			// Arithmetic
-			template<class Type> friend RGB<Type>& operator+(RGB<Type> color);
-			template<class Type> friend RGB<Type>& operator-(RGB<Type> color);
+			template<class Type> friend const RGB<Type> operator+(RGB<Type> color);
+			template<class Type> friend const RGB<Type> operator-(RGB<Type> color);
 
-			template<class Type> friend RGB<Type>& operator+(RGB<Type> lcolor, const RGB<Type>& rcolor);
-			template<class Type> friend RGB<Type>& operator+(RGB<Type> lcolor, const Type& rvalue);
-			template<class Type> friend RGB<Type>& operator+(const Type& lvalue, RGB<Type> rcolor);
+			template<class Type> friend const RGB<Type> operator+(RGB<Type> lcolor, const RGB<Type>& rcolor);
+			template<class Type> friend const RGB<Type> operator+(RGB<Type> lcolor, const Type& rvalue);
+			template<class Type> friend const RGB<Type> operator+(const Type& lvalue, RGB<Type> rcolor);
 
-			template<class Type> friend RGB<Type>& operator-(RGB<Type> lcolor, const RGB<Type>& rcolor);
-			template<class Type> friend RGB<Type>& operator-(RGB<Type> lcolor, const Type& rvalue);
-			template<class Type> friend RGB<Type>& operator-(const Type& lvalue, RGB<Type> rcolor);
+			template<class Type> friend const RGB<Type> operator-(RGB<Type> lcolor, const RGB<Type>& rcolor);
+			template<class Type> friend const RGB<Type> operator-(RGB<Type> lcolor, const Type& rvalue);
+			template<class Type> friend const RGB<Type> operator-(const Type& lvalue, RGB<Type> rcolor);
 
-			template<class Type> friend RGB<Type>& operator*(RGB<Type> lcolor, const RGB<Type>& rcolor);
-			template<class Type> friend RGB<Type>& operator*(RGB<Type> lcolor, const Type& rvalue);
-			template<class Type> friend RGB<Type>& operator*(const Type& lvalue, RGB<Type> rcolor);
+			template<class Type> friend const RGB<Type> operator*(RGB<Type> lcolor, const RGB<Type>& rcolor);
+			template<class Type> friend const RGB<Type> operator*(RGB<Type> lcolor, const Type& rvalue);
+			template<class Type> friend const RGB<Type> operator*(const Type& lvalue, RGB<Type> rcolor);
 
-			template<class Type> friend RGB<Type>& operator/(RGB<Type> lcolor, const RGB<Type>& rcolor);
-			template<class Type> friend RGB<Type>& operator/(RGB<Type> lcolor, const Type& rvalue);
-			template<class Type> friend RGB<Type>& operator/(const Type& lvalue, RGB<Type> rcolor);
+			template<class Type> friend const RGB<Type> operator/(RGB<Type> lcolor, const RGB<Type>& rcolor);
+			template<class Type> friend const RGB<Type> operator/(RGB<Type> lcolor, const Type& rvalue);
+			template<class Type> friend const RGB<Type> operator/(const Type& lvalue, RGB<Type> rcolor);
 
 			// Comparator
 			template<class Type> friend bool operator==(const RGB<Type>& lcolor, const RGB<Type>& rcolor);
@@ -66,24 +64,24 @@ namespace ImgClass {
 
 // Global Operators
 // Arithmetic
-template<class Type> ImgClass::RGB<Type>& operator+(ImgClass::RGB<Type> color);
-template<class Type> ImgClass::RGB<Type>& operator-(ImgClass::RGB<Type> color);
+template<class Type> const ImgClass::RGB<Type>& operator+(ImgClass::RGB<Type> color);
+template<class Type> const ImgClass::RGB<Type>& operator-(ImgClass::RGB<Type> color);
 
-template<class Type> ImgClass::RGB<Type>& operator+(ImgClass::RGB<Type> lcolor, const ImgClass::RGB<Type>& rcolor);
-template<class Type> ImgClass::RGB<Type>& operator+(ImgClass::RGB<Type> lcolor, const Type& rvalue);
-template<class Type> ImgClass::RGB<Type>& operator+(const Type& lvalue, ImgClass::RGB<Type> rcolor);
+template<class Type> const ImgClass::RGB<Type>& operator+(ImgClass::RGB<Type> lcolor, const ImgClass::RGB<Type>& rcolor);
+template<class Type> const ImgClass::RGB<Type>& operator+(ImgClass::RGB<Type> lcolor, const Type& rvalue);
+template<class Type> const ImgClass::RGB<Type>& operator+(const Type& lvalue, ImgClass::RGB<Type> rcolor);
 
-template<class Type> ImgClass::RGB<Type>& operator-(ImgClass::RGB<Type> lcolor, const ImgClass::RGB<Type>& rcolor);
-template<class Type> ImgClass::RGB<Type>& operator-(ImgClass::RGB<Type> lcolor, const Type& rvalue);
-template<class Type> ImgClass::RGB<Type>& operator-(const Type& lvalue, ImgClass::RGB<Type> rcolor);
+template<class Type> const ImgClass::RGB<Type>& operator-(ImgClass::RGB<Type> lcolor, const ImgClass::RGB<Type>& rcolor);
+template<class Type> const ImgClass::RGB<Type>& operator-(ImgClass::RGB<Type> lcolor, const Type& rvalue);
+template<class Type> const ImgClass::RGB<Type>& operator-(const Type& lvalue, ImgClass::RGB<Type> rcolor);
 
-template<class Type> ImgClass::RGB<Type>& operator*(ImgClass::RGB<Type> lcolor, const ImgClass::RGB<Type>& rcolor);
-template<class Type> ImgClass::RGB<Type>& operator*(ImgClass::RGB<Type> lcolor, const Type& rvalue);
-template<class Type> ImgClass::RGB<Type>& operator*(const Type& lvalue, ImgClass::RGB<Type> rcolor);
+template<class Type> const ImgClass::RGB<Type>& operator*(ImgClass::RGB<Type> lcolor, const ImgClass::RGB<Type>& rcolor);
+template<class Type> const ImgClass::RGB<Type>& operator*(ImgClass::RGB<Type> lcolor, const Type& rvalue);
+template<class Type> const ImgClass::RGB<Type>& operator*(const Type& lvalue, ImgClass::RGB<Type> rcolor);
 
-template<class Type> ImgClass::RGB<Type>& operator/(ImgClass::RGB<Type> lcolor, const ImgClass::RGB<Type>& rcolor);
-template<class Type> ImgClass::RGB<Type>& operator/(ImgClass::RGB<Type> lcolor, const Type& rvalue);
-template<class Type> ImgClass::RGB<Type>& operator/(const Type& lvalue, ImgClass::RGB<Type> rcolor);
+template<class Type> const ImgClass::RGB<Type>& operator/(ImgClass::RGB<Type> lcolor, const ImgClass::RGB<Type>& rcolor);
+template<class Type> const ImgClass::RGB<Type>& operator/(ImgClass::RGB<Type> lcolor, const Type& rvalue);
+template<class Type> const ImgClass::RGB<Type>& operator/(const Type& lvalue, ImgClass::RGB<Type> rcolor);
 
 // Comparator
 template<class Type> bool operator==(const ImgClass::RGB<Type>& lcolor, const ImgClass::RGB<Type>& rcolor);

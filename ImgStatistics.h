@@ -1,10 +1,10 @@
+#ifndef LIB_ImgClass_ImgStatistics
+#define LIB_ImgClass_ImgStatistics
+
 #ifndef nullptr
 #define nullptr 0
 #endif
 
-
-#ifndef LIB_ImgClass_ImgStatistics
-#define LIB_ImgClass_ImgStatistics
 
 class ImgStatistics
 {
@@ -14,7 +14,7 @@ class ImgStatistics
 		double *_data;
 	public:
 		ImgStatistics(void);
-		ImgStatistics(const ImgStatistics &copy);
+		explicit ImgStatistics(const ImgStatistics &copy);
 		ImgStatistics(int W, int H, double *Img);
 
 		virtual ~ImgStatistics(void);

@@ -1,10 +1,8 @@
-#include "ImgClass.h"
-#include "Vector.h"
-
-
-
 #ifndef LIB_ImgClass_MotionCompensation
 #define LIB_ImgClass_MotionCompensation
+
+#include "ImgClass.h"
+#include "Vector.h"
 
 class MotionCompensation
 {
@@ -18,7 +16,7 @@ class MotionCompensation
 		ImgVector<VECTOR_2D<double> > _vector;
 	public:
 		MotionCompensation(void);
-		MotionCompensation(const MotionCompensation &copy); // copy constructor
+		explicit MotionCompensation(const MotionCompensation &copy); // copy constructor
 		MotionCompensation(int width, int height, const double *image_prev, const double *image_next, const VECTOR_2D<double> *vector);
 		MotionCompensation(int width, int height, const double *image_prev, const double *image_next, int v_width, int v_height, const VECTOR_2D<double> *vector);
 		MotionCompensation(const ImgVector<double> &image_prev, const ImgVector<double> &image_next, const ImgVector<VECTOR_2D<double> > &vector);

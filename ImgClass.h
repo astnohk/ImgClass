@@ -1,11 +1,9 @@
+#ifndef LIB_ImgClass
+#define LIB_ImgClass
+
 #ifndef nullptr
 #define nullptr 0
 #endif
-
-
-
-#ifndef LIB_ImgClass
-#define LIB_ImgClass
 
 template <class T>
 class ImgVector
@@ -18,7 +16,7 @@ class ImgVector
 		ImgVector(void);
 		ImgVector(int W, int H, const T& value = T());
 		ImgVector(int W, int H, const T* array);
-		ImgVector(const ImgVector<T> &copy); // Copy constructor
+		explicit ImgVector(const ImgVector<T> &copy); // Copy constructor
 
 		virtual ~ImgVector(void);
 

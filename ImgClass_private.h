@@ -16,30 +16,6 @@ ImgVector<T>::ImgVector(void)
 }
 
 
-// Copy Constructor
-template <class T>
-ImgVector<T>::ImgVector(const ImgVector<T> &target)
-{
-	_data = nullptr;
-	_width = 0;
-	_height = 0;
-	if (target._width > 0 && target._height > 0) {
-		try {
-			_data = new T[target._width * target._height]();
-		}
-		catch (const std::bad_alloc &bad) {
-			std::cerr << "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory" << std::endl;
-			_data = nullptr;
-			throw;
-		}
-		_width = target._width;
-		_height = target._height;
-		for (int i = 0; i < _width * _height; i++) {
-			_data[i] = target._data[i];
-		}
-	}
-}
-
 template <class T>
 ImgVector<T>::ImgVector(int W, int H, const T& value)
 {
@@ -84,6 +60,30 @@ ImgVector<T>::ImgVector(int W, int H, const T* array)
 			for (int i = 0; i < _width * _height; i++) {
 				_data[i] = array[i];
 			}
+		}
+	}
+}
+
+
+template <class T>
+ImgVector<T>::ImgVector(const ImgVector<T>& copy)
+{
+	_data = nullptr;
+	_width = 0;
+	_height = 0;
+	if (copy._width > 0 && copy._height > 0) {
+		try {
+			_data = new T[copy._width * copy._height]();
+		}
+		catch (const std::bad_alloc &bad) {
+			std::cerr << "ImgVector::ImgVector(const ImgVector<T>&) : Cannot Allocate Memory" << std::endl;
+			_data = nullptr;
+			throw;
+		}
+		_width = copy._width;
+		_height = copy._height;
+		for (int i = 0; i < _width * _height; i++) {
+			_data[i] = copy._data[i];
 		}
 	}
 }
@@ -187,6 +187,36 @@ ImgVector<T>::copy(const ImgVector<T>& vector)
 }
 
 template <class T>
+template <class RT>
+ImgVector<T> &
+ImgVector<T>::cast_copy(const ImgVector<RT>& vector)
+{
+	if (vector.width() > 0 && vector.height() > 0) {
+		T *tmp_data = nullptr;
+		try {
+			tmp_data = new T[vector.size()]();
+		}
+		catch (const std::bad_alloc &bad) {
+			std::cerr << "ImgVector::operator=(ImgVector<T>&) : Cannot Allocate Memory" << std::endl;
+			throw;
+			return *this;
+		}
+		_width = vector.width();
+		_height = vector.height();
+		delete[] _data;
+		_data = tmp_data;
+		for (int i = 0; i < _width * _height; i++) {
+			_data[i] = T(vector.get(i)); // copy with cast
+		}
+	}
+	return *this;
+}
+
+
+
+
+// ----- Operators -----
+template <class T>
 ImgVector<T> &
 ImgVector<T>::operator=(const ImgVector<T>& vector)
 {
@@ -206,7 +236,7 @@ ImgVector<T>::operator=(const ImgVector<T>& vector)
 		delete[] _data;
 		_data = tmp_data;
 		for (int i = 0; i < _width * _height; i++) {
-			_data[i] = vector._data[i];
+			_data[i] = vector._data[i]; // copy with cast
 		}
 	}
 	return *this;

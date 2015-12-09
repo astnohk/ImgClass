@@ -16,7 +16,7 @@ class ImgVector
 		ImgVector(void);
 		ImgVector(int W, int H, const T& value = T());
 		ImgVector(int W, int H, const T* array);
-		explicit ImgVector(const ImgVector<T> &copy); // Copy constructor
+		explicit ImgVector(const ImgVector<T>& copy); // Copy constructor
 
 		virtual ~ImgVector(void);
 
@@ -25,6 +25,8 @@ class ImgVector
 		void reset(int W, int H, const T* array);
 
 		ImgVector<T>& copy(const ImgVector<T>& vector);
+		template<class RT> ImgVector<T>& cast_copy(const ImgVector<RT>& vector);
+
 		ImgVector<T>& operator=(const ImgVector<T>& vector);
 
 		// Properties

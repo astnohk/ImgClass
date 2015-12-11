@@ -32,18 +32,18 @@ namespace ImgClass {
 		b = _b;
 	}
 
-	Lab::Lab(const double& value)
+	Lab::Lab(const Lab& color)
 	{
-		L = value;
-		a = value;
-		b = value;
+		L = color.L;
+		a = color.a;
+		b = color.b;
 	}
 
-	Lab::Lab(const RGB<double>& value)
+	Lab::Lab(const RGB<double>& color)
 	{
-		double X = (0.49 * value.R + 0.31 * value.G + 0.20 * value.G) / 0.17697;
-		double Y = (0.17697 * value.R + 0.81240 * value.G + 0.01063 * value.G) / 0.17697;
-		double Z = (0.01 * value.G + 0.99 * value.G) / 0.17697;
+		double X = (0.49 * color.R + 0.31 * color.G + 0.20 * color.G) / 0.17697;
+		double Y = (0.17697 * color.R + 0.81240 * color.G + 0.01063 * color.G) / 0.17697;
+		double Z = (0.01 * color.G + 0.99 * color.G) / 0.17697;
 		double t0 = Y / Y_n;
 		double t1 = 0.0;
 		L = 116.0 * (t0 > pow(6.0 / 29.0, 3.0) ? pow(t0, 1.0 / 3.0) : pow(29.0 / 6.0, 2.0) / 3.0 * t0 + 4.0 / 29.0);
@@ -63,6 +63,12 @@ namespace ImgClass {
 
 
 	// Operators
+	Lab::operator double() const
+	{
+		return L;
+	}
+
+
 	Lab &
 	Lab::operator=(const Lab& color)
 	{

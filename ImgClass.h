@@ -1,9 +1,11 @@
 #ifndef LIB_ImgClass
 #define LIB_ImgClass
 
+/* Macro for compatibility where the C++11 not supported
 #ifndef nullptr
 #define nullptr 0
 #endif
+*/
 
 template <class T>
 class ImgVector

@@ -26,18 +26,20 @@ namespace ImgClass {
 		B = color.B;
 	}
 
-	template <class T>
-	RGB<T>::RGB(const T& value)
-	{
-		R = value;
-		G = value;
-		B = value;
-	}
-
 
 
 
 	// Operators
+	template <class T>
+	RGB<T>::operator T() const // return intensity
+	{
+		const double yum_y_red = 0.299;
+		const double yum_y_green = 0.587;
+		const double yum_y_blue = 0.114;
+
+		return yum_y_red * R + yum_y_green * G + yum_y_blue * B;
+	}
+
 	template <class T>
 	template <class ConvertType>
 	RGB<T>::operator RGB<ConvertType>() const
@@ -49,19 +51,6 @@ namespace ImgClass {
 		color.B = ConvertType(color.B);
 
 		return color;
-	}
-
-	template <class T>
-	template <class ConvertType>
-	RGB<T>::operator ConvertType() const
-	{
-		const double yuv_y_red = 0.299;
-		const double yuv_y_green = 0.587;
-		const double yuv_y_blue = 0.114;
-
-		return ConvertType(yuv_y_red * R
-		    + yuv_y_green * G
-		    + yuv_y_blue * B);
 	}
 
 
@@ -166,7 +155,55 @@ namespace ImgClass {
 		B /= rvalue;
 		return *this;
 	}
+
+
+	template <class T>
+	const RGB<T>
+	RGB<T>::operator+(const RGB<T>& rcolor) const
+	{
+		RGB<T> color;
+		color.R += rcolor.R;
+		color.G += rcolor.G;
+		color.B += rcolor.B;
+		return color;
+	}
+
+	template <class T>
+	const RGB<T>
+	RGB<T>::operator+(const T& rvalue) const
+	{
+		RGB<T> color;
+		color.R += rvalue;
+		color.G += rvalue;
+		color.B += rvalue;
+		return color;
+	}
+
+
+	template <class T>
+	const RGB<T>
+	RGB<T>::operator-(const RGB<T>& rcolor) const
+	{
+		RGB<T> color;
+		color.R -= rcolor.R;
+		color.G -= rcolor.G;
+		color.B -= rcolor.B;
+		return color;
+	}
+
+	template <class T>
+	const RGB<T>
+	RGB<T>::operator-(const T& rvalue) const
+	{
+		RGB<T> color;
+		color.R -= rvalue;
+		color.G -= rvalue;
+		color.B -= rvalue;
+		return color;
+	}
 }
+
+
 
 
 // ----- Global Operators -----
@@ -175,140 +212,86 @@ namespace ImgClass {
 
 template <class Type>
 const ImgClass::RGB<Type>
-operator+(ImgClass::RGB<Type> color)
+operator+(ImgClass::RGB<Type> rcolor)
 {
+	return rcolor;
+}
+
+template <class Type>
+const ImgClass::RGB<Type>
+operator-(ImgClass::RGB<Type> rcolor)
+{
+	rcolor.R = -rcolor.R;
+	rcolor.G = -rcolor.G;
+	rcolor.B = -rcolor.B;
+	return rcolor;
+}
+
+
+template <class Type>
+const ImgClass::RGB<Type>
+operator*(const ImgClass::RGB<Type>& lcolor, const ImgClass::RGB<Type>& rcolor)
+{
+	ImgClass::RGB<Type> color;
+	color.R = lcolor.R * rcolor.R;
+	color.G = lcolor.G * rcolor.G;
+	color.B = lcolor.B * rcolor.B;
 	return color;
 }
 
 template <class Type>
 const ImgClass::RGB<Type>
-operator-(ImgClass::RGB<Type> color)
+operator*(const ImgClass::RGB<Type>& lcolor, const Type& rvalue)
 {
-	color.R = -color.R;
-	color.G = -color.G;
-	color.B = -color.B;
+	ImgClass::RGB<Type> color;
+	color.R = lcolor.R * rvalue;
+	color.G = lcolor.G * rvalue;
+	color.B = lcolor.B * rvalue;
 	return color;
 }
 
-
 template <class Type>
 const ImgClass::RGB<Type>
-operator+(ImgClass::RGB<Type> lcolor, const ImgClass::RGB<Type>& rcolor)
+operator*(const Type& lvalue, const ImgClass::RGB<Type>& rcolor)
 {
-	lcolor.R += rcolor.R;
-	lcolor.G += rcolor.G;
-	lcolor.B += rcolor.B;
-	return lcolor;
+	ImgClass::RGB<Type> color;
+	color.R = lvalue * rcolor.R;
+	color.G = lvalue * rcolor.G;
+	color.B = lvalue * rcolor.B;
+	return color;
 }
 
 template <class Type>
 const ImgClass::RGB<Type>
-operator+(ImgClass::RGB<Type> lcolor, const Type& rvalue)
+operator/(const ImgClass::RGB<Type>& lcolor, const ImgClass::RGB<Type>& rcolor)
 {
-	lcolor.R += rvalue;
-	lcolor.G += rvalue;
-	lcolor.B += rvalue;
-	return lcolor;
+	ImgClass::RGB<Type> color;
+	color.R = lcolor.R / rcolor.R;
+	color.G = lcolor.G / rcolor.G;
+	color.B = lcolor.B / rcolor.B;
+	return color;
 }
 
 template <class Type>
 const ImgClass::RGB<Type>
-operator+(const Type& lvalue, ImgClass::RGB<Type> rcolor)
+operator/(const ImgClass::RGB<Type>& lcolor, const Type& rvalue)
 {
-	rcolor.R += lvalue;
-	rcolor.G += lvalue;
-	rcolor.B += lvalue;
-	return rcolor;
+	ImgClass::RGB<Type> color;
+	color.R = lcolor.R / rvalue;
+	color.G = lcolor.G / rvalue;
+	color.B = lcolor.B / rvalue;
+	return color;
 }
 
 template <class Type>
 const ImgClass::RGB<Type>
-operator-(ImgClass::RGB<Type> lcolor, const ImgClass::RGB<Type>& rcolor)
+operator/(const Type& lvalue, const ImgClass::RGB<Type>& rcolor)
 {
-	lcolor.R -= rcolor.R;
-	lcolor.G -= rcolor.G;
-	lcolor.B -= rcolor.B;
-	return lcolor;
-}
-
-template <class Type>
-const ImgClass::RGB<Type>
-operator-(ImgClass::RGB<Type> lcolor, const Type& rvalue)
-{
-	lcolor.R -= rvalue;
-	lcolor.G -= rvalue;
-	lcolor.B -= rvalue;
-	return lcolor;
-}
-
-template <class Type>
-const ImgClass::RGB<Type>
-operator-(const Type& lvalue, ImgClass::RGB<Type> rcolor)
-{
-	rcolor.R = lvalue - rcolor.R;
-	rcolor.G = lvalue - rcolor.G;
-	rcolor.B = lvalue - rcolor.B;
-	return rcolor;
-}
-
-template <class Type>
-const ImgClass::RGB<Type>
-operator*(ImgClass::RGB<Type> lcolor, const ImgClass::RGB<Type>& rcolor)
-{
-	lcolor.R *= rcolor.R;
-	lcolor.G *= rcolor.G;
-	lcolor.B *= rcolor.B;
-	return lcolor;
-}
-
-template <class Type>
-const ImgClass::RGB<Type>
-operator*(ImgClass::RGB<Type> lcolor, const Type& rvalue)
-{
-	lcolor.R *= rvalue;
-	lcolor.G *= rvalue;
-	lcolor.B *= rvalue;
-	return lcolor;
-}
-
-template <class Type>
-const ImgClass::RGB<Type>
-operator*(const Type& lvalue, ImgClass::RGB<Type> rcolor)
-{
-	rcolor.R *= lvalue;
-	rcolor.G *= lvalue;
-	rcolor.B *= lvalue;
-	return rcolor;
-}
-
-template <class Type>
-const ImgClass::RGB<Type>
-operator/(ImgClass::RGB<Type> lcolor, const ImgClass::RGB<Type>& rcolor)
-{
-	lcolor.R /= rcolor.R;
-	lcolor.G /= rcolor.G;
-	lcolor.B /= rcolor.B;
-	return lcolor;
-}
-
-template <class Type>
-const ImgClass::RGB<Type>
-operator/(ImgClass::RGB<Type> lcolor, const Type& rvalue)
-{
-	lcolor.R /= rvalue;
-	lcolor.G /= rvalue;
-	lcolor.B /= rvalue;
-	return lcolor;
-}
-
-template <class Type>
-const ImgClass::RGB<Type>
-operator/(const Type& lvalue, ImgClass::RGB<Type> rcolor)
-{
-	rcolor.R = lvalue / rcolor.R;
-	rcolor.G = lvalue / rcolor.G;
-	rcolor.B = lvalue / rcolor.B;
-	return rcolor;
+	ImgClass::RGB<Type> color;
+	color.R = lvalue / rcolor.R;
+	color.G = lvalue / rcolor.G;
+	color.B = lvalue / rcolor.B;
+	return color;
 }
 
 

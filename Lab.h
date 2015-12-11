@@ -17,10 +17,12 @@ namespace ImgClass {
 			// Constructor
 			Lab(void);
 			Lab(const double& _L, const double& _a, const double& _b);
-			Lab(const RGB<double>& value); // Copy constructor
-			explicit Lab(const double& value);
+			Lab(const Lab& color); // Copy constructor
+			Lab(const RGB<double>& color);
 
 			// Operators
+			explicit operator double() const;
+
 			Lab& operator=(const Lab& value);
 			Lab& operator=(const double& value);
 			Lab& operator=(const RGB<double>& value);
@@ -49,18 +51,6 @@ namespace ImgClass {
 
 			Lab operator/(const Lab& rcolor) const;
 			Lab operator/(const double& rvalue) const;
-
-			// friend Global Operators
-			// Arithmetic
-			friend const Lab operator+(Lab color);
-			friend const Lab operator-(Lab color);
-
-			// Comparator
-			friend bool operator==(const Lab& lcolor, const Lab& rcolor);
-			friend bool operator!=(const Lab& lcolor, const Lab& rcolor);
-
-			// Norm
-			friend double norm(const ImgClass::Lab& color);
 	};
 }
 

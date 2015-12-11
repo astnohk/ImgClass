@@ -1,9 +1,11 @@
 #ifndef LIB_ImgClass_ImgStatistics
 #define LIB_ImgClass_ImgStatistics
 
+/* Macro for compatibility where the C++11 is not supported
 #ifndef nullptr
 #define nullptr 0
 #endif
+*/
 
 
 class ImgStatistics

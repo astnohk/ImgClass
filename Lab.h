@@ -38,19 +38,6 @@ namespace ImgClass {
 
 			Lab& operator/=(const Lab& color);
 			Lab& operator/=(const double& value);
-
-			// Arithmetic non-substituting operator
-			Lab operator+(const Lab& rcolor) const;
-			Lab operator+(const double& rvalue) const;
-
-			Lab operator-(const Lab& rcolor) const;
-			Lab operator-(const double& rvalue) const;
-
-			Lab operator*(const Lab& rcolor) const;
-			Lab operator*(const double& rvalue) const;
-
-			Lab operator/(const Lab& rcolor) const;
-			Lab operator/(const double& rvalue) const;
 	};
 }
 
@@ -61,9 +48,38 @@ const ImgClass::Lab operator-(ImgClass::Lab color);
 
 // Comparator
 bool operator==(const ImgClass::Lab& lcolor, const ImgClass::Lab& rcolor);
+bool operator==(const ImgClass::Lab& lcolor, const double& rvalue);
+bool operator==(const double& lvalue, const ImgClass::Lab& rcolor);
+
 bool operator!=(const ImgClass::Lab& lcolor, const ImgClass::Lab& rcolor);
+bool operator!=(const ImgClass::Lab& lcolor, const double& rvalue);
+bool operator!=(const double& lvalue, const ImgClass::Lab& rcolor);
+
+bool operator<(const ImgClass::Lab& lcolor, const double& rvalue);
+bool operator<(const double& lvalue, const ImgClass::Lab& rcolor);
+
+bool operator>(const ImgClass::Lab& lcolor, const double& rvalue);
+bool operator>(const double& lvalue, const ImgClass::Lab& rcolor);
+
+// Arithmetic non-substituting operator
+ImgClass::Lab operator+(const ImgClass::Lab& lcolor, const ImgClass::Lab& rcolor);
+ImgClass::Lab operator+(const ImgClass::Lab& lcolor, const double& rvalue);
+ImgClass::Lab operator+(const double& lvalue, const ImgClass::Lab& rcolor);
+
+ImgClass::Lab operator-(const ImgClass::Lab& lcolor, const ImgClass::Lab& rcolor);
+ImgClass::Lab operator-(const ImgClass::Lab& lcolor, const double& rvalue);
+ImgClass::Lab operator-(const double& lvalue, const ImgClass::Lab& rcolor);
+
+ImgClass::Lab operator*(const ImgClass::Lab& lcolor, const ImgClass::Lab& rcolor);
+ImgClass::Lab operator*(const ImgClass::Lab& lcolor, const double& rvalue);
+ImgClass::Lab operator*(const double& lvalue, const ImgClass::Lab& rcolor);
+
+ImgClass::Lab operator/(const ImgClass::Lab& lcolor, const ImgClass::Lab& rcolor);
+ImgClass::Lab operator/(const ImgClass::Lab& lcolor, const double& rvalue);
 
 // Norm
+const ImgClass::Lab abs(const ImgClass::Lab& color);
+double fabs(const ImgClass::Lab& color);
 double norm_squared(const ImgClass::Lab& color);
 
 #endif

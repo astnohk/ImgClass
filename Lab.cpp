@@ -166,100 +166,6 @@ namespace ImgClass {
 		b /= value;
 		return *this;
 	}
-
-
-
-	// ----- Not substitute -----
-	Lab
-	Lab::operator+(const Lab& rcolor) const
-	{
-		Lab ret;
-
-		ret.L = L + rcolor.L;
-		ret.a = a + rcolor.a;
-		ret.b = b + rcolor.b;
-		return ret;
-	}
-
-	Lab
-	Lab::operator+(const double& rvalue) const
-	{
-		Lab ret;
-
-		ret.L = L + rvalue;
-		ret.a = a + rvalue;
-		ret.b = b + rvalue;
-		return ret;
-	}
-
-
-	Lab
-	Lab::operator-(const Lab& rcolor) const
-	{
-		Lab ret;
-
-		ret.L = L - rcolor.L;
-		ret.a = a - rcolor.a;
-		ret.b = b - rcolor.b;
-		return ret;
-	}
-
-	Lab
-	Lab::operator-(const double& rvalue) const
-	{
-		Lab ret;
-
-		ret.L = L - rvalue;
-		ret.a = a - rvalue;
-		ret.b = b - rvalue;
-		return ret;
-	}
-
-
-	Lab
-	Lab::operator*(const Lab& rcolor) const
-	{
-		Lab ret;
-
-		ret.L = L * rcolor.L;
-		ret.a = a * rcolor.a;
-		ret.b = b * rcolor.b;
-		return ret;
-	}
-
-	Lab
-	Lab::operator*(const double& rvalue) const
-	{
-		Lab ret;
-
-		ret.L = L * rvalue;
-		ret.a = a * rvalue;
-		ret.b = b * rvalue;
-		return ret;
-	}
-
-
-	Lab
-	Lab::operator/(const Lab& rcolor) const
-	{
-		Lab ret;
-
-		ret.L = L / rcolor.L;
-		ret.a = a / rcolor.a;
-		ret.b = b / rcolor.b;
-		return ret;
-	}
-
-	Lab
-	Lab::operator/(const double& rvalue) const
-	{
-		Lab ret;
-
-		ret.L = L / rvalue;
-		ret.a = a / rvalue;
-		ret.b = b / rvalue;
-		return ret;
-	}
 }
 
 
@@ -283,46 +189,6 @@ operator-(ImgClass::Lab color)
 }
 
 
-/* Can be overloaded in C++11 or later
-const ImgClass::Lab
-operator+(ImgClass::Lab lcolor, const ImgClass::Lab& rcolor)
-{
-	lcolor.L += rcolor.L;
-	lcolor.a += rcolor.a;
-	lcolor.b += rcolor.b;
-	return lcolor;
-}
-
-
-const ImgClass::Lab
-operator-(ImgClass::Lab lcolor, const ImgClass::Lab& rcolor)
-{
-	lcolor.L -= rcolor.L;
-	lcolor.a -= rcolor.a;
-	lcolor.b -= rcolor.b;
-	return lcolor;
-}
-
-
-const ImgClass::Lab
-operator*(ImgClass::Lab lcolor, const ImgClass::Lab& rcolor)
-{
-	lcolor.L *= rcolor.L;
-	lcolor.a *= rcolor.a;
-	lcolor.b *= rcolor.b;
-	return lcolor;
-}
-
-
-const ImgClass::Lab
-operator/(ImgClass::Lab lcolor, const ImgClass::Lab& rcolor)
-{
-	lcolor.L /= rcolor.L;
-	lcolor.a /= rcolor.a;
-	lcolor.b /= rcolor.b;
-	return lcolor;
-}
-*/
 
 
 // Comparator
@@ -339,6 +205,31 @@ operator==(const ImgClass::Lab& lcolor, const ImgClass::Lab& rcolor)
 }
 
 bool
+operator==(const ImgClass::Lab& lcolor, const double& rvalue)
+{
+	if (lcolor.L == rvalue
+	    && lcolor.a == rvalue
+	    && lcolor.b == rvalue) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+bool
+operator==(const double& lvalue, const ImgClass::Lab& rcolor)
+{
+	if (lvalue == rcolor.L
+	    && lvalue == rcolor.a
+	    && lvalue == rcolor.b) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+bool
 operator!=(const ImgClass::Lab& lcolor, const ImgClass::Lab& rcolor)
 {
 	if (lcolor.L != rcolor.L
@@ -350,6 +241,210 @@ operator!=(const ImgClass::Lab& lcolor, const ImgClass::Lab& rcolor)
 	}
 }
 
+bool
+operator!=(const ImgClass::Lab& lcolor, const double& rvalue)
+{
+	if (lcolor.L != rvalue
+	    || lcolor.a != rvalue
+	    || lcolor.b != rvalue) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+bool
+operator!=(const double& lvalue, const ImgClass::Lab& rcolor)
+{
+	if (lvalue != rcolor.L
+	    || lvalue != rcolor.a
+	    || lvalue != rcolor.b) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+bool
+operator<(const ImgClass::Lab& lcolor, const double& rvalue)
+{
+	if (lcolor.L * lcolor.L + lcolor.a * lcolor.a + lcolor.b * lcolor.b
+	    < rvalue * rvalue) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+bool
+operator<(const double& lvalue, const ImgClass::Lab& rcolor)
+{
+	if (lvalue * lvalue
+	    <rcolor.L * rcolor.L + rcolor.a * rcolor.a + rcolor.b * rcolor.b) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+bool
+operator>(const ImgClass::Lab& lcolor, const double& rvalue)
+{
+	if (lcolor.L * lcolor.L + lcolor.a * lcolor.a + lcolor.b * lcolor.b
+	    > rvalue * rvalue) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+bool
+operator>(const double& lvalue, const ImgClass::Lab& rcolor)
+{
+	if (lvalue * lvalue
+	    > rcolor.L * rcolor.L + rcolor.a * rcolor.a + rcolor.b * rcolor.b) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+
+// Arithmetic operators
+ImgClass::Lab operator+(const ImgClass::Lab& lcolor, const ImgClass::Lab& rcolor)
+{
+	ImgClass::Lab color;
+
+	color.L = lcolor.L + rcolor.L;
+	color.a = lcolor.a + rcolor.a;
+	color.b = lcolor.b + rcolor.b;
+	return color;
+}
+
+ImgClass::Lab operator+(const ImgClass::Lab& lcolor, const double& rvalue)
+{
+	ImgClass::Lab color;
+
+	color.L = lcolor.L + rvalue;
+	color.a = lcolor.a + rvalue;
+	color.b = lcolor.b + rvalue;
+	return color;
+}
+
+ImgClass::Lab operator+(const double& lvalue, const ImgClass::Lab& rcolor)
+{
+	ImgClass::Lab color;
+
+	color.L = lvalue + rcolor.L;
+	color.a = lvalue + rcolor.a;
+	color.b = lvalue + rcolor.b;
+	return color;
+}
+
+
+ImgClass::Lab operator-(const ImgClass::Lab& lcolor, const ImgClass::Lab& rcolor)
+{
+	ImgClass::Lab color;
+
+	color.L = lcolor.L - rcolor.L;
+	color.a = lcolor.a - rcolor.a;
+	color.b = lcolor.b - rcolor.b;
+	return color;
+}
+
+ImgClass::Lab operator-(const ImgClass::Lab& lcolor, const double& rvalue)
+{
+	ImgClass::Lab color;
+
+	color.L = lcolor.L - rvalue;
+	color.a = lcolor.a - rvalue;
+	color.b = lcolor.b - rvalue;
+	return color;
+}
+
+ImgClass::Lab operator-(const double& lvalue, const ImgClass::Lab& rcolor)
+{
+	ImgClass::Lab color;
+
+	color.L = lvalue - rcolor.L;
+	color.a = lvalue - rcolor.a;
+	color.b = lvalue - rcolor.b;
+	return color;
+}
+
+
+ImgClass::Lab operator*(const ImgClass::Lab& lcolor, const ImgClass::Lab& rcolor)
+{
+	ImgClass::Lab color;
+
+	color.L = lcolor.L * rcolor.L;
+	color.a = lcolor.a * rcolor.a;
+	color.b = lcolor.b * rcolor.b;
+	return color;
+}
+
+ImgClass::Lab operator*(const ImgClass::Lab& lcolor, const double& rvalue)
+{
+	ImgClass::Lab color;
+
+	color.L = lcolor.L * rvalue;
+	color.a = lcolor.a * rvalue;
+	color.b = lcolor.b * rvalue;
+	return color;
+}
+
+ImgClass::Lab operator*(const double& lvalue, const ImgClass::Lab& rcolor)
+{
+	ImgClass::Lab color;
+
+	color.L = lvalue * rcolor.L;
+	color.a = lvalue * rcolor.a;
+	color.b = lvalue * rcolor.b;
+	return color;
+}
+
+
+ImgClass::Lab operator/(const ImgClass::Lab& lcolor, const ImgClass::Lab& rcolor)
+{
+	ImgClass::Lab color;
+
+	color.L = lcolor.L / rcolor.L;
+	color.a = lcolor.a / rcolor.a;
+	color.b = lcolor.b / rcolor.b;
+	return color;
+}
+
+ImgClass::Lab operator/(const ImgClass::Lab& lcolor, const double& rvalue)
+{
+	ImgClass::Lab color;
+
+	color.L = lcolor.L / rvalue;
+	color.a = lcolor.a / rvalue;
+	color.b = lcolor.b / rvalue;
+	return color;
+}
+
+
+
+
+const ImgClass::Lab
+abs(const ImgClass::Lab& color)
+{
+	ImgClass::Lab ret;
+
+	ret.L = color.L;
+	ret.a = color.a;
+	ret.b = color.b;
+	return ret;
+}
+
+double
+fabs(const ImgClass::Lab& color)
+{
+	return sqrt(color.L * color.L + color.a * color.a + color.b * color.b);
+}
 
 // Norm
 double

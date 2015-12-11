@@ -20,6 +20,7 @@ class Segmentation
 		double _kernel_spatial;
 		double _kernel_intensity;
 		ImgVector<T> _image;
+		ImgVector<int> _decrease_color_image;
 		ImgVector<VECTOR_2D<double> > _shift_vector;
 		ImgVector<int> _segments_map;
 		std::vector<std::list<VECTOR_2D<int> > > _regions;
@@ -27,10 +28,10 @@ class Segmentation
 	public:
 		// Constructor
 		Segmentation(void);
-		Segmentation(const ImgVector<T>& image, const double kernel_spatial_radius = 8.0, const double kernel_intensity_radius = 0.07);
+		Segmentation(const ImgVector<T>& image, const double kernel_spatial_radius = 16.0, const double kernel_intensity_radius = 4.0 / 255.0);
 		explicit Segmentation(const Segmentation<T>& segments); // Copy constructor
 
-		Segmentation<T>& reset(const ImgVector<T>& image, const double kernel_spatial_radius = 8.0, const double kernel_intensity_radius = 0.07);
+		Segmentation<T>& reset(const ImgVector<T>& image, const double kernel_spatial_radius = 16.0, const double kernel_intensity_radius = 4.0 / 255.0);
 
 		Segmentation<T>& copy(const Segmentation<T>& segments);
 
@@ -41,7 +42,9 @@ class Segmentation
 		int width(void) const;
 		int height(void) const;
 
+		const ImgVector<int>& ref_decrease_color_image(void) const;
 		const ImgVector<int>& ref_segments_map(void) const;
+		const ImgVector<VECTOR_2D<double> >& ref_shift_vector(void) const;
 		const std::vector<std::list<VECTOR_2D<int> > >& ref_regions(void) const;
 
 		int& operator[](int n);
@@ -60,9 +63,8 @@ class Segmentation
 		void Segmentation_MeanShift(const int Iter_Max = 64, const unsigned int Min_Number_of_Pixels = 25);
 
 	protected:
-		const VECTOR_2D<double> MeanShift(const int x, const int y, std::vector<VECTOR_2D<int> >& pel_list, int Iter_Max); // Wrapper
-		const VECTOR_2D<double> MeanShift_Grayscale(const int x, const int y, std::vector<VECTOR_2D<int> >& pel_list, int Iter_Max);
-		const VECTOR_2D<double> MeanShift_Lab(const int x, const int y, std::vector<VECTOR_2D<int> >& pel_list, int Iter_Max);
+		const VECTOR_2D<double> MeanShift(const int x, const int y, std::vector<VECTOR_2D<int> >& pel_list, int Iter_Max);
+		unsigned int small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >* regions_vector, const unsigned int Min_Number_of_Pixels);
 		double mean_kernel(const int x, const int y, std::vector<VECTOR_2D<int> >& pel_list);
 };
 

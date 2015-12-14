@@ -23,15 +23,15 @@ class Segmentation
 		ImgVector<int> _decrease_color_image;
 		ImgVector<VECTOR_2D<double> > _shift_vector;
 		ImgVector<int> _segments_map;
-		std::vector<std::list<VECTOR_2D<int> > > _regions;
+		std::vector<std::vector<VECTOR_2D<int> > > _regions;
 
 	public:
 		// Constructor
 		Segmentation(void);
-		Segmentation(const ImgVector<T>& image, const double kernel_spatial_radius = 16.0, const double kernel_intensity_radius = 4.0 / 255.0);
+		Segmentation(const ImgVector<T>& image, const double kernel_spatial_radius = 16.0, const double kernel_intensity_radius = 8.0 / 255.0);
 		explicit Segmentation(const Segmentation<T>& segments); // Copy constructor
 
-		Segmentation<T>& reset(const ImgVector<T>& image, const double kernel_spatial_radius = 16.0, const double kernel_intensity_radius = 4.0 / 255.0);
+		Segmentation<T>& reset(const ImgVector<T>& image, const double kernel_spatial_radius = 16.0, const double kernel_intensity_radius = 8.0 / 255.0);
 
 		Segmentation<T>& copy(const Segmentation<T>& segments);
 
@@ -66,6 +66,8 @@ class Segmentation
 		const VECTOR_2D<double> MeanShift(const int x, const int y, std::vector<VECTOR_2D<int> >& pel_list, int Iter_Max);
 		unsigned int small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >* regions_vector, const unsigned int Min_Number_of_Pixels);
 		double mean_kernel(const int x, const int y, std::vector<VECTOR_2D<int> >& pel_list);
+
+		double distance(const T& lcolor, const T& rcolor); // Calculate distance depends on each color space
 };
 
 #include "Segmentation_private.h"

@@ -368,11 +368,12 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 			_decrease_color_image.at(x, y) = 1 + round(Decreased_Gray_Max * mean);
 		}
 	}
-	/*
+	// ----- Output -----
 	// Copy connected regions list
-	_regions.resize(num_region - num_small_region);
+	num_region -= num_small_region;
+	_regions.resize(num_region);
 	{
-		std::vector<std::list<VECTOR_2D<int> > >::iterator ite = _regions.begin();
+		std::vector<std::vector<VECTOR_2D<int> > >::iterator ite = _regions.begin();
 		for (unsigned int n = 0; n < regions_vector.size(); n++) {
 			if (regions_vector[n].size() > 0) {
 				ite->assign(regions_vector[n].begin(), regions_vector[n].end());
@@ -382,13 +383,10 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 	}
 	// Set _segments_map by _regions No.
 	for (unsigned int n = 0; n < _regions.size(); n++) {
-		for (std::list<VECTOR_2D<int> >::iterator ite = _regions[n].begin();
-		    ite != _regions[n].end();
-		    ++ite) {
-			_segments_map.at(ite->x, ite->y) = n;
+		for (unsigned int i = 0; i < _regions[n].size(); i++) {
+			_segments_map.at(_regions[n][i].x, _regions[n][i].y) = n;
 		}
 	}
-	*/
 }
 
 template <class T>
@@ -396,71 +394,77 @@ unsigned int
 Segmentation<T>::small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >* regions_vector, const unsigned int Min_Number_of_Pixels)
 {
 	const VECTOR_2D<int> adjacent[4] = {(VECTOR_2D<int>){1, 0}, (VECTOR_2D<int>){0, 1}, (VECTOR_2D<int>){-1, 0}, (VECTOR_2D<int>){0, -1}};
+	std::vector<bool> small_regions(regions_vector->size(), false);
 	int num_small_region = 0;
 
 	// Check small regions
-	std::list<std::vector<int> > small_regions;
 	for (unsigned int n = 0; n < regions_vector->size(); n++) {
-		if (regions_vector[n].size() < Min_Number_of_Pixels) {
+		if (regions_vector->at(n).size() < Min_Number_of_Pixels) {
 			for (std::list<VECTOR_2D<int> >::iterator ite = regions_vector->at(n).begin();
 			    ite != regions_vector->at(n).end();
 			    ++ite) {
-				_segments_map.at(ite->x, ite->y) = -1;
-				small_regions.push_back(std::vector<int>(3));
-				small_regions.back()[0] = n;
-				small_regions.back()[1] = ite->x;
-				small_regions.back()[2] = ite->y;
+				small_regions[n] = true;
 			}
-			num_small_region++;
-			regions_vector->at(n).clear();
 		}
 	}
-	// Eliminate small regions
-	unsigned int small_regions_size_prev = 0;
-	while (small_regions.size() > 0) { // Interpolate small region with of its neighborhood
-		if (small_regions.size() == small_regions_size_prev) {
-			break;
+	// Concatenate small regions
+	for (int n = 0; n < small_regions.size(); n++) {
+		if (small_regions[n] == false) {
+			continue;
 		}
-		small_regions_size_prev = small_regions.size();
-		for (std::list<std::vector<int> >::iterator ite = small_regions.begin();
-		    ite != small_regions.end();
-		    ) {
-			double color = _image.get(ite->at(1), ite->at(2));
-			ImgClass::Lab min(1.0, 1.0, 1.0);
-			bool check = false;
+		T center_color = _image.get(regions_vector->at(n).begin()->x, regions_vector->at(n).begin()->y);
+		int concatenate_target = n;
+		double min = 1000.0;
+		bool check = false;
+		for (std::list<VECTOR_2D<int> >::iterator ite = regions_vector->at(n).begin();
+		    ite != regions_vector->at(n).end();
+		    ++ite) {
 			for (int k = 0; k < 4; k++) {
-				VECTOR_2D<int> r(ite->at(1) + adjacent[k].x, ite->at(2) + adjacent[k].y);
+				VECTOR_2D<int> r(ite->x + adjacent[k].x, ite->y + adjacent[k].y);
+				double dist = 0.0;
 				if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height
-				    && _segments_map.get(r.x, r.y) >= 0
-				    && _segments_map.get(r.x, r.y) != ite->at(0)
-				    && fabs(color - _image.get(r.x, r.y)) < min) {
+				    && _segments_map.get(r.x, r.y) != n
+				    && (dist = this->distance(center_color, _image.get(r.x, r.y))) < min) {
 					check = true;
-					min = fabs(color - _image.get(r.x, r.y));
-					_image.at(ite->at(1), ite->at(2)) = _image.get(r.x, r.y);
-					_segments_map.at(ite->at(1), ite->at(2)) = _segments_map.at(r.x, r.y);
+					min = dist;
+					concatenate_target = _segments_map.get(r.x, r.y);
 				}
 			}
-			if (check) {
-				// remove from the list
-				VECTOR_2D<int> v_tmp(ite->at(1), ite->at(2));
-				regions_vector->at(_segments_map.at(ite->at(1), ite->at(2))).push_back(v_tmp);
-				ite = small_regions.erase(ite);
-			} else {
-				// left current pixel and increment the iterator
-				++ite;
-			}
 		}
-	}
-	if (small_regions.size() > 0) {
-		std::cerr << "There are some pixels which are NOT able to be eliminated" << std::endl;
-		for (std::list<std::vector<int> >::iterator ite = small_regions.begin();
-		    ite != small_regions.end();
-		    ++ite) {
-			std::cerr << ite->at(0) << " " << ite->at(1) << " " << ite->at(2) << std::endl;
+		if (check) {
+			regions_vector->at(concatenate_target).splice(regions_vector->at(concatenate_target).end(), regions_vector->at(n));
 		}
 	}
 	return num_small_region;
 }
+
+
+// Distance in any space
+template <class T>
+double
+Segmentation<T>::distance(const T& lvalue, const T& rvalue)
+{
+	return fabs(lvalue - rvalue);
+}
+
+template <>
+double
+Segmentation<ImgClass::RGB<double> >::distance(const ImgClass::RGB<double>& lvalue, const ImgClass::RGB<double>& rvalue)
+{
+	return sqrt(SQUARE(lvalue.R - rvalue.R)
+	    + SQUARE(lvalue.G - rvalue.G)
+	    + SQUARE(lvalue.B - rvalue.B));
+}
+
+template <>
+double
+Segmentation<ImgClass::Lab>::distance(const ImgClass::Lab& lvalue, const ImgClass::Lab& rvalue)
+{
+	return sqrt(SQUARE(lvalue.L - rvalue.L)
+	    + SQUARE(lvalue.a - rvalue.a)
+	    + SQUARE(lvalue.b - rvalue.b));
+}
+
 
 /*
  * std::vector<double> kernel has kernel radius for each dimensions.

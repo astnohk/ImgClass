@@ -79,7 +79,6 @@ ImgClass::Lab operator/(const ImgClass::Lab& lcolor, const double& rvalue);
 
 // Norm
 const ImgClass::Lab abs(const ImgClass::Lab& color);
-double fabs(const ImgClass::Lab& color);
 double norm_squared(const ImgClass::Lab& color);
 
 #endif

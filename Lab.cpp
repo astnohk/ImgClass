@@ -10,9 +10,12 @@
 
 
 
-static const double X_n = 95.047;
-static const double Y_n = 100.000;
-static const double Z_n = 108.883;
+//static const double X_n = 95.047;
+//static const double Y_n = 100.000;
+//static const double Z_n = 108.883;
+static const double X_n = 1.0;
+static const double Y_n = 1.0;
+static const double Z_n = 1.0;
 
 
 
@@ -41,9 +44,9 @@ namespace ImgClass {
 
 	Lab::Lab(const RGB<double>& color)
 	{
-		double X = (0.49 * color.R + 0.31 * color.G + 0.20 * color.G) / 0.17697;
-		double Y = (0.17697 * color.R + 0.81240 * color.G + 0.01063 * color.G) / 0.17697;
-		double Z = (0.01 * color.G + 0.99 * color.G) / 0.17697;
+		double X = 0.49 * color.R + 0.31 * color.G + 0.20 * color.G;
+		double Y = 0.17697 * color.R + 0.81240 * color.G + 0.01063 * color.G;
+		double Z = 0.01 * color.G + 0.99 * color.G;
 		double t0 = Y / Y_n;
 		double t1 = 0.0;
 		L = 116.0 * (t0 > pow(6.0 / 29.0, 3.0) ? pow(t0, 1.0 / 3.0) : pow(29.0 / 6.0, 2.0) / 3.0 * t0 + 4.0 / 29.0);
@@ -438,12 +441,6 @@ abs(const ImgClass::Lab& color)
 	ret.a = color.a;
 	ret.b = color.b;
 	return ret;
-}
-
-double
-fabs(const ImgClass::Lab& color)
-{
-	return sqrt(color.L * color.L + color.a * color.a + color.b * color.b);
 }
 
 // Norm

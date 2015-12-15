@@ -28,10 +28,10 @@ class Segmentation
 	public:
 		// Constructor
 		Segmentation(void);
-		Segmentation(const ImgVector<T>& image, const double kernel_spatial_radius = 16.0, const double kernel_intensity_radius = 8.0 / 255.0);
+		Segmentation(const ImgVector<T>& image, const double kernel_spatial_radius = 8.0, const double kernel_intensity_radius = 12.0 / 255.0);
 		explicit Segmentation(const Segmentation<T>& segments); // Copy constructor
 
-		Segmentation<T>& reset(const ImgVector<T>& image, const double kernel_spatial_radius = 16.0, const double kernel_intensity_radius = 8.0 / 255.0);
+		Segmentation<T>& reset(const ImgVector<T>& image, const double kernel_spatial_radius = 8.0, const double kernel_intensity_radius = 12.0 / 255.0);
 
 		Segmentation<T>& copy(const Segmentation<T>& segments);
 

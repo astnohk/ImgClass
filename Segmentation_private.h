@@ -34,6 +34,12 @@ Segmentation<T>::Segmentation(const ImgVector<T>& image, const double kernel_spa
 	_height = _image.height();
 	_kernel_spatial = kernel_spatial_radius;
 	_kernel_intensity = kernel_intensity_radius;
+	if (_kernel_spatial <= 0.0) {
+		_kernel_spatial = 1.0;
+	}
+	if (_kernel_intensity <= 0.0) {
+		_kernel_intensity = 1.0;
+	}
 
 	_decrease_color_image.reset(_width, _height);
 	_shift_vector.reset(_width, _height);
@@ -72,6 +78,12 @@ Segmentation<T>::reset(const ImgVector<T>& image, const double kernel_spatial_ra
 	_height = _image.height();
 	_kernel_spatial = kernel_spatial_radius;
 	_kernel_intensity = kernel_intensity_radius;
+	if (_kernel_spatial <= 0.0) {
+		_kernel_spatial = 1.0;
+	}
+	if (_kernel_intensity <= 0.0) {
+		_kernel_intensity = 1.0;
+	}
 
 	_decrease_color_image.reset(_width, _height);
 	_segments_map.reset(_width, _height);
@@ -85,14 +97,20 @@ Segmentation<T>::reset(const ImgVector<T>& image, const double kernel_spatial_ra
 
 // For L*a*b* color
 template <>
-Segmentation<ImgClass::RGB<double> > &
-Segmentation<ImgClass::RGB<double> >::reset(const ImgVector<ImgClass::RGB<double> >& image, const double kernel_spatial_radius, const double kernel_intensity_radius)
+Segmentation<ImgClass::RGB> &
+Segmentation<ImgClass::RGB>::reset(const ImgVector<ImgClass::RGB>& image, const double kernel_spatial_radius, const double kernel_intensity_radius)
 {
 	_image.copy(image);
 	_width = _image.width();
 	_height = _image.height();
 	_kernel_spatial = kernel_spatial_radius;
 	_kernel_intensity = kernel_intensity_radius;
+	if (_kernel_spatial <= 0.0) {
+		_kernel_spatial = 1.0;
+	}
+	if (_kernel_intensity <= 0.0) {
+		_kernel_intensity = 1.0;
+	}
 
 	_decrease_color_image.reset(_width, _height);
 	_segments_map.reset(_width, _height);
@@ -114,6 +132,12 @@ Segmentation<ImgClass::Lab>::reset(const ImgVector<ImgClass::Lab>& image, const 
 	_height = _image.height();
 	_kernel_spatial = kernel_spatial_radius;
 	_kernel_intensity = kernel_intensity_radius;
+	if (_kernel_spatial <= 0.0) {
+		_kernel_spatial = 1.0;
+	}
+	if (_kernel_intensity <= 0.0) {
+		_kernel_intensity = 1.0;
+	}
 
 	_decrease_color_image.reset(_width, _height);
 	_segments_map.reset(_width, _height);
@@ -309,10 +333,21 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 		for (int x = 0; x < _width; x++) {
 			_shift_vector.at(x, y) = MeanShift(x, y, pel_list, Iter_Max);
 			VECTOR_2D<int> r((int)round(_shift_vector.get(x, y).x), (int)round(_shift_vector.get(x, y).y));
+			if (r.x < 0) {
+				r.x = 0;
+			} else if (_width <= r.x) {
+				r.x = _width - 1;
+			}
+			if (r.y < 0) {
+				r.y = 0;
+			} else if (_height <= r.y) {
+				r.y = _height - 1;
+			}
 			vector_converge_map.at(r.x, r.y) = -1;
 		}
 	}
 	// Collect connected region
+	num_region = 1; // To consider the out of image as region #0
 	for (int y = 0; y < _height; y++) {
 		for (int x = 0; x < _width; x++) {
 			if (vector_converge_map.get(x, y) < 0) {
@@ -338,12 +373,13 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 			}
 		}
 	}
+	// Make the list of regions
 	regions_list.clear();
 	regions_vector.resize(num_region);
 	for (int y = 0; y < _shift_vector.height(); y++) {
 		for (int x = 0; x < _shift_vector.width(); x++) {
 			VECTOR_2D<int> r((int)round(_shift_vector.get(x, y).x), (int)round(_shift_vector.get(x, y).y));
-			int n_region = vector_converge_map.get(r.x, r.y);
+			int n_region = vector_converge_map.get_zeropad(r.x, r.y);
 			regions_vector[n_region].push_back(VECTOR_2D<int>(x, y));
 		}
 	}
@@ -355,9 +391,8 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 			_segments_map.at(ite->x, ite->y) = n;
 		}
 	}
-#if 1
+	// Eliminate small connected regions
 	num_small_region = small_region_eliminate(&regions_vector, Min_Number_of_Pixels);
-#endif
 	// Make decreased color image
 	for (int y = 0; y < _height; y++) {
 		for (int x = 0; x < _width; x++) {
@@ -449,7 +484,7 @@ Segmentation<T>::distance(const T& lvalue, const T& rvalue)
 
 template <>
 double
-Segmentation<ImgClass::RGB<double> >::distance(const ImgClass::RGB<double>& lvalue, const ImgClass::RGB<double>& rvalue)
+Segmentation<ImgClass::RGB>::distance(const ImgClass::RGB& lvalue, const ImgClass::RGB& rvalue)
 {
 	return sqrt(SQUARE(lvalue.R - rvalue.R)
 	    + SQUARE(lvalue.G - rvalue.G)
@@ -528,15 +563,15 @@ Segmentation<T>::MeanShift(const int x, const int y, std::vector<VECTOR_2D<int> 
  */
 template <> // Specialized for ImgClass::RGB<double>
 const VECTOR_2D<double>
-Segmentation<ImgClass::RGB<double> >::MeanShift(const int x, const int y, std::vector<VECTOR_2D<int> >& pel_list, int Iter_Max)
+Segmentation<ImgClass::RGB>::MeanShift(const int x, const int y, std::vector<VECTOR_2D<int> >& pel_list, int Iter_Max)
 {
 	// Initialize
 	VECTOR_2D<double> u(x, y);
-	ImgClass::RGB<double> center(_image.get(x, y));
+	ImgClass::RGB center(_image.get(x, y));
 	// Iterate until it converge
 	for (int i = 0; i < Iter_Max; i++) {
 		double N = 0.0;
-		ImgClass::RGB<double> sum_diff(0.0, 0.0, 0.0);
+		ImgClass::RGB sum_diff(0.0, 0.0, 0.0);
 		VECTOR_2D<double> sum_d(0.0, 0.0);
 		VECTOR_2D<double> d_tmp;
 
@@ -544,7 +579,7 @@ Segmentation<ImgClass::RGB<double> >::MeanShift(const int x, const int y, std::v
 			VECTOR_2D<double> r(u.x + pel_list[n].x, u.y + pel_list[n].y);
 
 			if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height) {
-				ImgClass::RGB<double> diff(_image.get(r.x, r.y) - center);
+				ImgClass::RGB diff(_image.get(r.x, r.y) - center);
 
 				if (norm_squared(diff) <= _kernel_intensity * _kernel_intensity) {
 					double coeff = 1.0 - (

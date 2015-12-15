@@ -53,13 +53,11 @@ namespace ImgClass {
 
 	Lab::Lab(const RGB& color)
 	{
-		//double X = 0.49 * color.R + 0.31 * color.G + 0.20 * color.B;
-		//double Y = 0.17697 * color.R + 0.81240 * color.G + 0.01063 * color.B;
-		//double Z = 0.01 * color.G + 0.99 * color.B;
-		double X = 0.4124564 * color.R + 0.3575761 * color.G + 0.1804375 * color.B;
-		double Y = 0.2126729 * color.R + 0.7151522 * color.G + 0.0721750 * color.B;
-		double Z = 0.0193339 * color.R + 0.1191920 * color.G + 0.9503041 * color.B;
-		std::cout << "xyz : " << X << " " << Y << " " << Z << std::endl;
+		RGB linear_sRGB(color);
+		linear_sRGB.gamma(2.2); // Convert sRGB to linear sRGB
+		double X = 0.4124564 * linear_sRGB.R + 0.3575761 * linear_sRGB.G + 0.1804375 * linear_sRGB.B;
+		double Y = 0.2126729 * linear_sRGB.R + 0.7151522 * linear_sRGB.G + 0.0721750 * linear_sRGB.B;
+		double Z = 0.0193339 * linear_sRGB.R + 0.1191920 * linear_sRGB.G + 0.9503041 * linear_sRGB.B;
 		L = 116.0 * this->f(Y / Y_n) - 16.0;
 		a = 500.0 * (this->f(X / X_n) - this->f(Y / Y_n));
 		b = 200.0 * (this->f(Y / Y_n) - this->f(Z / Z_n));
@@ -81,7 +79,7 @@ namespace ImgClass {
 	Lab &
 	Lab::set(const RGB& color)
 	{
-		Lab tmp(color);
+		Lab tmp(color); // Convert with constructor
 		L = tmp.L;
 		a = tmp.a;
 		b = tmp.b;

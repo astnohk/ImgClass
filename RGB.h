@@ -11,10 +11,11 @@ namespace ImgClass {
 
 			// Constructor
 			RGB(void);
-			RGB(const double& red, const double& green, const double& blue, const double& gamma = 0.0);
+			RGB(const double& red, const double& green, const double& blue);
 			RGB(const RGB& color); // Copy constructor
 
-			RGB& set(const double& red, const double& green, const double& blue, const double& gamma = 0.0);
+			RGB& set(const double& red, const double& green, const double& blue);
+			RGB& gamma(const double& gamma_val);
 
 			// Operators
 			explicit operator double() const; // return intensity

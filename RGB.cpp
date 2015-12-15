@@ -12,17 +12,11 @@ namespace ImgClass {
 		B = 0;
 	}
 
-	RGB::RGB(const double& red, const double& green, const double& blue, const double& gamma_val)
+	RGB::RGB(const double& red, const double& green, const double& blue)
 	{
-		if (gamma_val > 0.0) {
-			R = pow(red, gamma_val);
-			G = pow(green, gamma_val);
-			B = pow(blue, gamma_val);
-		} else {
-			R = red;
-			G = green;
-			B = blue;
-		}
+		R = red;
+		G = green;
+		B = blue;
 	}
 
 	RGB::RGB(const RGB& color)
@@ -34,20 +28,23 @@ namespace ImgClass {
 
 
 	RGB &
-	RGB::set(const double& red, const double& green, const double& blue, const double& gamma_val)
+	RGB::set(const double& red, const double& green, const double& blue)
 	{
-		if (gamma_val > 0.0) {
-			R = pow(red, gamma_val);
-			G = pow(green, gamma_val);
-			B = pow(blue, gamma_val);
-		} else {
-			R = red;
-			G = green;
-			B = blue;
-		}
+		R = red;
+		G = green;
+		B = blue;
 		return *this;
 	}
 
+
+	RGB &
+	RGB::gamma(const double& gamma_val)
+	{
+		R = pow(R, gamma_val);
+		G = pow(G, gamma_val);
+		B = pow(B, gamma_val);
+		return *this;
+	}
 
 	// Operators
 	RGB::operator double() const // return intensity

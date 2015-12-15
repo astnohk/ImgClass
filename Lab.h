@@ -18,14 +18,14 @@ namespace ImgClass {
 			Lab(void);
 			Lab(const double& _L, const double& _a, const double& _b);
 			Lab(const Lab& color); // Copy constructor
-			Lab(const RGB<double>& color);
+			Lab(const RGB& color);
 
+			Lab& set(const RGB& color);
 			// Operators
 			explicit operator double() const;
 
 			Lab& operator=(const Lab& value);
 			Lab& operator=(const double& value);
-			Lab& operator=(const RGB<double>& value);
 
 			Lab& operator+=(const Lab& color);
 			Lab& operator+=(const double& value);
@@ -38,6 +38,10 @@ namespace ImgClass {
 
 			Lab& operator/=(const Lab& color);
 			Lab& operator/=(const double& value);
+
+		protected:
+			// Converter
+			double f(const double t);
 	};
 }
 

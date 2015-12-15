@@ -1,6 +1,7 @@
 /*
  * by default use CIELAB-CIEXYZ conversions
  */
+#include <iostream>
 
 #include <cmath>
 #include <stdexcept>
@@ -10,12 +11,20 @@
 
 
 
-//static const double X_n = 95.047;
-//static const double Y_n = 100.000;
-//static const double Z_n = 108.883;
-static const double X_n = 1.0;
+// d65
+static const double X_n = 0.95045;
 static const double Y_n = 1.0;
-static const double Z_n = 1.0;
+static const double Z_n = 1.088917;
+
+// d50
+//static const double X_n = 0.9642;
+//static const double Y_n = 1.0;
+//static const double Z_n = 0.8249;
+
+// flat
+//static const double X_n = 1.0;
+//static const double Y_n = 1.0;
+//static const double Z_n = 1.0;
 
 
 
@@ -42,28 +51,42 @@ namespace ImgClass {
 		b = color.b;
 	}
 
-	Lab::Lab(const RGB<double>& color)
+	Lab::Lab(const RGB& color)
 	{
-		double X = 0.49 * color.R + 0.31 * color.G + 0.20 * color.G;
-		double Y = 0.17697 * color.R + 0.81240 * color.G + 0.01063 * color.G;
-		double Z = 0.01 * color.G + 0.99 * color.G;
-		double t0 = Y / Y_n;
-		double t1 = 0.0;
-		L = 116.0 * (t0 > pow(6.0 / 29.0, 3.0) ? pow(t0, 1.0 / 3.0) : pow(29.0 / 6.0, 2.0) / 3.0 * t0 + 4.0 / 29.0);
-		t0 = X / X_n;
-		t1 = Y / Y_n;
-		a = 500.0 * (
-		    (t0 > pow(6.0 / 29.0, 3.0) ? pow(t0, 1.0 / 3.0) : pow(29.0 / 6.0, 2.0) / 3.0 * t0 + 4.0 / 29.0)
-		    - (t1 > pow(6.0 / 29.0, 3.0) ? pow(t1, 1.0 / 3.0) : pow(29.0 / 6.0, 2.0) / 3.0 * t1 + 4.0 / 29.0));
-		t0 = Y / Y_n;
-		t1 = Z / Z_n;
-		b = 200.0 * (
-		    (t0 > pow(6.0 / 29.0, 3.0) ? pow(t0, 1.0 / 3.0) : pow(29.0 / 6.0, 2.0) / 3.0 * t0 + 4.0 / 29.0)
-		    - (t1 > pow(6.0 / 29.0, 3.0) ? pow(t1, 1.0 / 3.0) : pow(29.0 / 6.0, 2.0) / 3.0 * t1 + 4.0 / 29.0));
+		//double X = 0.49 * color.R + 0.31 * color.G + 0.20 * color.B;
+		//double Y = 0.17697 * color.R + 0.81240 * color.G + 0.01063 * color.B;
+		//double Z = 0.01 * color.G + 0.99 * color.B;
+		double X = 0.4124564 * color.R + 0.3575761 * color.G + 0.1804375 * color.B;
+		double Y = 0.2126729 * color.R + 0.7151522 * color.G + 0.0721750 * color.B;
+		double Z = 0.0193339 * color.R + 0.1191920 * color.G + 0.9503041 * color.B;
+		std::cout << "xyz : " << X << " " << Y << " " << Z << std::endl;
+		L = 116.0 * this->f(Y / Y_n) - 16.0;
+		a = 500.0 * (this->f(X / X_n) - this->f(Y / Y_n));
+		b = 200.0 * (this->f(Y / Y_n) - this->f(Z / Z_n));
+	}
+
+	double
+	Lab::f(const double t)
+	{
+		if (t > pow(6.0 / 29.0, 3.0)) {
+			return pow(t, 1.0 / 3.0);
+		} else {
+			return pow(29.0 / 6.0, 2.0) / 3.0 * t + 4.0 / 29.0;
+		}
 	}
 
 
 
+
+	Lab &
+	Lab::set(const RGB& color)
+	{
+		Lab tmp(color);
+		L = tmp.L;
+		a = tmp.a;
+		b = tmp.b;
+		return *this;
+	}
 
 	// Operators
 	Lab::operator double() const
@@ -87,32 +110,6 @@ namespace ImgClass {
 		L = value;
 		a = value;
 		b = value;
-		return *this;
-	}
-
-	Lab &
-	Lab::operator=(const RGB<double>& value)
-	{
-		double X = (0.49 * value.R + 0.31 * value.G + 0.20 * value.G) / 0.17697;
-		double Y = (0.17697 * value.R + 0.81240 * value.G + 0.01063 * value.G) / 0.17697;
-		double Z = (0.01 * value.G + 0.99 * value.G) / 0.17697;
-
-		double t0 = Y / Y_n;
-		double t1 = 0.0;
-		L = 116.0 * (t0 > pow(6.0 / 29.0, 3.0) ? pow(t0, 1.0 / 3.0) : pow(29.0 / 6.0, 2.0) / 3.0 * t0 + 4.0 / 29.0);
-
-		t0 = X / X_n;
-		t1 = Y / Y_n;
-		a = 500.0 * (
-		    (t0 > pow(6.0 / 29.0, 3.0) ? pow(t0, 1.0 / 3.0) : pow(29.0 / 6.0, 2.0) / 3.0 * t0 + 4.0 / 29.0)
-		    - (t1 > pow(6.0 / 29.0, 3.0) ? pow(t1, 1.0 / 3.0) : pow(29.0 / 6.0, 2.0) / 3.0 * t1 + 4.0 / 29.0));
-
-		t0 = Y / Y_n;
-		t1 = Z / Z_n;
-		b = 200.0 * (
-		    (t0 > pow(6.0 / 29.0, 3.0) ? pow(t0, 1.0 / 3.0) : pow(29.0 / 6.0, 2.0) / 3.0 * t0 + 4.0 / 29.0)
-		    - (t1 > pow(6.0 / 29.0, 3.0) ? pow(t1, 1.0 / 3.0) : pow(29.0 / 6.0, 2.0) / 3.0 * t1 + 4.0 / 29.0));
-
 		return *this;
 	}
 

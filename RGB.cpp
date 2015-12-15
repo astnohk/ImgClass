@@ -1,6 +1,8 @@
 #include <cmath>
 #include <stdexcept>
 
+#include "RGB.h"
+
 
 namespace ImgClass {
 	RGB::RGB(void)
@@ -10,11 +12,17 @@ namespace ImgClass {
 		B = 0;
 	}
 
-	RGB::RGB(const double& red, const double& green, const double& blue)
+	RGB::RGB(const double& red, const double& green, const double& blue, const double& gamma_val)
 	{
-		R = this->rgamma(red, 2.4);
-		G = this->rgamma(green, 2.4);
-		B = this->rgamma(blue, 2.4);
+		if (gamma_val > 0.0) {
+			R = pow(red, gamma_val);
+			G = pow(green, gamma_val);
+			B = pow(blue, gamma_val);
+		} else {
+			R = red;
+			G = green;
+			B = blue;
+		}
 	}
 
 	RGB::RGB(const RGB& color)
@@ -24,16 +32,21 @@ namespace ImgClass {
 		B = color.B;
 	}
 
-	double
-	ImgClass::RGB::rgamma(const double& value, const double gamma)
-	{
-		if (value < 0.040450) {
-			return value / 12.92;
-		} else {
-			return pow((value + 0.055) / 1.055, gamma);
-		}
-	}
 
+	RGB &
+	RGB::set(const double& red, const double& green, const double& blue, const double& gamma_val)
+	{
+		if (gamma_val > 0.0) {
+			R = pow(red, gamma_val);
+			G = pow(green, gamma_val);
+			B = pow(blue, gamma_val);
+		} else {
+			R = red;
+			G = green;
+			B = blue;
+		}
+		return *this;
+	}
 
 
 	// Operators

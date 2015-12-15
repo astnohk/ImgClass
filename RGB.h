@@ -2,48 +2,62 @@
 #define LIB_ImgClass_RGB
 
 namespace ImgClass {
-	template <class T>
 	class RGB
 	{
 		public:
-			T R;
-			T G;
-			T B;
+			double R;
+			double G;
+			double B;
 
 			// Constructor
 			RGB(void);
-			RGB(const T& red, const T& green, const T& blue);
-			RGB(const RGB<T>& color); // Copy constructor
+			RGB(const double& red, const double& green, const double& blue, const double& gamma = 0.0);
+			RGB(const RGB& color); // Copy constructor
+
+			RGB& set(const double& red, const double& green, const double& blue, const double& gamma = 0.0);
 
 			// Operators
-			explicit operator T() const; // return intensity
-			template<class ConvertType> operator RGB<ConvertType>() const;
+			explicit operator double() const; // return intensity
 
-			template<class RT> RGB<T>& operator=(const RGB<RT>& rvalue);
-			RGB<T>& operator=(const T& rvalue);
+			RGB& operator=(const RGB& rvalue);
+			RGB& operator=(const double& rvalue);
 
-			RGB<T>& operator+=(const RGB<T>& rcolor);
-			RGB<T>& operator+=(const T& rvalue);
+			RGB& operator+=(const RGB& rcolor);
+			RGB& operator+=(const double& rvalue);
 
-			RGB<T>& operator-=(const RGB<T>& rcolor);
-			RGB<T>& operator-=(const T& rvalue);
+			RGB& operator-=(const RGB& rcolor);
+			RGB& operator-=(const double& rvalue);
 
-			RGB<T>& operator*=(const RGB<T>& rcolor);
-			RGB<T>& operator*=(const T& rvalue);
+			RGB& operator*=(const RGB& rcolor);
+			RGB& operator*=(const double& rvalue);
 
-			RGB<T>& operator/=(const RGB<T>& rcolor);
-			RGB<T>& operator/=(const T& rvalue);
+			RGB& operator/=(const RGB& rcolor);
+			RGB& operator/=(const double& rvalue);
 
 			// Non substituting
-			const RGB<T> operator+(const RGB<T>& rcolor) const;
-			const RGB<T> operator+(const T& rvalue) const;
+			const RGB operator+(const RGB& rcolor) const;
+			const RGB operator+(const double& rvalue) const;
 
-			const RGB<T> operator-(const RGB<T>& rcolor) const;
-			const RGB<T> operator-(const T& rvalue) const;
+			const RGB operator-(const RGB& rcolor) const;
+			const RGB operator-(const double& rvalue) const;
 	};
 }
 
-#include "RGB_private.h"
+
+const ImgClass::RGB operator+(ImgClass::RGB rcolor);
+const ImgClass::RGB operator-(ImgClass::RGB rcolor);
+
+const ImgClass::RGB operator*(const ImgClass::RGB& lcolor, const ImgClass::RGB& rcolor);
+const ImgClass::RGB operator*(const ImgClass::RGB& lcolor, const double& rvalue);
+const ImgClass::RGB operator*(const double& lvalue, const ImgClass::RGB& rcolor);
+
+const ImgClass::RGB operator/(const ImgClass::RGB& lcolor, const ImgClass::RGB& rcolor);
+const ImgClass::RGB operator/(const ImgClass::RGB& lcolor, const double& rvalue);
+const ImgClass::RGB operator/(const double& lvalue, const ImgClass::RGB& rcolor);
+
+// Comparator
+bool operator==(const ImgClass::RGB& lcolor, const ImgClass::RGB& rcolor);
+bool operator!=(const ImgClass::RGB& lcolor, const ImgClass::RGB& rcolor);
 
 #endif
 

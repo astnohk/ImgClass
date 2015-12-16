@@ -70,64 +70,6 @@ Segmentation<T> &
 Segmentation<T>::reset(const ImgVector<T>& image, const double kernel_spatial_radius, const double kernel_intensity_radius)
 {
 	_image.copy(image);
-	if (_image.max() > 1.0) {
-		// Normalize
-		_image.contrast_stretching(0.0, 1.0);
-	}
-	_width = _image.width();
-	_height = _image.height();
-	_kernel_spatial = kernel_spatial_radius;
-	_kernel_intensity = kernel_intensity_radius;
-	if (_kernel_spatial <= 0.0) {
-		_kernel_spatial = 1.0;
-	}
-	if (_kernel_intensity <= 0.0) {
-		_kernel_intensity = 1.0;
-	}
-
-	_decrease_color_image.reset(_width, _height);
-	_segments_map.reset(_width, _height);
-	_regions.clear();
-	_shift_vector.reset(_width, _height);
-
-	// Initial Segmentation
-	Segmentation_MeanShift();
-	return *this;
-}
-
-// For L*a*b* color
-template <>
-Segmentation<ImgClass::RGB> &
-Segmentation<ImgClass::RGB>::reset(const ImgVector<ImgClass::RGB>& image, const double kernel_spatial_radius, const double kernel_intensity_radius)
-{
-	_image.copy(image);
-	_width = _image.width();
-	_height = _image.height();
-	_kernel_spatial = kernel_spatial_radius;
-	_kernel_intensity = kernel_intensity_radius;
-	if (_kernel_spatial <= 0.0) {
-		_kernel_spatial = 1.0;
-	}
-	if (_kernel_intensity <= 0.0) {
-		_kernel_intensity = 1.0;
-	}
-
-	_decrease_color_image.reset(_width, _height);
-	_segments_map.reset(_width, _height);
-	_regions.clear();
-	_shift_vector.reset(_width, _height);
-
-	// Initial Segmentation
-	Segmentation_MeanShift();
-	return *this;
-}
-
-// For L*a*b* color
-template <>
-Segmentation<ImgClass::Lab> &
-Segmentation<ImgClass::Lab>::reset(const ImgVector<ImgClass::Lab>& image, const double kernel_spatial_radius, const double kernel_intensity_radius)
-{
-	_image.copy(image);
 	_width = _image.width();
 	_height = _image.height();
 	_kernel_spatial = kernel_spatial_radius;
@@ -544,9 +486,9 @@ Segmentation<T>::MeanShift(const int x, const int y, std::vector<VECTOR_2D<int> 
 			}
 		}
 		intensity += sum_intensity_diff / N;
-		d_tmp.x = std::min(sum_d.x / N, 1.0);
-		d_tmp.y = std::min(sum_d.y / N, 1.0);
-		if (Vector_2D::norm(d_tmp) < 0.01) {
+		d_tmp.x = sum_d.x / N;
+		d_tmp.y = sum_d.y / N;
+		if (Vector_2D::norm(d_tmp) < 0.001) {
 			u += d_tmp;
 			break;
 		}
@@ -593,9 +535,10 @@ Segmentation<ImgClass::RGB>::MeanShift(const int x, const int y, std::vector<VEC
 			}
 		}
 		center += sum_diff / N;
-		d_tmp.x = std::min(sum_d.x / N, 1.0);
-		d_tmp.y = std::min(sum_d.y / N, 1.0);
-		if (Vector_2D::norm(d_tmp) < 0.01) {
+		d_tmp.x = sum_d.x / N;
+		d_tmp.y = sum_d.y / N;
+		std::cout << sum_d.x << ", " << sum_d.y << std::endl;
+		if (Vector_2D::norm(d_tmp) < 0.001) {
 			u += d_tmp;
 			break;
 		}
@@ -630,9 +573,9 @@ Segmentation<ImgClass::Lab>::MeanShift(const int x, const int y, std::vector<VEC
 			if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height) {
 				ImgClass::Lab diff(_image.get(r.x, r.y) - center);
 
-				if (norm_squared(diff) <= _kernel_intensity * _kernel_intensity) {
+				if (norm_squared(diff) <= (100 * _kernel_intensity) * (100 * _kernel_intensity)) {
 					double coeff = 1.0 - (
-					    (norm_squared(diff) / SQUARE(_kernel_intensity))
+					    (norm_squared(diff) / SQUARE(100 * _kernel_intensity))
 					    * ((SQUARE(pel_list[n].x) + SQUARE(pel_list[n].y)) / SQUARE(_kernel_spatial))
 					    );
 					N += coeff;
@@ -642,9 +585,9 @@ Segmentation<ImgClass::Lab>::MeanShift(const int x, const int y, std::vector<VEC
 			}
 		}
 		center += sum_diff / N;
-		d_tmp.x = std::min(sum_d.x / N, 1.0);
-		d_tmp.y = std::min(sum_d.y / N, 1.0);
-		if (Vector_2D::norm(d_tmp) < 0.01) {
+		d_tmp.x = sum_d.x / N;
+		d_tmp.y = sum_d.y / N;
+		if (Vector_2D::norm(d_tmp) < 0.001) {
 			u += d_tmp;
 			break;
 		}

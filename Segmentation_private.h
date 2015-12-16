@@ -385,7 +385,7 @@ Segmentation<T>::small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >
 		}
 	}
 	// Concatenate small regions
-	for (int n = 0; n < small_regions.size(); n++) {
+	for (unsigned int n = 0; n < small_regions.size(); n++) {
 		if (small_regions[n] == false) {
 			continue;
 		}
@@ -400,7 +400,7 @@ Segmentation<T>::small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >
 				VECTOR_2D<int> r(ite->x + adjacent[k].x, ite->y + adjacent[k].y);
 				double dist = 0.0;
 				if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height
-				    && _segments_map.get(r.x, r.y) != n
+				    && (unsigned int)_segments_map.get(r.x, r.y) != n
 				    && (dist = this->distance(center_color, _image.get(r.x, r.y))) < min) {
 					check = true;
 					min = dist;

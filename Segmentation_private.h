@@ -580,6 +580,7 @@ Segmentation<ImgClass::Lab>::MeanShift(const int x, const int y, std::vector<VEC
 
 			if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height) {
 				ImgClass::Lab diff(_image.get(r.x, r.y) - center);
+				diff.L /= 4.0; // Difference of Lighting is not so important in segmentation
 
 				if (norm_squared(diff) <= (100 * _kernel_intensity) * (100 * _kernel_intensity)) {
 					double coeff = 1.0 - (

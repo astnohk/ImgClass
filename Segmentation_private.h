@@ -244,7 +244,7 @@ Segmentation<T>::get_mirror(int x, int y) const
 
 template <class T>
 void
-Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int Min_Number_of_Pixels)
+Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int Min_Number_of_Pixels, const int Search_Range)
 {
 	const double Decreased_Gray_Max = 255;
 	const VECTOR_2D<int> adjacent[4] = {(VECTOR_2D<int>){1, 0}, (VECTOR_2D<int>){0, 1}, (VECTOR_2D<int>){-1, 0}, (VECTOR_2D<int>){0, -1}};
@@ -334,7 +334,7 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 		}
 	}
 	// Eliminate small connected regions
-	num_small_region = small_region_eliminate(&regions_vector, Min_Number_of_Pixels);
+	num_small_region = small_region_eliminate(&regions_vector, Min_Number_of_Pixels, Search_Range);
 	// Make decreased color image
 	for (int y = 0; y < _height; y++) {
 		for (int x = 0; x < _width; x++) {
@@ -368,9 +368,8 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 
 template <class T>
 unsigned int
-Segmentation<T>::small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >* regions_vector, const unsigned int Min_Number_of_Pixels)
+Segmentation<T>::small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >* regions_vector, const unsigned int Min_Number_of_Pixels, const int search_range)
 {
-	const VECTOR_2D<int> adjacent[4] = {(VECTOR_2D<int>){1, 0}, (VECTOR_2D<int>){0, 1}, (VECTOR_2D<int>){-1, 0}, (VECTOR_2D<int>){0, -1}};
 	std::vector<bool> small_regions(regions_vector->size(), false);
 	int num_small_region = 0;
 
@@ -396,19 +395,28 @@ Segmentation<T>::small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >
 		for (std::list<VECTOR_2D<int> >::iterator ite = regions_vector->at(n).begin();
 		    ite != regions_vector->at(n).end();
 		    ++ite) {
-			for (int k = 0; k < 4; k++) {
-				VECTOR_2D<int> r(ite->x + adjacent[k].x, ite->y + adjacent[k].y);
-				double dist = 0.0;
-				if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height
-				    && (unsigned int)_segments_map.get(r.x, r.y) != n
-				    && (dist = this->distance(center_color, _image.get(r.x, r.y))) < min) {
-					check = true;
-					min = dist;
-					concatenate_target = _segments_map.get(r.x, r.y);
+			for (int y = -search_range; y <= search_range; y++) {
+				for (int x = -search_range; x <= search_range; x++) {
+					VECTOR_2D<int> r(ite->x + x, ite->y + y);
+					double dist = 0.0;
+					if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height
+					    && (unsigned int)_segments_map.get(r.x, r.y) != n
+					    && (dist = this->distance(center_color, _image.get(r.x, r.y))) < min) {
+						check = true;
+						min = dist;
+						concatenate_target = _segments_map.get(r.x, r.y);
+					}
 				}
 			}
 		}
 		if (check) {
+			// Update _segments_map
+			for (std::list<VECTOR_2D<int> >::iterator ite = regions_vector->at(n).begin();
+			    ite != regions_vector->at(n).end();
+			    ++ite) {
+				_segments_map.at(ite->x, ite->y) = concatenate_target;
+			}
+			// splice the list
 			regions_vector->at(concatenate_target).splice(regions_vector->at(concatenate_target).end(), regions_vector->at(n));
 		}
 	}

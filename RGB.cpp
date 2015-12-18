@@ -46,6 +46,9 @@ namespace ImgClass {
 		return *this;
 	}
 
+
+
+
 	// Operators
 	RGB::operator double() const // return intensity
 	{

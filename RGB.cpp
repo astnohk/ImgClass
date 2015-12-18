@@ -303,3 +303,12 @@ operator!=(const ImgClass::RGB& lcolor, const ImgClass::RGB& rcolor)
 	}
 }
 
+
+// Stream
+std::ostream &
+operator<<(std::ostream& os, const ImgClass::RGB& rcolor)
+{
+	os << "[R:" << rcolor.R << " G:" << rcolor.G << " B:" << rcolor.B << "]";
+	return os;
+}
+

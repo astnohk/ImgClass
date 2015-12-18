@@ -1,6 +1,8 @@
 #ifndef LIB_ImgClass_RGB
 #define LIB_ImgClass_RGB
 
+#include <ostream>
+
 namespace ImgClass {
 	class RGB
 	{
@@ -59,6 +61,9 @@ const ImgClass::RGB operator/(const double& lvalue, const ImgClass::RGB& rcolor)
 // Comparator
 bool operator==(const ImgClass::RGB& lcolor, const ImgClass::RGB& rcolor);
 bool operator!=(const ImgClass::RGB& lcolor, const ImgClass::RGB& rcolor);
+
+// Stream
+std::ostream& operator<<(std::ostream& os, const ImgClass::RGB& color);
 
 #endif
 

@@ -421,8 +421,8 @@ ImgVector<T>::get_zeropad(double x, double y, double B, double C) const
 	T value = T();
 
 	for (int n = 0; n < 4; n++) {
-		bicubic_x[n] = ImgVector<double>::cubic(n - 1.0 - (x - floor(x)), B, C);
-		bicubic_y[n] = ImgVector<double>::cubic(n - 1.0 - (y - floor(y)), B, C);
+		bicubic_x[n] = this->cubic(n - 1.0 - (x - floor(x)), B, C);
+		bicubic_y[n] = this->cubic(n - 1.0 - (y - floor(y)), B, C);
 	}
 	for (int m = 0; m < 4; m++) {
 		for (int n = 0; n < 4; n++) {

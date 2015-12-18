@@ -256,8 +256,8 @@ MotionCompensation<T>::create_image_compensated(const ImgVector<bool>* mask)
 		_image_compensated.reset(_width, _height);
 		for (int y = 0; y < _height; y++) {
 			for (int x = 0; x < _width; x++) {
-				VECTOR_2D<double> v = _vector.get(x, y);
-				_image_compensated.at(x, y) = _image_prev.get_zeropad(x + v.x, y + v.y);
+				VECTOR_2D<double> r((int)round(x + _vector.get(x, y).x), (int)round(y + _vector.get(x, y).y));
+				_image_compensated.at(x, y) = _image_prev.get_zeropad(r.x, r.y);
 			}
 		}
 		motion_compensated = true;

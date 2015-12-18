@@ -119,6 +119,18 @@ Segmentation<T>::~Segmentation(void)
 
 
 
+// ----- Setter ------
+template <class T>
+void
+Segmentation<T>::set_kernel(const double kernel_spatial_radius, const double kernel_intensity_radius)
+{
+	_kernel_spatial = kernel_spatial_radius;
+	_kernel_intensity = kernel_intensity_radius;
+}
+
+
+
+
 // ----- Data -----
 template <class T>
 const ImgVector<int> &

@@ -38,6 +38,9 @@ class Segmentation
 		// Destructor
 		~Segmentation(void);
 
+		// Setter
+		void set_kernel(const double kernel_spatial_radius, const double kernel_intensity_radius);
+
 		// Accessor
 		int width(void) const;
 		int height(void) const;

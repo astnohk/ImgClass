@@ -54,9 +54,9 @@ class ImgVector
 		const T get_repeat(int x, int y) const;
 		const T get_mirror(int x, int y) const;
 
-		const T get_zeropad(double x, double y, double B = 0.0, double C = (1.0 / 2.0)) const;
-		const T get_repeat(double x, double y, double B = 0.0, double C = (1.0 / 2.0)) const;
-		const T get_mirror(double x, double y, double B = 0.0, double C = (1.0 / 2.0)) const;
+		const T get_zeropad_cubic(double x, double y, double B = 0.0, double C = (1.0 / 2.0)) const;
+		const T get_repeat_cubic(double x, double y, double B = 0.0, double C = (1.0 / 2.0)) const;
+		const T get_mirror_cubic(double x, double y, double B = 0.0, double C = (1.0 / 2.0)) const;
 
 		const T min(void) const;
 		const T max(void) const;

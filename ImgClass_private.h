@@ -414,7 +414,7 @@ ImgVector<T>::get_mirror(int x, int y) const
 // Get continuous function interpolated by bicubic
 template <class T>
 const T
-ImgVector<T>::get_zeropad(double x, double y, double B, double C) const
+ImgVector<T>::get_zeropad_cubic(double x, double y, double B, double C) const
 {
 	double bicubic_x[4];
 	double bicubic_y[4];
@@ -435,7 +435,7 @@ ImgVector<T>::get_zeropad(double x, double y, double B, double C) const
 
 template <class T>
 const T
-ImgVector<T>::get_repeat(double x, double y, double B, double C) const
+ImgVector<T>::get_repeat_cubic(double x, double y, double B, double C) const
 {
 	double bicubic_x[4];
 	double bicubic_y[4];
@@ -456,7 +456,7 @@ ImgVector<T>::get_repeat(double x, double y, double B, double C) const
 
 template <class T>
 const T
-ImgVector<T>::get_mirror(double x, double y, double B, double C) const
+ImgVector<T>::get_mirror_cubic(double x, double y, double B, double C) const
 {
 	double bicubic_x[4];
 	double bicubic_y[4];

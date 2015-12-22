@@ -12,6 +12,8 @@
 #include <vector>
 
 #include "ImgClass.h"
+#include "Lab.h"
+#include "RGB.h"
 #include "Vector.h"
 
 
@@ -24,7 +26,6 @@ class BlockMatching
 		int _block_size;
 		int _cells_width;
 		int _cells_height;
-		T _max_intensity;
 		ImgVector<T> _image_prev;
 		ImgVector<T> _image_next;
 		ImgVector<VECTOR_2D<double> > _motion_vector;
@@ -51,7 +52,7 @@ class BlockMatching
 		bool isNULL(void);
 
 		// Get reference
-		ImgVector<VECTOR_2D<double> >& data(void);
+		ImgVector<VECTOR_2D<double> >& ref_motion_vector(void);
 		VECTOR_2D<double>& operator[](int n);
 		VECTOR_2D<double>& at(int x, int y);
 		VECTOR_2D<double>& at_block(int x, int y);
@@ -66,6 +67,7 @@ class BlockMatching
 		void block_matching(const int search_range = 41);
 
 	protected:
+		void image_normalizer(void);
 		// Extract connected region from region_map
 		void get_connected_region_list(const ImgVector<int>& region_map_original); // get copy of region_map to modify
 
@@ -75,7 +77,7 @@ class BlockMatching
 		void block_matching_arbitrary_shaped(const int search_range);
 		// Interpolate skipped Motion Vectors
 		void vector_interpolation(const std::list<VECTOR_2D<int> >& flat_blocks, ImgVector<bool>* estimated);
-		const T MAD(const int x_l, const int y_l, const int x_r, const int y_r, const int block_width, const int block_height, const ImgVector<T>& limage, const ImgVector<T>& rimage);
+		double MAD(const int x_l, const int y_l, const int x_r, const int y_r, const int block_width, const int block_height, const ImgVector<T>& limage, const ImgVector<T>& rimage);
 		// Get gradients
 		ImgVector<VECTOR_2D<double> >* grad_prev(const int top_left_x, const int top_left_y, const int crop_width, const int crop_height);
 
@@ -89,6 +91,8 @@ class BlockMatching
 		double MAD_region(const int x_diff_prev, const int y_diff_prev, const std::list<VECTOR_2D<int> >& region);
 		double ZNCC_region(const int x_diff_prev, const int y_diff_prev, const std::list<VECTOR_2D<int> >& region);
 };
+
+double norm(const double& value);
 
 #include "BlockMatching_private_initializer.h"
 #include "BlockMatching_private_accessor.h"

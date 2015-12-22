@@ -60,7 +60,7 @@ BlockMatching<T>::isNULL(void)
 // ----- Get reference -----
 template <class T>
 ImgVector<VECTOR_2D<double> > &
-BlockMatching<T>::data(void)
+BlockMatching<T>::ref_motion_vector(void)
 {
 	if (_motion_vector.isNULL()) {
 		this->block_matching();

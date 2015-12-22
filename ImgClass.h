@@ -80,10 +80,10 @@ class ImgVector
 		double cubic(double x, double B, double C) const;
 
 		// Operators
-		ImgVector<T>& operator+=(const T& val);
-		ImgVector<T>& operator-=(const T& val);
-		ImgVector<T>& operator*=(const T& val);
-		ImgVector<T>& operator/=(const T& val);
+		template<class RT> ImgVector<T>& operator+=(const RT& val);
+		template<class RT> ImgVector<T>& operator-=(const RT& val);
+		template<class RT> ImgVector<T>& operator*=(const RT& val);
+		template<class RT> ImgVector<T>& operator/=(const RT& val);
 };
 
 #include "ImgClass_private.h"

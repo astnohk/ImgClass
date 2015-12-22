@@ -870,8 +870,9 @@ ImgVector<T>::map(T (*func)(T &value))
 
 // ----- Arithmetic Operators -----
 template <class T>
+template <class RT>
 ImgVector<T> &
-ImgVector<T>::operator+=(const T& val)
+ImgVector<T>::operator+=(const RT& val)
 {
 	for (int i = 0; i < _width * _height; i++) {
 		_data[i] += val;
@@ -880,8 +881,9 @@ ImgVector<T>::operator+=(const T& val)
 }
 
 template <class T>
+template <class RT>
 ImgVector<T> &
-ImgVector<T>::operator-=(const T& val)
+ImgVector<T>::operator-=(const RT& val)
 {
 	for (int i = 0; i < _width * _height; i++) {
 		_data[i] -= val;
@@ -890,8 +892,9 @@ ImgVector<T>::operator-=(const T& val)
 }
 
 template <class T>
+template <class RT>
 ImgVector<T> &
-ImgVector<T>::operator*=(const T& val)
+ImgVector<T>::operator*=(const RT& val)
 {
 	for (int i = 0; i < _width * _height; i++) {
 		_data[i] *= val;
@@ -900,8 +903,9 @@ ImgVector<T>::operator*=(const T& val)
 }
 
 template <class T>
+template <class RT>
 ImgVector<T> &
-ImgVector<T>::operator/=(const T& val)
+ImgVector<T>::operator/=(const RT& val)
 {
 	for (int i = 0; i < _width * _height; i++) {
 		_data[i] /= val;

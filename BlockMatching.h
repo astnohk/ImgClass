@@ -12,6 +12,8 @@
 #include <vector>
 
 #include "ImgClass.h"
+#include "Lab.h"
+#include "RGB.h"
 #include "Vector.h"
 
 
@@ -80,14 +82,14 @@ class BlockMatching
 		ImgVector<VECTOR_2D<double> >* grad_prev(const int top_left_x, const int top_left_y, const int crop_width, const int crop_height);
 
 		// Correlation function
-		T SAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
-		T MAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
-		T ZNCC(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
+		double SAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
+		double MAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
+		double ZNCC(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
 		// Center color weighted
-		T MAD_centered(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
+		double MAD_centered(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
 		// Arbitrary shaped correlation function
-		T MAD_region(const int x_diff_prev, const int y_diff_prev, const std::list<VECTOR_2D<int> >& region);
-		T ZNCC_region(const int x_diff_prev, const int y_diff_prev, const std::list<VECTOR_2D<int> >& region);
+		double MAD_region(const int x_diff_prev, const int y_diff_prev, const std::list<VECTOR_2D<int> >& region);
+		double ZNCC_region(const int x_diff_prev, const int y_diff_prev, const std::list<VECTOR_2D<int> >& region);
 };
 
 #include "BlockMatching_private_initializer.h"

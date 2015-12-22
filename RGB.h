@@ -62,6 +62,13 @@ const ImgClass::RGB operator/(const double& lvalue, const ImgClass::RGB& rcolor)
 bool operator==(const ImgClass::RGB& lcolor, const ImgClass::RGB& rcolor);
 bool operator!=(const ImgClass::RGB& lcolor, const ImgClass::RGB& rcolor);
 
+// Product
+double inner_prod(const ImgClass::RGB& lcolor, const ImgClass::RGB& rcolor);
+
+// Norm
+double norm_squared(const ImgClass::RGB& color);
+double norm(const ImgClass::RGB& color);
+
 // Stream
 std::ostream& operator<<(std::ostream& os, const ImgClass::RGB& color);
 

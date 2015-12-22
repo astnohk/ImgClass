@@ -304,6 +304,34 @@ operator!=(const ImgClass::RGB& lcolor, const ImgClass::RGB& rcolor)
 }
 
 
+// Product
+double
+inner_prod(const ImgClass::RGB& lcolor, const ImgClass::RGB& rcolor)
+{
+	return lcolor.R * rcolor.R
+	    + lcolor.G * rcolor.G
+	    + lcolor.B * rcolor.B;
+}
+
+
+// Norm
+double
+norm_squared(const ImgClass::RGB& color)
+{
+	return color.R * color.R
+	    + color.G * color.G
+	    + color.B * color.B;
+}
+
+double
+norm(const ImgClass::RGB& color)
+{
+	return sqrt(color.R * color.R
+	    + color.G * color.G
+	    + color.B * color.B);
+}
+
+
 // Stream
 std::ostream &
 operator<<(std::ostream& os, const ImgClass::RGB& rcolor)

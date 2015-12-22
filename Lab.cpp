@@ -438,6 +438,17 @@ abs(const ImgClass::Lab& color)
 	return ret;
 }
 
+
+// Product
+double
+inner_prod(const ImgClass::Lab& lcolor, const ImgClass::Lab& rcolor)
+{
+	return lcolor.L * rcolor.L
+	    + lcolor.a * rcolor.a
+	    + lcolor.b * rcolor.b;
+}
+
+
 // Norm
 double
 norm_squared(const ImgClass::Lab& color)
@@ -445,5 +456,13 @@ norm_squared(const ImgClass::Lab& color)
 	return color.L * color.L
 	    + color.a * color.a
 	    + color.b * color.b;
+}
+
+double
+norm(const ImgClass::Lab& color)
+{
+	return sqrt(color.L * color.L
+	    + color.a * color.a
+	    + color.b * color.b);
 }
 

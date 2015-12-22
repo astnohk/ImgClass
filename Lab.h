@@ -81,9 +81,13 @@ ImgClass::Lab operator*(const double& lvalue, const ImgClass::Lab& rcolor);
 ImgClass::Lab operator/(const ImgClass::Lab& lcolor, const ImgClass::Lab& rcolor);
 ImgClass::Lab operator/(const ImgClass::Lab& lcolor, const double& rvalue);
 
+// Product
+double inner_prod(const ImgClass::Lab& lcolor, const ImgClass::Lab& rcolor);
+
 // Norm
 const ImgClass::Lab abs(const ImgClass::Lab& color);
 double norm_squared(const ImgClass::Lab& color);
+double norm(const ImgClass::Lab& color);
 
 #endif
 

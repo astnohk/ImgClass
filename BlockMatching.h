@@ -12,8 +12,6 @@
 #include <vector>
 
 #include "ImgClass.h"
-#include "Lab.h"
-#include "RGB.h"
 #include "Vector.h"
 
 

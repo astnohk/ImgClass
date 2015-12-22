@@ -92,9 +92,6 @@ BlockMatching<T>::block_matching_lattice(const int search_range)
 			estimated.at(X_b, Y_b) = true;
 
 			VECTOR_2D<double> MV(.0, .0);
-			T SAD_min;
-			T ZNCC_max;
-			T E_min;
 			int x_start, x_end;
 			int y_start, y_end;
 			// Compute start and end coordinates
@@ -109,27 +106,27 @@ BlockMatching<T>::block_matching_lattice(const int search_range)
 				y_start = std::max(y_b - (search_range / 2), 1 - _block_size);
 				y_end = std::min(y_b + search_range / 2, _height - 1);
 			}
-			SAD_min = (this->*SAD_func)(
+			double SAD = (this->*SAD_func)(
 			    x_start, y_start,
 			    x_b, y_b,
 			    _block_size, _block_size);
-			ZNCC_max = (this->*NCC_func)(
+			double ZNCC = (this->*NCC_func)(
 			    x_start, y_start,
 			    x_b, y_b,
 			    _block_size, _block_size);
-			E_min = coeff_SAD * SAD_min + coeff_ZNCC * (1.0 - ZNCC_max);
+			double E_min = coeff_SAD * SAD + coeff_ZNCC * (1.0 - ZNCC);
 			for (int y = y_start; y <= y_end; y++) {
 				for (int x = x_start; x <= x_end; x++) {
-					VECTOR_2D<double> v_tmp((double)x - x_b, (double)y - y_b);
-					T SAD_min = (this->*SAD_func)(
+					VECTOR_2D<double> v_tmp(double(x - x_b), double(y - y_b));
+					SAD = (this->*SAD_func)(
 					    x, y,
 					    x_b, y_b,
 					    _block_size, _block_size);
-					T ZNCC_max = (this->*NCC_func)(
+					ZNCC = (this->*NCC_func)(
 					    x, y,
 					    x_b, y_b,
 					    _block_size, _block_size);
-					T E_tmp = coeff_SAD * SAD_min + coeff_ZNCC * (1.0 - ZNCC_max);
+					T E_tmp = coeff_SAD * SAD + coeff_ZNCC * (1.0 - ZNCC);
 					if (E_tmp < E_min) {
 						E_min = E_tmp;
 						MV = v_tmp;
@@ -174,9 +171,6 @@ BlockMatching<T>::block_matching_dense_lattice(const int search_range)
 			int x_b = x_c - _block_size / 2;
 
 			VECTOR_2D<double> MV(.0, .0);
-			T SAD_min;
-			T ZNCC_max;
-			T E_min;
 			int x_start, x_end;
 			int y_start, y_end;
 			// Compute start and end coordinates
@@ -191,28 +185,28 @@ BlockMatching<T>::block_matching_dense_lattice(const int search_range)
 				y_start = std::max(y_b - (search_range / 2), 1 - _block_size);
 				y_end = std::min(y_b + search_range / 2, _height - 1);
 			}
-			SAD_min = (this->*SAD_func)(
+			double SAD = (this->*SAD_func)(
 			    x_start, y_start,
 			    x_b, y_b,
 			    _block_size, _block_size);
-			ZNCC_max = (this->*NCC_func)(
+			double ZNCC = (this->*NCC_func)(
 			    x_start, y_start,
 			    x_b, y_b,
 			    _block_size, _block_size);
-			E_min = coeff_SAD * SAD_min + coeff_ZNCC * (1.0 - ZNCC_max);
+			double E_min = coeff_SAD * SAD + coeff_ZNCC * (1.0 - ZNCC);
 			for (int y = y_start; y <= y_end; y++) {
 				for (int x = x_start; x <= x_end; x++) {
 					if (fabs(_image_prev.get_zeropad(x, y) - _image_next.get(x_c, y_c)) < 0.07 * _max_intensity) {
-						VECTOR_2D<double> v_tmp((double)x - x_c, (double)y - y_c);
-						T SAD_min = (this->*SAD_func)(
+						VECTOR_2D<double> v_tmp(double(x - x_c), double(y - y_c));
+						SAD = (this->*SAD_func)(
 						    x, y,
 						    x_b, y_b,
 						    _block_size, _block_size);
-						T ZNCC_max = (this->*NCC_func)(
+						ZNCC = (this->*NCC_func)(
 						    x, y,
 						    x_b, y_b,
 						    _block_size, _block_size);
-						T E_tmp = coeff_SAD * SAD_min + coeff_ZNCC * (1.0 - ZNCC_max);
+						T E_tmp = coeff_SAD * SAD + coeff_ZNCC * (1.0 - ZNCC);
 						if (E_tmp < E_min) {
 							E_min = E_tmp;
 							MV = v_tmp;
@@ -325,9 +319,6 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range)
 #pragma omp parallel for schedule(dynamic)
 	for (unsigned int n = 0; n < _connected_regions.size(); n++) {
 		VECTOR_2D<double> MV(.0, .0);
-		T SAD_min;
-		T ZNCC_max;
-		T E_min;
 		int x_start, x_end;
 		int y_start, y_end;
 		// Compute start and end coordinates
@@ -336,20 +327,20 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range)
 		y_start = -search_range / 2;
 		y_end = search_range / 2;
 		// Compute initial value
-		SAD_min = (this->*SAD_func)(x_start, y_start, _connected_regions[n]);
-		ZNCC_max = (this->*NCC_func)(x_start, y_start, _connected_regions[n]);
-		E_min = coeff_SAD * SAD_min + coeff_ZNCC * (1.0 - ZNCC_max);
+		double SAD = (this->*SAD_func)(x_start, y_start, _connected_regions[n]);
+		double ZNCC = (this->*NCC_func)(x_start, y_start, _connected_regions[n]);
+		double E_min = coeff_SAD * SAD + coeff_ZNCC * (1.0 - ZNCC);
 		// Search minimum value
 		for (int y_diff = y_start; y_diff <= y_end; y_diff++) {
 			for (int x_diff = x_start; x_diff <= x_end; x_diff++) {
 				VECTOR_2D<double> v_tmp((double)x_diff, (double)y_diff);
-				T SAD_min = (this->*SAD_func)(
+				SAD = (this->*SAD_func)(
 				    x_diff, y_diff,
 				    _connected_regions[n]);
-				T ZNCC_max = (this->*NCC_func)(
+				ZNCC = (this->*NCC_func)(
 				    x_diff, y_diff,
 				    _connected_regions[n]);
-				T E_tmp = coeff_SAD * SAD_min + coeff_ZNCC * (1.0 - ZNCC_max);
+				double E_tmp = coeff_SAD * SAD + coeff_ZNCC * (1.0 - ZNCC);
 				if (E_tmp < E_min) {
 					E_min = E_tmp;
 					MV = v_tmp;
@@ -380,7 +371,7 @@ BlockMatching<T>::SAD(const int x_prev, const int y_prev, const int x_next, cons
 
 	for (int y = 0; y < block_height; y++) {
 		for (int x = 0; x < block_width; x++) {
-			sad = sad + fabs((double)_image_next.get_zeropad(x_next + x, y_next + y) - _image_prev.get_zeropad(x_prev + x, y_prev + y));
+			sad = sad + fabs(double(_image_next.get_zeropad(x_next + x, y_next + y) - _image_prev.get_zeropad(x_prev + x, y_prev + y)));
 		}
 	}
 	return sad;
@@ -395,38 +386,6 @@ BlockMatching<T>::MAD(const int x_prev, const int y_prev, const int x_next, cons
 	for (int y = 0; y < block_height; y++) {
 		for (int x = 0; x < block_width; x++) {
 			sad = sad + fabs(double(_image_next.get_zeropad(x_next + x, y_next + y) - _image_prev.get_zeropad(x_prev + x, y_prev + y)));
-		}
-	}
-	return sad / double(block_width * block_height);
-}
-
-template <>
-double
-BlockMatching<ImgClass::RGB>::MAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height)
-{
-	double sad = 0;
-
-	for (int y = 0; y < block_height; y++) {
-		for (int x = 0; x < block_width; x++) {
-			ImgClass::RGB color_prev(_image_prev.get_zeropad(x_prev + x, y_prev + y));
-			ImgClass::RGB color_next(_image_next.get_zeropad(x_next + x, y_next + y));
-			sad = sad + norm(color_next - color_prev);
-		}
-	}
-	return sad / double(block_width * block_height);
-}
-
-template <>
-double
-BlockMatching<ImgClass::Lab>::MAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height)
-{
-	double sad = 0;
-
-	for (int y = 0; y < block_height; y++) {
-		for (int x = 0; x < block_width; x++) {
-			ImgClass::Lab color_prev(_image_prev.get_zeropad(x_prev + x, y_prev + y));
-			ImgClass::Lab color_next(_image_next.get_zeropad(x_next + x, y_next + y));
-			sad = sad + norm(color_next - color_prev);
 		}
 	}
 	return sad / double(block_width * block_height);
@@ -453,52 +412,6 @@ BlockMatching<T>::ZNCC(const int x_prev, const int y_prev, const int x_next, con
 		}
 	}
 	return (N * sum_sq_prev_next - sum_prev * sum_next) / (sqrt(N * sum_sq_prev - sum_prev * sum_prev) * sqrt(N * sum_sq_next - sum_next * sum_next) + 1E-10);
-}
-
-template <>
-double
-BlockMatching<ImgClass::RGB>::ZNCC(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height)
-{
-	double N = block_width * block_height;
-	ImgClass::RGB sum_prev(.0, .0, .0);
-	ImgClass::RGB sum_next(.0, .0, .0);
-	double sum_sq_prev = 0;
-	double sum_sq_next = 0;
-	double sum_sq_prev_next = 0;
-
-	for (int y = 0; y < block_height; y++) {
-		for (int x = 0; x < block_width; x++) {
-			sum_prev += _image_prev.get_zeropad(x_prev + x, y_prev + y);
-			sum_next += _image_next.get_zeropad(x_next + x, y_next + y);
-			sum_sq_prev += inner_prod(_image_prev.get_zeropad(x_prev + x, y_prev + y), _image_prev.get_zeropad(x_prev + x, y_prev + y));
-			sum_sq_next += inner_prod(_image_next.get_zeropad(x_next + x, y_next + y), _image_next.get_zeropad(x_next + x, y_next + y));
-			sum_sq_prev_next += inner_prod(_image_prev.get_zeropad(x_prev + x, y_prev + y), _image_next.get_zeropad(x_next + x, y_next + y));
-		}
-	}
-	return (N * sum_sq_prev_next - inner_prod(sum_prev, sum_next)) / (sqrt(N * sum_sq_prev - inner_prod(sum_prev, sum_prev)) * sqrt(N * sum_sq_next - inner_prod(sum_next, sum_next)) + 1E-10);
-}
-
-template <>
-double
-BlockMatching<ImgClass::Lab>::ZNCC(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height)
-{
-	double N = block_width * block_height;
-	ImgClass::Lab sum_prev(.0, .0, .0);
-	ImgClass::Lab sum_next(.0, .0, .0);
-	double sum_sq_prev = 0;
-	double sum_sq_next = 0;
-	double sum_sq_prev_next = 0;
-
-	for (int y = 0; y < block_height; y++) {
-		for (int x = 0; x < block_width; x++) {
-			sum_prev += _image_prev.get_zeropad(x_prev + x, y_prev + y);
-			sum_next += _image_next.get_zeropad(x_next + x, y_next + y);
-			sum_sq_prev += inner_prod(_image_prev.get_zeropad(x_prev + x, y_prev + y), _image_prev.get_zeropad(x_prev + x, y_prev + y));
-			sum_sq_next += inner_prod(_image_next.get_zeropad(x_next + x, y_next + y), _image_next.get_zeropad(x_next + x, y_next + y));
-			sum_sq_prev_next += inner_prod(_image_prev.get_zeropad(x_prev + x, y_prev + y), _image_next.get_zeropad(x_next + x, y_next + y));
-		}
-	}
-	return (N * sum_sq_prev_next - inner_prod(sum_prev, sum_next)) / (sqrt(N * sum_sq_prev - inner_prod(sum_prev, sum_prev)) * sqrt(N * sum_sq_next - inner_prod(sum_next, sum_next)) + 1E-10);
 }
 
 
@@ -574,111 +487,5 @@ BlockMatching<T>::ZNCC_region(const int x_diff_prev, const int y_diff_prev, cons
 	// Calculate Covariance
 	return (N * sum_sq_prev_next - sum_prev * sum_next)
 	    / (sqrt(N * sum_sq_prev - sum_prev * sum_prev) * sqrt(N * sum_sq_next - sum_next * sum_next));
-}
-
-template <>
-double
-BlockMatching<ImgClass::RGB>::MAD_region(const int x_diff_prev, const int y_diff_prev, const std::list<VECTOR_2D<int> >& region)
-{
-	double N = .0;
-	double sad = 0;
-
-	for (std::list<VECTOR_2D<int> >::const_iterator ite = region.begin();
-	    ite != region.end();
-	    ++ite) {
-		N += 1.0;
-		ImgClass::RGB color_prev(_image_prev.get_zeropad(ite->x + x_diff_prev, ite->y + y_diff_prev));
-		ImgClass::RGB color_next(_image_next.get_zeropad(ite->x, ite->y));
-		sad = sad + norm(color_next - color_prev);
-	}
-	return sad / N;
-}
-
-template <>
-double
-BlockMatching<ImgClass::Lab>::MAD_region(const int x_diff_prev, const int y_diff_prev, const std::list<VECTOR_2D<int> >& region)
-{
-	double N = .0;
-	double sad = 0;
-
-	for (std::list<VECTOR_2D<int> >::const_iterator ite = region.begin();
-	    ite != region.end();
-	    ++ite) {
-		N += 1.0;
-		ImgClass::Lab color_prev(_image_prev.get_zeropad(ite->x + x_diff_prev, ite->y + y_diff_prev));
-		ImgClass::Lab color_next(_image_next.get_zeropad(ite->x, ite->y));
-		sad = sad + norm(color_next - color_prev);
-	}
-	return sad / N;
-}
-
-template <>
-double
-BlockMatching<ImgClass::RGB>::ZNCC_region(const int x_diff_prev, const int y_diff_prev, const std::list<VECTOR_2D<int> >& region)
-{
-	double N = 0;
-	ImgClass::RGB sum_prev(.0, .0, .0);
-	ImgClass::RGB sum_next(.0, .0, .0);
-	double sum_sq_prev = 0;
-	double sum_sq_next = 0;
-	double sum_sq_prev_next = 0;
-
-	for (std::list<VECTOR_2D<int> >::const_iterator ite = region.begin();
-	    ite != region.end();
-	    ++ite) {
-		N += 1.0;
-		// Previous frame
-		sum_prev += _image_prev.get_zeropad(ite->x + x_diff_prev, ite->y + y_diff_prev);
-		sum_sq_prev += inner_prod(
-		    _image_prev.get_zeropad(ite->x + x_diff_prev, ite->y + y_diff_prev)
-		    , _image_prev.get_zeropad(ite->x + x_diff_prev, ite->y + y_diff_prev));
-		// Next frame
-		sum_next += _image_next.get_zeropad(ite->x, ite->y);
-		sum_sq_next += inner_prod(
-		    _image_next.get_zeropad(ite->x, ite->y)
-		    , _image_next.get_zeropad(ite->x, ite->y));
-		// Co-frame
-		sum_sq_prev_next += inner_prod(
-		    _image_prev.get_zeropad(ite->x + x_diff_prev, ite->y + y_diff_prev)
-		    , _image_next.get_zeropad(ite->x, ite->y));
-	}
-	// Calculate Covariance
-	return (N * sum_sq_prev_next - inner_prod(sum_prev, sum_next))
-	    / (sqrt(N * sum_sq_prev - inner_prod(sum_prev, sum_prev)) * sqrt(N * sum_sq_next - inner_prod(sum_next, sum_next)));
-}
-
-template <>
-double
-BlockMatching<ImgClass::Lab>::ZNCC_region(const int x_diff_prev, const int y_diff_prev, const std::list<VECTOR_2D<int> >& region)
-{
-	double N = 0;
-	ImgClass::Lab sum_prev(.0, .0, .0);
-	ImgClass::Lab sum_next(.0, .0, .0);
-	double sum_sq_prev = 0;
-	double sum_sq_next = 0;
-	double sum_sq_prev_next = 0;
-
-	for (std::list<VECTOR_2D<int> >::const_iterator ite = region.begin();
-	    ite != region.end();
-	    ++ite) {
-		N += 1.0;
-		// Previous frame
-		sum_prev += _image_prev.get_zeropad(ite->x + x_diff_prev, ite->y + y_diff_prev);
-		sum_sq_prev += inner_prod(
-		    _image_prev.get_zeropad(ite->x + x_diff_prev, ite->y + y_diff_prev)
-		    , _image_prev.get_zeropad(ite->x + x_diff_prev, ite->y + y_diff_prev));
-		// Next frame
-		sum_next += _image_next.get_zeropad(ite->x, ite->y);
-		sum_sq_next += inner_prod(
-		    _image_next.get_zeropad(ite->x, ite->y)
-		    , _image_next.get_zeropad(ite->x, ite->y));
-		// Co-frame
-		sum_sq_prev_next += inner_prod(
-		    _image_prev.get_zeropad(ite->x + x_diff_prev, ite->y + y_diff_prev)
-		    , _image_next.get_zeropad(ite->x, ite->y));
-	}
-	// Calculate Covariance
-	return (N * sum_sq_prev_next - inner_prod(sum_prev, sum_next))
-	    / (sqrt(N * sum_sq_prev - inner_prod(sum_prev, sum_prev)) * sqrt(N * sum_sq_next - inner_prod(sum_next, sum_next)));
 }
 

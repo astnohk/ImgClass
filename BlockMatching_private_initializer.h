@@ -49,8 +49,6 @@ BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<
 	_height = image_prev.height();
 	_image_prev.copy(image_prev);
 	_image_next.copy(image_next);
-	_motion_vector.clear();
-	_connected_regions.clear();
 
 	// Normalize the image
 	image_normalizer();
@@ -66,7 +64,7 @@ BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<
 }
 
 template <class T>
-BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<T>& image_next, const ImgVector<int>& region_map)
+BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<T>& image_next, const ImgVector<int>& region_map_prev, const ImgVector<int>& region_map_next)
 {
 	_width = 0;
 	_height = 0;
@@ -82,12 +80,18 @@ BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<
 	} else if (image_prev.width() != image_next.width() || image_prev.height() != image_next.height()) {
 		std::cerr << "BlockMatching<T>::BlockMatching(const ImgVector<T>&, const ImgVector<T>&, const int) : width or height of image_prev and image_next not match" << std::endl;
 		throw std::invalid_argument("width or height of image_prev and image_next not match");
-	} else if (region_map.isNULL()) {
-		std::cerr << "BlockMatching<T>::BlockMatching(const ImgVector<T>&, const ImgVector<T>&, const int) : const ImgVector<int>& region_map" << std::endl;
-		throw std::invalid_argument("const ImgVector<int>& region_map");
-	} else if (region_map.width() != image_next.width() || region_map.height() != image_next.height()) {
-		std::cerr << "BlockMatching<T>::BlockMatching(const ImgVector<T>&, const ImgVector<T>&, const int) : width or height of region_map and image_next not match" << std::endl;
-		throw std::invalid_argument("width or height of region_map and image_next not match");
+	} else if (region_map_prev.isNULL()) {
+		std::cerr << "BlockMatching<T>::BlockMatching(const ImgVector<T>&, const ImgVector<T>&, const int) : const ImgVector<int>& region_map_prev" << std::endl;
+		throw std::invalid_argument("const ImgVector<int>& region_map_prev");
+	} else if (region_map_next.isNULL()) {
+		std::cerr << "BlockMatching<T>::BlockMatching(const ImgVector<T>&, const ImgVector<T>&, const int) : const ImgVector<int>& region_map_next" << std::endl;
+		throw std::invalid_argument("const ImgVector<int>& region_map_prev");
+	} else if (region_map_prev.width() != image_prev.width() || region_map_prev.height() != image_prev.height()) {
+		std::cerr << "BlockMatching<T>::BlockMatching(const ImgVector<T>&, const ImgVector<T>&, const int) : width or height of region_map_prev and image_prev not match" << std::endl;
+		throw std::invalid_argument("width or height of region_map_prev and image_prev not match");
+	} else if (region_map_next.width() != image_next.width() || region_map_next.height() != image_next.height()) {
+		std::cerr << "BlockMatching<T>::BlockMatching(const ImgVector<T>&, const ImgVector<T>&, const int) : width or height of region_map_next and image_next not match" << std::endl;
+		throw std::invalid_argument("width or height of region_map_next and image_next not match");
 	}
 
 	_width = image_prev.width();
@@ -97,13 +101,15 @@ BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<
 	_cells_height = _height;
 	_image_prev.copy(image_prev);
 	_image_next.copy(image_next);
-	_motion_vector.clear();
+	_region_map_prev.copy(region_map_prev);
+	_region_map_next.copy(region_map_next);
 
 	// Normalize the image
 	image_normalizer();
 
 	// Extract connected regions from region_map
-	get_connected_region_list(region_map);
+	get_connected_region_list(&_connected_regions_prev, region_map_prev);
+	get_connected_region_list(&_connected_regions_next, region_map_next);
 }
 
 
@@ -120,8 +126,11 @@ BlockMatching<T>::BlockMatching(const BlockMatching& copy)
 
 	_image_prev.copy(copy._image_prev);
 	_image_next.copy(copy._image_next);
+	_region_map_prev.copy(copy._region_map_prev);
+	_region_map_next.copy(copy._region_map_next);
 	_motion_vector.copy(copy._motion_vector);
-	_connected_regions.assign(copy._connected_regions.begin(), copy._connected_regions.end());
+	_connected_regions_prev.assign(copy._connected_regions_prev.begin(), copy._connected_regions_prev.end());
+	_connected_regions_next.assign(copy._connected_regions_next.begin(), copy._connected_regions_next.end());
 }
 
 
@@ -160,8 +169,11 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& imag
 	_block_size = BlockSize;
 	_image_prev.copy(image_prev);
 	_image_next.copy(image_next);
+	_region_map_prev.clear();
+	_region_map_next.clear();
+	_connected_regions_prev.clear();
+	_connected_regions_next.clear();
 	_motion_vector.clear();
-	_connected_regions.clear();
 
 	// Normalize the image
 	image_normalizer();
@@ -177,7 +189,7 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& imag
 
 template <class T>
 void
-BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& image_next, const ImgVector<int>& region_map)
+BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& image_next, const ImgVector<int>& region_map_prev, const ImgVector<int>& region_map_next)
 {
 	_width = 0;
 	_height = 0;
@@ -190,9 +202,12 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& imag
 	} else if (image_prev.width() != image_next.width() || image_prev.height() != image_next.height()) {
 		std::cerr << "void BlockMatching<T>::reset(const ImgVector<T>&, const ImgVector<T>&, const ImgVector<int>&) : const ImgVector<T>& image_prev, const ImgVector<T>& image_next" << std::endl;
 		throw std::invalid_argument("width or height of image_prev and image_next not match");
-	} else if (region_map.width() != image_next.width() || region_map.height() != image_next.height()) {
-		std::cerr << "void BlockMatching<T>::reset(const ImgVector<T>&, const ImgVector<T>&, const ImgVector<int>&) : const ImgVector<int>& region_map" << std::endl;
-		throw std::invalid_argument("width or height of region_map not match with image_next");
+	} else if (region_map_prev.width() != image_prev.width() || region_map_prev.height() != image_prev.height()) {
+		std::cerr << "void BlockMatching<T>::reset(const ImgVector<T>&, const ImgVector<T>&, const ImgVector<int>&) : const ImgVector<int>& region_map_prev" << std::endl;
+		throw std::invalid_argument("width or height of region_map_prev not match with image_prev");
+	} else if (region_map_next.width() != image_next.width() || region_map_next.height() != image_next.height()) {
+		std::cerr << "void BlockMatching<T>::reset(const ImgVector<T>&, const ImgVector<T>&, const ImgVector<int>&) : const ImgVector<int>& region_map_next" << std::endl;
+		throw std::invalid_argument("width or height of region_map_next not match with image_next");
 	}
 
 	_width = image_prev.width();
@@ -202,13 +217,16 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& imag
 	_cells_height = _height;
 	_image_prev.copy(image_prev);
 	_image_next.copy(image_next);
+	_region_map_prev.copy(region_map_prev);
+	_region_map_next.copy(region_map_next);
 	_motion_vector.clear();
 
 	// Normalize the image
 	image_normalizer();
 
 	// Extract connected regions from region_map
-	get_connected_region_list(region_map);
+	get_connected_region_list(&_connected_regions_prev, region_map_prev);
+	get_connected_region_list(&_connected_regions_next, region_map_next);
 }
 
 
@@ -221,44 +239,44 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& imag
  */
 template <class T>
 void
-BlockMatching<T>::get_connected_region_list(const ImgVector<int>& region_map_original) // get copy of region_map
+BlockMatching<T>::get_connected_region_list(std::vector<std::list<VECTOR_2D<int> > >* connected_regions, const ImgVector<int>& region_map)
 {
 	std::list<std::list<VECTOR_2D<int> > > tmp_list;
-	ImgVector<int> region_map(region_map_original);
+	ImgVector<int> region_map_tmp(region_map);
 	// Clear the vector
-	_connected_regions.clear();
+	connected_regions->clear();
 
-	for (int y = 0; y < region_map.height(); y++) {
-		for (int x = 0; x < region_map.width(); x++) {
-			if (region_map.get(x, y) > 0) {
-				int num = region_map.get(x, y);
-				region_map.at(x, y) = 0;
+	for (int y = 0; y < region_map_tmp.height(); y++) {
+		for (int x = 0; x < region_map_tmp.width(); x++) {
+			if (region_map_tmp.get(x, y) > 0) {
+				int num = region_map_tmp.get(x, y);
+				region_map_tmp.at(x, y) = 0;
 				tmp_list.push_back(std::list<VECTOR_2D<int> >(0)); // Add new region pixel list
 				VECTOR_2D<int> r(x, y);
 				tmp_list.back().push_back(r); // Add first element
 				for (std::list<VECTOR_2D<int> >::const_iterator ite = tmp_list.back().begin();
 				    ite != tmp_list.back().end();
 				    ++ite) {
-					if (region_map.get_zeropad(ite->x + 1, ite->y) == num) {
-						region_map.at(ite->x + 1, ite->y) = 0;
+					if (region_map_tmp.get_zeropad(ite->x + 1, ite->y) == num) {
+						region_map_tmp.at(ite->x + 1, ite->y) = 0;
 						r.x = ite->x + 1;
 						r.y = ite->y;
 						tmp_list.back().push_back(r);
 					}
-					if (region_map.get_zeropad(ite->x, ite->y + 1) == num) {
-						region_map.at(ite->x, ite->y + 1) = 0;
+					if (region_map_tmp.get_zeropad(ite->x, ite->y + 1) == num) {
+						region_map_tmp.at(ite->x, ite->y + 1) = 0;
 						r.x = ite->x;
 						r.y = ite->y + 1;
 						tmp_list.back().push_back(r);
 					}
-					if (region_map.get_zeropad(ite->x - 1, ite->y) == num) {
-						region_map.at(ite->x - 1, ite->y) = 0;
+					if (region_map_tmp.get_zeropad(ite->x - 1, ite->y) == num) {
+						region_map_tmp.at(ite->x - 1, ite->y) = 0;
 						r.x = ite->x - 1;
 						r.y = ite->y;
 						tmp_list.back().push_back(r);
 					}
-					if (region_map.get_zeropad(ite->x, ite->y + 1) == num) {
-						region_map.at(ite->x, ite->y + 1) = 0;
+					if (region_map_tmp.get_zeropad(ite->x, ite->y + 1) == num) {
+						region_map_tmp.at(ite->x, ite->y + 1) = 0;
 						r.x = ite->x;
 						r.y = ite->y + 1;
 						tmp_list.back().push_back(r);
@@ -267,11 +285,11 @@ BlockMatching<T>::get_connected_region_list(const ImgVector<int>& region_map_ori
 			}
 		}
 	}
-	_connected_regions.resize(tmp_list.size());
+	connected_regions->resize(tmp_list.size());
 	// Copy extracted connected region to std::vector _connected_regions
 	std::list<std::list<VECTOR_2D<int> > >::iterator ite = tmp_list.begin();
-	for (unsigned int n = 0; n < _connected_regions.size(); ++ite, n++) {
-		_connected_regions[n].assign(ite->begin(), ite->end());
+	for (unsigned int n = 0; n < connected_regions->size(); ++ite, n++) {
+		connected_regions->at(n).assign(ite->begin(), ite->end());
 	}
 }
 

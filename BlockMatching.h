@@ -28,20 +28,27 @@ class BlockMatching
 		int _cells_height;
 		ImgVector<T> _image_prev;
 		ImgVector<T> _image_next;
+		ImgVector<int> _region_map_prev;
+		ImgVector<int> _region_map_next;
+		ImgVector<double> _decreased_color_prev;
+		ImgVector<double> _decreased_color_next;
 		ImgVector<VECTOR_2D<double> > _motion_vector;
 		// For arbitrary shaped block matching
-		std::vector<std::list<VECTOR_2D<int> > > _connected_regions;
+		std::vector<std::list<VECTOR_2D<int> > > _connected_regions_prev;
+		std::vector<std::list<VECTOR_2D<int> > > _connected_regions_next;
 
 	public:
 		// Constructors
 		BlockMatching(void);
 		explicit BlockMatching(const BlockMatching& copy);
 		BlockMatching(const ImgVector<T>& image_prev, const ImgVector<T>& image_next, const int BlockSize, const bool dense = false);
-		BlockMatching(const ImgVector<T>& image_prev, const ImgVector<T>& image_next, const ImgVector<int>& region_map);
+		BlockMatching(const ImgVector<T>& image_prev, const ImgVector<T>& image_next, const ImgVector<int>& region_prev, const ImgVector<int>& region_next);
+		// Destructor
 		virtual ~BlockMatching(void);
 
+		// Resetter
 		void reset(const ImgVector<T>& image_prev, const ImgVector<T>& image_next, const int BlockSize, const bool dense = false);
-		void reset(const ImgVector<T>& image_prev, const ImgVector<T>& image_next, const ImgVector<int>& region_map);
+		void reset(const ImgVector<T>& image_prev, const ImgVector<T>& image_next, const ImgVector<int>& region_prev, const ImgVector<int>& region_next);
 
 		// Get state
 		int width(void) const;
@@ -49,7 +56,7 @@ class BlockMatching
 		int block_size(void) const;
 		int vector_field_width(void) const;
 		int vector_field_height(void) const;
-		bool isNULL(void);
+		bool isNULL(void) const;
 
 		// Get reference
 		ImgVector<VECTOR_2D<double> >& ref_motion_vector(void);
@@ -69,7 +76,7 @@ class BlockMatching
 	protected:
 		void image_normalizer(void);
 		// Extract connected region from region_map
-		void get_connected_region_list(const ImgVector<int>& region_map_original); // get copy of region_map to modify
+		void get_connected_region_list(std::vector<std::list<VECTOR_2D<int> > >* connected_regions, const ImgVector<int>& region_map);
 
 		// Main method of block_matching
 		void block_matching_lattice(const int search_range);

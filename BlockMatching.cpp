@@ -285,7 +285,7 @@ BlockMatching<ImgClass::RGB>::ZNCC_region(const int x_diff_prev, const int y_dif
 	}
 	// Calculate Covariance
 	return (N * sum_sq_prev_next - inner_prod(sum_prev, sum_next))
-	    / (sqrt(N * sum_sq_prev - inner_prod(sum_prev, sum_prev)) * sqrt(N * sum_sq_next - inner_prod(sum_next, sum_next)));
+	    / (sqrt(N * sum_sq_prev - inner_prod(sum_prev, sum_prev)) * sqrt(N * sum_sq_next - inner_prod(sum_next, sum_next)) + 1.0E-10);
 }
 
 template <>
@@ -320,7 +320,7 @@ BlockMatching<ImgClass::Lab>::ZNCC_region(const int x_diff_prev, const int y_dif
 	}
 	// Calculate Covariance
 	return (N * sum_sq_prev_next - inner_prod(sum_prev, sum_next))
-	    / (sqrt(N * sum_sq_prev - inner_prod(sum_prev, sum_prev)) * sqrt(N * sum_sq_next - inner_prod(sum_next, sum_next)));
+	    / (sqrt(N * sum_sq_prev - inner_prod(sum_prev, sum_prev)) * sqrt(N * sum_sq_next - inner_prod(sum_next, sum_next)) + 1.0E-10);
 }
 
 

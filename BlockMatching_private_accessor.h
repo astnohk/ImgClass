@@ -45,7 +45,7 @@ BlockMatching<T>::vector_field_height(void) const
 
 template <class T>
 bool
-BlockMatching<T>::isNULL(void)
+BlockMatching<T>::isNULL(void) const
 {
 	if (_width <= 0 || _height <= 0) {
 		return true;

@@ -18,7 +18,7 @@ template <class T>
 void
 BlockMatching<T>::block_matching(const int search_range)
 {
-	if (_connected_regions.size() > 0) {
+	if (_connected_regions_next.size() > 0) {
 		block_matching_arbitrary_shaped(search_range);
 	} else if (_width == _cells_width && _height == _cells_height) {
 		block_matching_dense_lattice(search_range);
@@ -284,7 +284,7 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range)
 	_motion_vector.reset(_width, _height);
 	// Compute Motion Vectors
 #pragma omp parallel for schedule(dynamic)
-	for (unsigned int n = 0; n < _connected_regions.size(); n++) {
+	for (unsigned int n = 0; n < _connected_regions_next.size(); n++) {
 		VECTOR_2D<double> MV(.0, .0);
 		int x_start, x_end;
 		int y_start, y_end;
@@ -294,19 +294,19 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range)
 		y_start = -search_range / 2;
 		y_end = search_range / 2;
 		// Compute initial value
-		double SAD = (this->*SAD_func)(x_start, y_start, _connected_regions[n]);
-		double ZNCC = (this->*NCC_func)(x_start, y_start, _connected_regions[n]);
+		double SAD = (this->*SAD_func)(x_start, y_start, _connected_regions_next[n]);
+		double ZNCC = (this->*NCC_func)(x_start, y_start, _connected_regions_next[n]);
 		double E_min = coeff_SAD * SAD + coeff_ZNCC * (1.0 - ZNCC);
 		// Search minimum value
 		for (int y_diff = y_start; y_diff <= y_end; y_diff++) {
 			for (int x_diff = x_start; x_diff <= x_end; x_diff++) {
-				VECTOR_2D<double> v_tmp((double)x_diff, (double)y_diff);
+				VECTOR_2D<double> v_tmp(x_diff, y_diff);
 				SAD = (this->*SAD_func)(
 				    x_diff, y_diff,
-				    _connected_regions[n]);
+				    _connected_regions_next[n]);
 				ZNCC = (this->*NCC_func)(
 				    x_diff, y_diff,
-				    _connected_regions[n]);
+				    _connected_regions_next[n]);
 				double E_tmp = coeff_SAD * SAD + coeff_ZNCC * (1.0 - ZNCC);
 				if (E_tmp < E_min) {
 					E_min = E_tmp;
@@ -319,8 +319,8 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range)
 				}
 			}
 		}
-		for (std::list<VECTOR_2D<int> >::iterator ite = _connected_regions[n].begin();
-		    ite != _connected_regions[n].end();
+		for (std::list<VECTOR_2D<int> >::iterator ite = _connected_regions_next[n].begin();
+		    ite != _connected_regions_next[n].end();
 		    ++ite) {
 			_motion_vector.at(ite->x, ite->y) = MV;
 		}

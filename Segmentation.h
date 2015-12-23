@@ -22,18 +22,18 @@ class Segmentation
 		ImgVector<T> _image;
 		ImgVector<int> _decrease_color_image;
 		ImgVector<VECTOR_2D<double> > _shift_vector;
-		ImgVector<int> _segments_map;
+		ImgVector<int> _segmentation_map;
 		std::vector<std::vector<VECTOR_2D<int> > > _regions;
 
 	public:
 		// Constructor
 		Segmentation(void);
 		Segmentation(const ImgVector<T>& image, const double kernel_spatial_radius = 8.0, const double kernel_intensity_radius = 12.0 / 255.0);
-		explicit Segmentation(const Segmentation<T>& segments); // Copy constructor
+		explicit Segmentation(const Segmentation<T>& segmentation); // Copy constructor
 
 		Segmentation<T>& reset(const ImgVector<T>& image, const double kernel_spatial_radius = 8.0, const double kernel_intensity_radius = 12.0 / 255.0);
 
-		Segmentation<T>& copy(const Segmentation<T>& segments);
+		Segmentation<T>& copy(const Segmentation<T>& segmentation);
 
 		// Destructor
 		~Segmentation(void);
@@ -46,7 +46,7 @@ class Segmentation
 		int height(void) const;
 
 		const ImgVector<int>& ref_decrease_color_image(void) const;
-		const ImgVector<int>& ref_segments_map(void) const;
+		const ImgVector<int>& ref_segmentation_map(void) const;
 		const ImgVector<VECTOR_2D<double> >& ref_shift_vector(void) const;
 		const std::vector<std::list<VECTOR_2D<int> > >& ref_regions(void) const;
 

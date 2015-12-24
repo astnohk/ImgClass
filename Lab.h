@@ -1,6 +1,7 @@
 #ifndef LIB_ImgClass_Lab
 #define LIB_ImgClass_Lab
 
+#include <ostream>
 #include "RGB.h"
 
 /* L*a*b* color space
@@ -88,6 +89,9 @@ double inner_prod(const ImgClass::Lab& lcolor, const ImgClass::Lab& rcolor);
 const ImgClass::Lab abs(const ImgClass::Lab& color);
 double norm_squared(const ImgClass::Lab& color);
 double norm(const ImgClass::Lab& color);
+
+// Stream
+std::ostream& operator<<(std::ostream& os, const ImgClass::Lab& rcolor);
 
 #endif
 

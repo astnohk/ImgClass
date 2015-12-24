@@ -466,3 +466,12 @@ norm(const ImgClass::Lab& color)
 	    + color.b * color.b);
 }
 
+
+// Stream
+std::ostream &
+operator<<(std::ostream& os, const ImgClass::Lab& rcolor)
+{
+	os << "[L*:" << rcolor.L << " a*:" << rcolor.a << " b*:" << rcolor.b << "]";
+	return os;
+}
+

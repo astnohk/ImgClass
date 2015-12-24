@@ -214,46 +214,54 @@ operator/(VECTOR_2D<Type> lvector, const Tval& rvalue)
 }
 
 
-namespace Vector_2D {
-	template <class Type>
-	double
-	norm(const VECTOR_2D<Type> &vector)
-	{
-		return sqrt((double)vector.x * vector.x + vector.y * vector.y);
-	}
+template <class Type>
+double
+norm(const VECTOR_2D<Type> &vector)
+{
+	return sqrt((double)vector.x * vector.x + vector.y * vector.y);
+}
 
-	template <class Type>
-	double
-	arg(const VECTOR_2D<Type> &vector)
-	{
-		return atan2(vector.y, vector.x);
-	}
+template <class Type>
+double
+arg(const VECTOR_2D<Type> &vector)
+{
+	return atan2(vector.y, vector.x);
+}
 
-	template <class Type>
-	VECTOR_2D<Type>
-	floor(VECTOR_2D<Type> vector)
-	{
-		vector.x = floor(vector.x);
-		vector.y = floor(vector.y);
-		return vector;
-	}
+template <class Type>
+VECTOR_2D<Type>
+floor(VECTOR_2D<Type> vector)
+{
+	vector.x = floor(vector.x);
+	vector.y = floor(vector.y);
+	return vector;
+}
 
-	template <class Type>
-	VECTOR_2D<Type>
-	round(VECTOR_2D<Type> vector)
-	{
-		vector.x = round(vector.x);
-		vector.y = round(vector.y);
-		return vector;
-	}
+template <class Type>
+VECTOR_2D<Type>
+round(VECTOR_2D<Type> vector)
+{
+	vector.x = round(vector.x);
+	vector.y = round(vector.y);
+	return vector;
+}
 
-	template <class Type>
-	VECTOR_2D<Type>
-	ceil(VECTOR_2D<Type> vector)
-	{
-		vector.x = ceil(vector.x);
-		vector.y = ceil(vector.y);
-		return vector;
-	}
+template <class Type>
+VECTOR_2D<Type>
+ceil(VECTOR_2D<Type> vector)
+{
+	vector.x = ceil(vector.x);
+	vector.y = ceil(vector.y);
+	return vector;
+}
+
+
+// Stream
+template <class Type>
+std::ostream &
+operator<<(std::ostream& os, const VECTOR_2D<Type>& rvalue)
+{
+	os << "[x:" << rvalue.x << " y:" << rvalue.y << "]";
+	return os;
 }
 

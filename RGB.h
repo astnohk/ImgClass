@@ -70,7 +70,7 @@ double norm_squared(const ImgClass::RGB& color);
 double norm(const ImgClass::RGB& color);
 
 // Stream
-std::ostream& operator<<(std::ostream& os, const ImgClass::RGB& color);
+std::ostream& operator<<(std::ostream& os, const ImgClass::RGB& rcolor);
 
 #endif
 

@@ -1,6 +1,8 @@
 #ifndef LIB_ImgClass_Vector
 #define LIB_ImgClass_Vector
 
+#include <ostream>
+
 template <class T>
 struct VECTOR_2D
 {
@@ -66,13 +68,15 @@ template<class Type, class Tval> VECTOR_2D<Type> operator*(const Tval& lvalue, V
 
 template<class Type, class Tval> VECTOR_2D<Type> operator/(VECTOR_2D<Type> lvector, const Tval& rvalue);
 
-namespace Vector_2D {
-	template<class Type> double norm(const VECTOR_2D<Type>& vector);
-	template<class Type> double arg(const VECTOR_2D<Type>& vector);
-	template<class Type> VECTOR_2D<Type> floor(const VECTOR_2D<Type> &vector);
-	template<class Type> VECTOR_2D<Type> round(const VECTOR_2D<Type> &vector);
-	template<class Type> VECTOR_2D<Type> ceil(const VECTOR_2D<Type> &vector);
-}
+// Arithmetic
+template<class Type> double norm(const VECTOR_2D<Type>& vector);
+template<class Type> double arg(const VECTOR_2D<Type>& vector);
+template<class Type> VECTOR_2D<Type> floor(const VECTOR_2D<Type> &vector);
+template<class Type> VECTOR_2D<Type> round(const VECTOR_2D<Type> &vector);
+template<class Type> VECTOR_2D<Type> ceil(const VECTOR_2D<Type> &vector);
+
+// Stream
+template<class Type> std::ostream& operator<<(std::ostream& os, const VECTOR_2D<Type>& rvalue);
 
 #include "Vector_private.h"
 

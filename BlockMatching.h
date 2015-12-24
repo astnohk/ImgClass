@@ -30,8 +30,8 @@ class BlockMatching
 		ImgVector<T> _image_next;
 		ImgVector<int> _region_map_prev;
 		ImgVector<int> _region_map_next;
-		ImgVector<double> _decreased_color_prev;
-		ImgVector<double> _decreased_color_next;
+		ImgVector<T> _color_quantized_prev;
+		ImgVector<T> _color_quantized_next;
 		ImgVector<VECTOR_2D<double> > _motion_vector;
 		// For arbitrary shaped block matching
 		std::vector<std::list<VECTOR_2D<int> > > _connected_regions_prev;
@@ -77,6 +77,7 @@ class BlockMatching
 		void image_normalizer(void);
 		// Extract connected region from region_map
 		void get_connected_region_list(std::vector<std::list<VECTOR_2D<int> > >* connected_regions, const ImgVector<int>& region_map);
+		void get_color_quantized_image(ImgVector<T>* decreased_color_image, const ImgVector<T>& image, const std::vector<std::list<VECTOR_2D<int> > >& connected_regions);
 
 		// Main method of block_matching
 		void block_matching_lattice(const int search_range);
@@ -97,6 +98,8 @@ class BlockMatching
 		// Arbitrary shaped correlation function
 		double MAD_region(const int x_diff_prev, const int y_diff_prev, const std::list<VECTOR_2D<int> >& region);
 		double ZNCC_region(const int x_diff_prev, const int y_diff_prev, const std::list<VECTOR_2D<int> >& region);
+		double MAD_region_nearest_intensity(const int x_diff_prev, const int y_diff_prev, const std::list<VECTOR_2D<int> >& region);
+		double ZNCC_region_nearest_intensity(const int x_diff_prev, const int y_diff_prev, const std::list<VECTOR_2D<int> >& region);
 };
 
 double norm(const double& value);

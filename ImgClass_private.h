@@ -300,6 +300,14 @@ ImgVector<T>::operator[](int n)
 
 template <class T>
 T &
+ImgVector<T>::at(int n)
+{
+	assert(0 <= n && n < _width * _height);
+	return _data[n];
+}
+
+template <class T>
+T &
 ImgVector<T>::at(int x, int y)
 {
 	assert(0 <= x && x < _width && 0 <= y && y < _height);

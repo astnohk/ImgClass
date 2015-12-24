@@ -254,7 +254,10 @@ void
 Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int Min_Number_of_Pixels, const int Search_Range)
 {
 	const double Decreased_Gray_Max = 255.0;
-	const VECTOR_2D<int> adjacent[4] = {VECTOR_2D<int>(1, 0), VECTOR_2D<int>(0, 1), VECTOR_2D<int>(-1, 0), VECTOR_2D<int>(0, -1)};
+	const VECTOR_2D<int> adjacent[8] = {
+	    VECTOR_2D<int>(-1, -1), VECTOR_2D<int>(0, -1), VECTOR_2D<int>(1, -1),
+	    VECTOR_2D<int>(-1, 0), VECTOR_2D<int>(1, 0),
+	    VECTOR_2D<int>(-1, 1), VECTOR_2D<int>(0, 1), VECTOR_2D<int>(1, 1)};
 	ImgVector<int> vector_converge_map(_width, _height);
 	std::vector<VECTOR_2D<int> > pel_list((2 * _kernel_spatial + 1) * (2 * _kernel_spatial + 1));
 	std::list<std::list<VECTOR_2D<int> > > regions_list(0);
@@ -282,6 +285,7 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 		for (int x = 0; x < _width; x++) {
 			_shift_vector.at(x, y) = MeanShift(x, y, pel_list, Iter_Max);
 			VECTOR_2D<int> r(round(_shift_vector.get(x, y).x), round(_shift_vector.get(x, y).y));
+			// Check if the shift vector do NOT point on out of bounds
 			if (r.x < 0) {
 				_shift_vector.at(x, y).x = 0;
 				r.x = 0;
@@ -296,6 +300,7 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 				_shift_vector.at(x, y).y = _height - 1;
 				r.y = _height - 1;
 			}
+			// Check converge point
 			vector_converge_map.at(r.x, r.y) = -1;
 		}
 	}
@@ -304,38 +309,27 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 	for (int y = 0; y < _height; y++) {
 		for (int x = 0; x < _width; x++) {
 			if (vector_converge_map.get(x, y) < 0) {
-				T sum_color = T();
 				VECTOR_2D<int> r(x, y);
 				regions_list.push_back(std::list<VECTOR_2D<int> >(1, r));
 				for (std::list<VECTOR_2D<int> >::iterator ite = regions_list.back().begin();
 				    ite != regions_list.back().end();
 				    ++ite) {
-					for (int k = 0; k < 4; k++) { // Search 4-adjacent
+					for (int k = 0; k < 8; k++) { // Search 8-adjacent
 						r.x = ite->x + adjacent[k].x;
 						r.y = ite->y + adjacent[k].y;
 						if (vector_converge_map.get_zeropad(r.x, r.y) < 0) {
 							vector_converge_map.at(r.x, r.y) = 0; // eliminate collected point from map
 							regions_list.back().push_back(r);
-							sum_color += _image.get(r.x, r.y);
 						}
 					}
 				}
-				T quantized_color = sum_color * Decreased_Gray_Max / double(regions_list.back().size());
 				for (std::list<VECTOR_2D<int> >::iterator ite = regions_list.back().begin();
 				    ite != regions_list.back().end();
 				    ++ite) {
 					vector_converge_map.at(ite->x, ite->y) = num_region;
-					_color_quantized_image.at(ite->x, ite->y) = quantized_color;
 				}
 				num_region++;
 			}
-		}
-	}
-	// Make color-quantized image
-	for (int y = 0; y < _height; y++) {
-		for (int x = 0; x < _width; x++) {
-			VECTOR_2D<int> r(round(_shift_vector.get(x, y).x), round(_shift_vector.get(x, y).y));
-			_color_quantized_image.at(x, y) = _color_quantized_image.get_zeropad(r.x, r.y);
 		}
 	}
 	// Pick all pixels related to limit points and Make the list of regions
@@ -375,6 +369,17 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 	for (unsigned int n = 0; n < _regions.size(); n++) {
 		for (unsigned int i = 0; i < _regions[n].size(); i++) {
 			_segmentation_map.at(_regions[n][i].x, _regions[n][i].y) = n;
+		}
+	}
+	// Make color-quantized image
+	for (unsigned int n = 0; n < _regions.size(); n++) {
+		T sum_color = T();
+		for (int k = 0; k < _regions[n].size(); k++) {
+			sum_color += _image.get(_regions[n][k].x, _regions[n][k].y);
+		}
+		T quantized_color = sum_color * Decreased_Gray_Max / double(_regions[n].size());
+		for (int k = 0; k < _regions[n].size(); k++) {
+			_color_quantized_image.at(_regions[n][k].x, _regions[n][k].y) += quantized_color;
 		}
 	}
 }

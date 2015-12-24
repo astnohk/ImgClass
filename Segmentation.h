@@ -20,7 +20,7 @@ class Segmentation
 		double _kernel_spatial;
 		double _kernel_intensity;
 		ImgVector<T> _image;
-		ImgVector<int> _decrease_color_image;
+		ImgVector<T> _color_quantized_image;
 		ImgVector<VECTOR_2D<double> > _shift_vector;
 		ImgVector<int> _segmentation_map;
 		std::vector<std::vector<VECTOR_2D<int> > > _regions;
@@ -45,7 +45,7 @@ class Segmentation
 		int width(void) const;
 		int height(void) const;
 
-		const ImgVector<int>& ref_decrease_color_image(void) const;
+		const ImgVector<T>& ref_color_quantized_image(void) const;
 		const ImgVector<int>& ref_segmentation_map(void) const;
 		const ImgVector<VECTOR_2D<double> >& ref_shift_vector(void) const;
 		const std::vector<std::list<VECTOR_2D<int> > >& ref_regions(void) const;
@@ -63,12 +63,11 @@ class Segmentation
 		int get_mirror(int x, int y) const;
 
 		// Mean Shift segmentation
-		void Segmentation_MeanShift(const int Iter_Max = 64, const unsigned int Min_Number_of_Pixels = 25, const int Search_Range = 4);
+		void Segmentation_MeanShift(const int Iter_Max = 64, const unsigned int Min_Number_of_Pixels = 16, const int Search_Range = 4);
 
 	protected:
 		const VECTOR_2D<double> MeanShift(const int x, const int y, std::vector<VECTOR_2D<int> >& pel_list, int Iter_Max);
 		unsigned int small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >* regions_vector, const unsigned int Min_Number_of_Pixels, const int search_range);
-		double mean_kernel(const int x, const int y, std::vector<VECTOR_2D<int> >& pel_list);
 
 		double distance(const T& lcolor, const T& rcolor); // Calculate distance depends on each color space
 };

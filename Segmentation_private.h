@@ -37,7 +37,7 @@ Segmentation<T>::Segmentation(const ImgVector<T>& image, const double kernel_spa
 		_kernel_intensity = 1.0;
 	}
 
-	_decrease_color_image.reset(_width, _height);
+	_color_quantized_image.reset(_width, _height);
 	_shift_vector.reset(_width, _height);
 	_segmentation_map.reset(_width, _height);
 
@@ -54,7 +54,7 @@ Segmentation<T>::Segmentation(const Segmentation<T>& segmentation) // Copy const
 	_kernel_intensity = segmentation._kernel_intensity;
 
 	_image.copy(segmentation._image);
-	_decrease_color_image.copy(segmentation._decrease_color_image);
+	_color_quantized_image.copy(segmentation._color_quantized_image);
 	_shift_vector.copy(segmentation._shift_vector);
 	_segmentation_map.copy(segmentation._segmentation_map);
 	_regions.assign(segmentation._regions.begin(), segmentation._regions.end());
@@ -77,7 +77,7 @@ Segmentation<T>::reset(const ImgVector<T>& image, const double kernel_spatial_ra
 		_kernel_intensity = 1.0;
 	}
 
-	_decrease_color_image.reset(_width, _height);
+	_color_quantized_image.reset(_width, _height);
 	_segmentation_map.reset(_width, _height);
 	_regions.clear();
 	_shift_vector.reset(_width, _height);
@@ -98,7 +98,7 @@ Segmentation<T>::copy(const Segmentation<T>& segmentation)
 	_kernel_intensity = segmentation._kernel_intensity;
 
 	_image.copy(segmentation._image);
-	_decrease_color_image.copy(segmentation._decrease_color_image);
+	_color_quantized_image.copy(segmentation._color_quantized_image);
 	_shift_vector.copy(segmentation._shift_vector);
 	_segmentation_map.copy(segmentation._segmentation_map);
 	_regions.assign(segmentation._regions.begin(), segmentation._regions.end());
@@ -129,10 +129,10 @@ Segmentation<T>::set_kernel(const double kernel_spatial_radius, const double ker
 
 // ----- Data -----
 template <class T>
-const ImgVector<int> &
-Segmentation<T>::ref_decrease_color_image(void) const
+const ImgVector<T> &
+Segmentation<T>::ref_color_quantized_image(void) const
 {
-	return _decrease_color_image;
+	return _color_quantized_image;
 }
 
 template <class T>
@@ -283,13 +283,17 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 			_shift_vector.at(x, y) = MeanShift(x, y, pel_list, Iter_Max);
 			VECTOR_2D<int> r(round(_shift_vector.get(x, y).x), round(_shift_vector.get(x, y).y));
 			if (r.x < 0) {
+				_shift_vector.at(x, y).x = 0;
 				r.x = 0;
 			} else if (_width <= r.x) {
+				_shift_vector.at(x, y).x = _width - 1;
 				r.x = _width - 1;
 			}
 			if (r.y < 0) {
+				_shift_vector.at(x, y).y = 0;
 				r.y = 0;
 			} else if (_height <= r.y) {
+				_shift_vector.at(x, y).y = _height - 1;
 				r.y = _height - 1;
 			}
 			vector_converge_map.at(r.x, r.y) = -1;
@@ -300,39 +304,38 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 	for (int y = 0; y < _height; y++) {
 		for (int x = 0; x < _width; x++) {
 			if (vector_converge_map.get(x, y) < 0) {
-				double sum_intensity = 0.0;
+				T sum_color = T();
 				VECTOR_2D<int> r(x, y);
 				regions_list.push_back(std::list<VECTOR_2D<int> >(1, r));
 				for (std::list<VECTOR_2D<int> >::iterator ite = regions_list.back().begin();
 				    ite != regions_list.back().end();
 				    ++ite) {
 					for (int k = 0; k < 4; k++) { // Search 4-adjacent
-						r = (VECTOR_2D<int>){ite->x + adjacent[k].x, ite->y + adjacent[k].y};
+						r.x = ite->x + adjacent[k].x;
+						r.y = ite->y + adjacent[k].y;
 						if (vector_converge_map.get_zeropad(r.x, r.y) < 0) {
 							vector_converge_map.at(r.x, r.y) = 0; // eliminate collected point from map
 							regions_list.back().push_back(r);
-							sum_intensity += mean_kernel(r.x, r.y, pel_list);
+							sum_color += _image.get(r.x, r.y);
 						}
 					}
 				}
-				int decreased_intensity = int(Decreased_Gray_Max * sum_intensity / double(regions_list.back().size()));
+				T quantized_color = sum_color * Decreased_Gray_Max / double(regions_list.back().size());
 				for (std::list<VECTOR_2D<int> >::iterator ite = regions_list.back().begin();
 				    ite != regions_list.back().end();
 				    ++ite) {
 					vector_converge_map.at(ite->x, ite->y) = num_region;
-					_decrease_color_image.at(ite->x, ite->y) = decreased_intensity;
+					_color_quantized_image.at(ite->x, ite->y) = quantized_color;
 				}
 				num_region++;
 			}
 		}
 	}
-	// Make decreased color image
+	// Make color-quantized image
 	for (int y = 0; y < _height; y++) {
 		for (int x = 0; x < _width; x++) {
-			if (_decrease_color_image.get(x, y) == 0) {
-				VECTOR_2D<int> r(round(_shift_vector.get(x, y).x), round(_shift_vector.get(x, y).y));
-				_decrease_color_image.at(x, y) = _decrease_color_image.get(r.x, r.y);
-			}
+			VECTOR_2D<int> r(round(_shift_vector.get(x, y).x), round(_shift_vector.get(x, y).y));
+			_color_quantized_image.at(x, y) = _color_quantized_image.get_zeropad(r.x, r.y);
 		}
 	}
 	// Pick all pixels related to limit points and Make the list of regions
@@ -421,10 +424,12 @@ Segmentation<T>::small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >
 		}
 		if (check) {
 			// Update _segmentation_map
+			VECTOR_2D<int> r = regions_vector->at(concatenate_target).front();
 			for (std::list<VECTOR_2D<int> >::iterator ite = regions_vector->at(n).begin();
 			    ite != regions_vector->at(n).end();
 			    ++ite) {
 				_segmentation_map.at(ite->x, ite->y) = concatenate_target;
+				_color_quantized_image.at(ite->x, ite->y) = _color_quantized_image.get(r.x, r.y);
 			}
 			// splice the list
 			regions_vector->at(concatenate_target).splice(regions_vector->at(concatenate_target).end(), regions_vector->at(n));
@@ -506,7 +511,7 @@ Segmentation<T>::MeanShift(const int x, const int y, std::vector<VECTOR_2D<int> 
 		intensity += sum_intensity_diff / N;
 		d_tmp.x = sum_d.x / N;
 		d_tmp.y = sum_d.y / N;
-		if (Vector_2D::norm(d_tmp) < 0.001) {
+		if (norm(d_tmp) < 0.001) {
 			u += d_tmp;
 			break;
 		}
@@ -544,8 +549,7 @@ Segmentation<ImgClass::RGB>::MeanShift(const int x, const int y, std::vector<VEC
 				if (norm_squared(diff) <= _kernel_intensity * _kernel_intensity) {
 					double coeff = 1.0 - (
 					    (norm_squared(diff) / SQUARE(_kernel_intensity))
-					    * ((SQUARE(pel_list[n].x) + SQUARE(pel_list[n].y)) / SQUARE(_kernel_spatial))
-					    );
+					    * ((SQUARE(pel_list[n].x) + SQUARE(pel_list[n].y)) / SQUARE(_kernel_spatial)));
 					N += coeff;
 					sum_diff += diff * coeff;
 					sum_d += VECTOR_2D<double>(pel_list[n]) * coeff;
@@ -556,7 +560,7 @@ Segmentation<ImgClass::RGB>::MeanShift(const int x, const int y, std::vector<VEC
 		d_tmp.x = sum_d.x / N;
 		d_tmp.y = sum_d.y / N;
 		std::cout << sum_d.x << ", " << sum_d.y << std::endl;
-		if (Vector_2D::norm(d_tmp) < 0.001) {
+		if (norm(d_tmp) < 0.001) {
 			u += d_tmp;
 			break;
 		}
@@ -606,32 +610,12 @@ Segmentation<ImgClass::Lab>::MeanShift(const int x, const int y, std::vector<VEC
 		center += sum_diff / N;
 		d_tmp.x = sum_d.x / N;
 		d_tmp.y = sum_d.y / N;
-		if (Vector_2D::norm(d_tmp) < 0.001) {
+		if (norm(d_tmp) < 0.001) {
 			u += d_tmp;
 			break;
 		}
 		u += d_tmp;
 	}
 	return u;
-}
-
-
-template <class T>
-double
-Segmentation<T>::mean_kernel(const int x, const int y, std::vector<VECTOR_2D<int> >& pel_list)
-{
-	double N = 0.0;
-	double mean = 0.0;
-	for (unsigned int n = 0; n < pel_list.size(); n++) {
-		VECTOR_2D<double> r(x + pel_list[n].x, y + pel_list[n].y);
-
-		if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height) {
-			double coeff =
-			    1.0 - (SQUARE(pel_list[n].x) + SQUARE(pel_list[n].y)) / SQUARE(_kernel_spatial);
-			N += coeff;
-			mean += double(_image.get(r.x, r.y)) * coeff; // RGB and Lab returns intensity
-		}
-	}
-	return mean / N;
 }
 

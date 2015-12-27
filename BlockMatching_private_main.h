@@ -229,6 +229,11 @@ template <class T>
 void
 BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range)
 {
+	const int x_start = -search_range / 2;
+	const int x_end = search_range / 2;
+	const int y_start = -search_range / 2;
+	const int y_end = search_range / 2;
+
 	const double coeff_SAD = 1.0;
 	const double coeff_ZNCC = 1.0;
 	//double (BlockMatching<T>::*SAD_func)(const int, const int, const std::list<VECTOR_2D<int> >&) = &BlockMatching<T>::MAD_region;
@@ -242,14 +247,15 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range)
 	}
 	// MV are expanded on entire image pixels
 	_motion_vector.reset(_width, _height);
+#ifndef NO_DEBUG_IMG_CLASS
+	unsigned int finished_regions = 0;
+	unsigned int progress = .0;
+	printf("   0.0%%\x1b[1A\n");
+#endif
 	// Compute Motion Vectors
 #pragma omp parallel for schedule(dynamic)
 	for (unsigned int n = 0; n < _connected_regions_next.size(); n++) {
 		VECTOR_2D<double> MV(.0, .0);
-		const int x_start = -search_range / 2;
-		const int x_end = search_range / 2;
-		const int y_start = -search_range / 2;
-		const int y_end = search_range / 2;
 
 		// Compute initial value
 		double SAD = (this->*SAD_func)(x_start, y_start, _connected_regions_next[n]);
@@ -258,6 +264,9 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range)
 		// Search minimum value
 		for (int y_diff = y_start; y_diff <= y_end; y_diff++) {
 			for (int x_diff = x_start; x_diff <= x_end; x_diff++) {
+				std::vector<VECTOR_2D<int> > region;
+				region = get_nearest_color_regions(_connected_regions_next[n], x_diff, y_diff);
+
 				VECTOR_2D<double> v_tmp(x_diff, y_diff);
 				SAD = (this->*SAD_func)(
 				    x_diff, y_diff,
@@ -282,6 +291,16 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range)
 		    ++ite) {
 			_motion_vector.at(ite->x, ite->y) = MV;
 		}
+#ifndef NO_DEBUG_IMG_CLASS
+#pragma omp critical
+		{
+			double ratio = double(++finished_regions) / _connected_regions_next.size();
+			if (round(ratio * 1000.0) > progress) {
+				progress = round(ratio * 1000.0); // Take account of Over-Run
+				printf("\r %5.1f%%\x1b[1A\n", progress * 0.1);
+			}
+		}
+#endif
 	}
 }
 
@@ -354,6 +373,33 @@ BlockMatching<T>::grad_prev(const int top_left_x, const int top_left_y, const in
 template <>
 ImgVector<VECTOR_2D<double> > *
 BlockMatching<ImgClass::Lab>::grad_prev(const int top_left_x, const int top_left_y, const int crop_width, const int crop_height);
+
+
+
+
+// ----- Others -----
+std::vector<VECTOR_2D<int> >
+BlockMatching<T>::get_nearest_color_regions(const ImgVector<T>& image, const std::list<VECTOR_2D<int> >& connected_region, const int x_diff, const int y_diff)
+{
+	std::vector<VECTOR_2D<int> > region;
+	std::list<T> overlapping_regions;
+
+	// Collect neighborhood regions
+	for (std::list<VECTOR_2D<int> >::const_iterator ite_region = connected_region.begin();
+	    ite != connected_region.end();
+	    ++ite) {
+		for (std::list<T>::iterator ite = overlapping_regions.begin();
+		    ite != overlapping_regions.end();
+		    ++ite) {
+			if (*ite == image.get_zeropad(ite_region->x, ite_region->y)) {
+				overlapping_regions.push_back(image.get_zeropad(ite_region->x, ite_region->y));
+				break;
+			}
+		}
+	}
+	// Select neighborhood regions which has near colors to the region and covers connected_region greater than 9%
+	return region;
+}
 
 
 

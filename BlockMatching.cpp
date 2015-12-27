@@ -335,17 +335,17 @@ BlockMatching<ImgClass::RGB>::MAD_region_nearest_intensity(const int x_diff_prev
 	double N = .0;
 	double sad = .0;
 
-	for (std::list<VECTOR_2D<int> >::const_iterator ite = region.begin();
+	std::list<VECTOR_2D<int> >::const_iterator ite = region.begin();
+	ImgClass::RGB color(_color_quantized_next.get(ite->x, ite->y));
+	for (;
 	    ite != region.end();
 	    ++ite) {
 		VECTOR_2D<int> r(ite->x + x_diff_prev, ite->y + y_diff_prev);
-		double coeff = norm(
-		    _color_quantized_next.get(ite->x, ite->y)
-		    - _color_quantized_prev.get_zeropad(r.x, r.y));
+		double coeff = norm(color - _color_quantized_prev.get_zeropad(r.x, r.y));
 		N += coeff;
-		ImgClass::RGB color_prev(_image_prev.get_zeropad(r.x, r.y));
-		ImgClass::RGB color_next(_image_next.get_zeropad(ite->x, ite->y));
-		sad += coeff * norm(color_next - color_prev);
+		sad += coeff * norm(
+		    _image_next.get_zeropad(ite->x, ite->y)
+		    - _image_prev.get_zeropad(r.x, r.y));
 	}
 	return sad / N;
 }
@@ -356,18 +356,18 @@ BlockMatching<ImgClass::Lab>::MAD_region_nearest_intensity(const int x_diff_prev
 {
 	double N = .0;
 	double sad = .0;
-
-	for (std::list<VECTOR_2D<int> >::const_iterator ite = region.begin();
+	
+	std::list<VECTOR_2D<int> >::const_iterator ite = region.begin();
+	ImgClass::Lab color(_color_quantized_next.get(ite->x, ite->y));
+	for (;
 	    ite != region.end();
 	    ++ite) {
 		VECTOR_2D<int> r(ite->x + x_diff_prev, ite->y + y_diff_prev);
-		double coeff = norm(
-		    _color_quantized_next.get(ite->x, ite->y)
-		    - _color_quantized_prev.get_zeropad(r.x, r.y));
+		double coeff = norm(color - _color_quantized_prev.get_zeropad(r.x, r.y));
 		N += coeff;
-		ImgClass::Lab color_prev(_image_prev.get_zeropad(r.x, r.y));
-		ImgClass::Lab color_next(_image_next.get_zeropad(ite->x, ite->y));
-		sad += coeff * norm(color_next - color_prev);
+		sad += coeff * norm(
+		    _image_next.get_zeropad(ite->x, ite->y)
+		    - _image_prev.get_zeropad(r.x, r.y));
 	}
 	return sad / N;
 }
@@ -384,28 +384,24 @@ BlockMatching<ImgClass::RGB>::ZNCC_region_nearest_intensity(const int x_diff_pre
 	double sum_sq_next = .0;
 	double sum_sq_prev_next = .0;
 
-	for (std::list<VECTOR_2D<int> >::const_iterator ite = region.begin();
+	std::list<VECTOR_2D<int> >::const_iterator ite = region.begin();
+	ImgClass::RGB color(_color_quantized_next.get(ite->x, ite->y));
+	for (;
 	    ite != region.end();
 	    ++ite) {
 		VECTOR_2D<int> r(ite->x + x_diff_prev, ite->y + y_diff_prev);
-		double coeff = 1.0 - norm(
-		    _color_quantized_next.get(ite->x, ite->y)
-		    - _color_quantized_prev.get_zeropad(r.x, r.y));
+		double coeff = 1.0 - norm(color - _color_quantized_prev.get_zeropad(r.x, r.y));
 		N += coeff;
+		ImgClass::RGB color_prev(_image_prev.get_zeropad(r.x, r.y));
+		ImgClass::RGB color_next(_image_next.get_zeropad(ite->x, ite->y));
 		// Previous frame
-		sum_prev += coeff * _image_prev.get_zeropad(r.x, r.y);
-		sum_sq_prev += coeff * inner_prod(
-		    _image_prev.get_zeropad(r.x, r.y)
-		    , _image_prev.get_zeropad(r.x, r.y));
+		sum_prev += coeff * color_prev;
+		sum_sq_prev += coeff * inner_prod(color_prev, color_prev);
 		// Next frame
-		sum_next += coeff * _image_next.get_zeropad(ite->x, ite->y);
-		sum_sq_next += coeff * inner_prod(
-		    _image_next.get_zeropad(ite->x, ite->y)
-		    , _image_next.get_zeropad(ite->x, ite->y));
+		sum_next += coeff * color_next;
+		sum_sq_next += coeff * inner_prod(color_next, color_next);
 		// Co-frame
-		sum_sq_prev_next += coeff * inner_prod(
-		    _image_prev.get_zeropad(r.x, r.y)
-		    , _image_next.get_zeropad(ite->x, ite->y));
+		sum_sq_prev_next += coeff * inner_prod(color_prev, color_next);
 	}
 	// Calculate Covariance
 	return (N * sum_sq_prev_next - inner_prod(sum_prev, sum_next))
@@ -423,28 +419,24 @@ BlockMatching<ImgClass::Lab>::ZNCC_region_nearest_intensity(const int x_diff_pre
 	double sum_sq_next = .0;
 	double sum_sq_prev_next = .0;
 
-	for (std::list<VECTOR_2D<int> >::const_iterator ite = region.begin();
+	std::list<VECTOR_2D<int> >::const_iterator ite = region.begin();
+	ImgClass::Lab quantized_color = _color_quantized_next.get(ite->x, ite->y);
+	for (;
 	    ite != region.end();
 	    ++ite) {
 		VECTOR_2D<int> r(ite->x + x_diff_prev, ite->y + y_diff_prev);
-		double coeff = 1.0 - norm(
-		    _color_quantized_next.get(ite->x, ite->y)
-		    - _color_quantized_prev.get_zeropad(r.x, r.y));
+		double coeff = 1.0 - norm(quantized_color - _color_quantized_prev.get_zeropad(r.x, r.y));
 		N += coeff;
+		ImgClass::Lab color_prev(_image_prev.get_zeropad(r.x, r.y));
+		ImgClass::Lab color_next(_image_next.get_zeropad(ite->x, ite->y));
 		// Previous frame
-		sum_prev += coeff * _image_prev.get_zeropad(r.x, r.y);
-		sum_sq_prev += coeff * inner_prod(
-		    _image_prev.get_zeropad(r.x, r.y)
-		    , _image_prev.get_zeropad(r.x, r.y));
+		sum_prev += coeff * color_prev;
+		sum_sq_prev += coeff * inner_prod(color_prev, color_prev);
 		// Next frame
-		sum_next += coeff * _image_next.get_zeropad(ite->x, ite->y);
-		sum_sq_next += coeff * inner_prod(
-		    _image_next.get_zeropad(ite->x, ite->y)
-		    , _image_next.get_zeropad(ite->x, ite->y));
+		sum_next += coeff * color_next;
+		sum_sq_next += coeff * inner_prod(color_next, color_next);
 		// Co-frame
-		sum_sq_prev_next += coeff * inner_prod(
-		    _image_prev.get_zeropad(r.x, r.y)
-		    , _image_next.get_zeropad(ite->x, ite->y));
+		sum_sq_prev_next += coeff * inner_prod(color_prev, color_next);
 	}
 	// Calculate Covariance
 	return (N * sum_sq_prev_next - inner_prod(sum_prev, sum_next))

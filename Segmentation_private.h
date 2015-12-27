@@ -516,7 +516,7 @@ Segmentation<T>::MeanShift(const int x, const int y, std::vector<VECTOR_2D<int> 
 		intensity += sum_intensity_diff / N;
 		d_tmp.x = sum_d.x / N;
 		d_tmp.y = sum_d.y / N;
-		if (norm(d_tmp) < 0.001) {
+		if (norm(d_tmp) < 0.01) {
 			u += d_tmp;
 			break;
 		}
@@ -565,7 +565,7 @@ Segmentation<ImgClass::RGB>::MeanShift(const int x, const int y, std::vector<VEC
 		d_tmp.x = sum_d.x / N;
 		d_tmp.y = sum_d.y / N;
 		std::cout << sum_d.x << ", " << sum_d.y << std::endl;
-		if (norm(d_tmp) < 0.001) {
+		if (norm(d_tmp) < 0.01) {
 			u += d_tmp;
 			break;
 		}
@@ -615,7 +615,7 @@ Segmentation<ImgClass::Lab>::MeanShift(const int x, const int y, std::vector<VEC
 		center += sum_diff / N;
 		d_tmp.x = sum_d.x / N;
 		d_tmp.y = sum_d.y / N;
-		if (norm(d_tmp) < 0.001) {
+		if (norm(d_tmp) < 0.01) {
 			u += d_tmp;
 			break;
 		}

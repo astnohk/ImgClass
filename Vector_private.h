@@ -9,6 +9,13 @@ VECTOR_2D<T>::VECTOR_2D(void)
 }
 
 template <class T>
+VECTOR_2D<T>::VECTOR_2D(const VECTOR_2D<T>& value)
+{
+	x = value.x;
+	y = value.y;
+}
+
+template <class T>
 VECTOR_2D<T>::VECTOR_2D(const T& init_x, const T& init_y)
 {
 	x = init_x;
@@ -218,7 +225,8 @@ template <class Type>
 double
 norm(const VECTOR_2D<Type> &vector)
 {
-	return sqrt((double)vector.x * vector.x + vector.y * vector.y);
+	VECTOR_2D<double> v(vector);
+	return sqrt(v.x * v.x + v.y * v.y);
 }
 
 template <class Type>

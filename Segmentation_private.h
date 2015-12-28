@@ -125,6 +125,24 @@ Segmentation<T>::set_kernel(const double kernel_spatial_radius, const double ker
 }
 
 
+template <class T>
+Segmentation<T> &
+Segmentation<T>::operator=(const Segmentation<T>& rvalue)
+{
+	_width = segmentation._width;
+	_height = segmentation._height;
+	_kernel_spatial = segmentation._kernel_spatial;
+	_kernel_intensity = segmentation._kernel_intensity;
+
+	_image.copy(segmentation._image);
+	_color_quantized_image.copy(segmentation._color_quantized_image);
+	_shift_vector.copy(segmentation._shift_vector);
+	_segmentation_map.copy(segmentation._segmentation_map);
+	_regions.assign(segmentation._regions.begin(), segmentation._regions.end());
+	return *this;
+}
+
+
 
 
 // ----- Data -----
@@ -259,7 +277,7 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 	    VECTOR_2D<int>(-1, 0), VECTOR_2D<int>(1, 0),
 	    VECTOR_2D<int>(-1, 1), VECTOR_2D<int>(0, 1), VECTOR_2D<int>(1, 1)};
 	ImgVector<int> vector_converge_map(_width, _height);
-	std::vector<VECTOR_2D<int> > pel_list((2 * _kernel_spatial + 1) * (2 * _kernel_spatial + 1));
+	std::vector<VECTOR_2D<int> > pel_list(SQUARE(static_cast<unsigned int>(ceil(2.0 * _kernel_spatial + 1.0))));
 	std::list<std::list<VECTOR_2D<int> > > regions_list(0);
 	std::vector<std::list<VECTOR_2D<int> > > regions_vector(0);
 	unsigned int num_region = 0;
@@ -270,8 +288,8 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 	}
 	// Make pixel list
 	unsigned int num = 0;
-	for (int m = -_kernel_spatial; m <= _kernel_spatial; m++) {
-		for (int n = -_kernel_spatial; n <= _kernel_spatial; n++) {
+	for (int m = int(round(-_kernel_spatial)); m <= round(_kernel_spatial); m++) {
+		for (int n = int(round(-_kernel_spatial)); n <= round(_kernel_spatial); n++) {
 			if (n * n + m * m <= SQUARE(_kernel_spatial)) {
 				pel_list[num] = (VECTOR_2D<int>){n, m};
 				num++;
@@ -374,11 +392,11 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 	// Make color-quantized image
 	for (unsigned int n = 0; n < _regions.size(); n++) {
 		T sum_color = T();
-		for (int k = 0; k < _regions[n].size(); k++) {
+		for (unsigned int k = 0; k < _regions[n].size(); k++) {
 			sum_color += _image.get(_regions[n][k].x, _regions[n][k].y);
 		}
 		T quantized_color = sum_color * Decreased_Gray_Max / double(_regions[n].size());
-		for (int k = 0; k < _regions[n].size(); k++) {
+		for (unsigned int k = 0; k < _regions[n].size(); k++) {
 			_color_quantized_image.at(_regions[n][k].x, _regions[n][k].y) += quantized_color;
 		}
 	}
@@ -389,7 +407,7 @@ unsigned int
 Segmentation<T>::small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >* regions_vector, const unsigned int Min_Number_of_Pixels, const int search_range)
 {
 	std::vector<bool> small_regions(regions_vector->size(), false);
-	int num_small_region = 0;
+	unsigned int num_small_region = 0;
 
 	// Check small regions
 	for (unsigned int n = 0; n < regions_vector->size(); n++) {
@@ -407,7 +425,7 @@ Segmentation<T>::small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >
 			continue;
 		}
 		T center_color = _image.get(regions_vector->at(n).begin()->x, regions_vector->at(n).begin()->y);
-		int concatenate_target = n;
+		unsigned int concatenate_target = n;
 		double min = 1000.0;
 		bool check = false;
 		for (std::list<VECTOR_2D<int> >::iterator ite = regions_vector->at(n).begin();
@@ -418,7 +436,7 @@ Segmentation<T>::small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >
 					VECTOR_2D<int> r(ite->x + x, ite->y + y);
 					double dist = 0.0;
 					if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height
-					    && (unsigned int)_segmentation_map.get(r.x, r.y) != n
+					    && static_cast<unsigned int>(_segmentation_map.get(r.x, r.y)) != n
 					    && (dist = this->distance(center_color, _image.get(r.x, r.y))) < min) {
 						check = true;
 						min = dist;
@@ -536,7 +554,7 @@ const VECTOR_2D<double>
 Segmentation<ImgClass::RGB>::MeanShift(const int x, const int y, std::vector<VECTOR_2D<int> >& pel_list, int Iter_Max)
 {
 	// Initialize
-	VECTOR_2D<double> u(x, y);
+	VECTOR_2D<int> u(x, y);
 	ImgClass::RGB center(_image.get(x, y));
 	// Iterate until it converge
 	for (int i = 0; i < Iter_Max; i++) {
@@ -546,7 +564,7 @@ Segmentation<ImgClass::RGB>::MeanShift(const int x, const int y, std::vector<VEC
 		VECTOR_2D<double> d_tmp;
 
 		for (unsigned int n = 0; n < pel_list.size(); n++) {
-			VECTOR_2D<double> r(u.x + pel_list[n].x, u.y + pel_list[n].y);
+			VECTOR_2D<int> r(u.x + pel_list[n].x, u.y + pel_list[n].y);
 
 			if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height) {
 				ImgClass::RGB diff(_image.get(r.x, r.y) - center);
@@ -585,7 +603,7 @@ const VECTOR_2D<double>
 Segmentation<ImgClass::Lab>::MeanShift(const int x, const int y, std::vector<VECTOR_2D<int> >& pel_list, int Iter_Max)
 {
 	// Initialize
-	VECTOR_2D<double> u(x, y);
+	VECTOR_2D<int> u(x, y);
 	ImgClass::Lab center = _image.get(x, y);
 	// Iterate until it converge
 	for (int i = 0; i < Iter_Max; i++) {
@@ -595,7 +613,7 @@ Segmentation<ImgClass::Lab>::MeanShift(const int x, const int y, std::vector<VEC
 		VECTOR_2D<double> d_tmp;
 
 		for (unsigned int n = 0; n < pel_list.size(); n++) {
-			VECTOR_2D<double> r(u.x + pel_list[n].x, u.y + pel_list[n].y);
+			VECTOR_2D<int> r(u.x + pel_list[n].x, u.y + pel_list[n].y);
 
 			if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height) {
 				ImgClass::Lab diff(_image.get(r.x, r.y) - center);

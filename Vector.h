@@ -12,6 +12,7 @@ struct VECTOR_2D
 
 		// Constructors
 		VECTOR_2D(void);
+		VECTOR_2D(const VECTOR_2D<T>& value);
 		VECTOR_2D(const T& init_x, const T& init_y);
 		void reset(void);
 		void reset(const T& init_x, const T& init_y);

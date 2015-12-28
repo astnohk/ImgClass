@@ -48,9 +48,9 @@ MotionCompensation<T>::MotionCompensation(const ImgVector<T> &image_prev, const 
 		// Projection of small vector field to the scaled plane which has same range of images
 		_vector.reset(_width, _height);
 		for (int y = 0; y < _height; y++) {
-			int Y = (int)floor(y * vector.height() / _height);
+			int Y = int(floor(y * vector.height() / _height));
 			for (int x = 0; x < _width; x++) {
-				int X = (int)floor(x * vector.width() / _width);
+				int X = int(floor(x * vector.width() / _width));
 				_vector.at(x, y) = vector.get(X, Y);
 			}
 		}
@@ -103,9 +103,9 @@ MotionCompensation<T>::set(const ImgVector<T>& image_prev, const ImgVector<T>& i
 		// Projection of small vector field to the scaled plane which has same range of images
 		_vector.reset(_width, _height);
 		for (int y = 0; y < _height; y++) {
-			int Y = (int)floor(y * vector.height() / _height);
+			int Y = int(floor(y * vector.height() / _height));
 			for (int x = 0; x < _width; x++) {
-				int X = (int)floor(x * vector.width() / _width);
+				int X = int(floor(x * vector.width() / _width));
 				_vector.at(x, y) = vector.get(X, Y);
 			}
 		}
@@ -256,7 +256,7 @@ MotionCompensation<T>::create_image_compensated(const ImgVector<bool>* mask)
 		_image_compensated.reset(_width, _height);
 		for (int y = 0; y < _height; y++) {
 			for (int x = 0; x < _width; x++) {
-				VECTOR_2D<double> r((int)round(x + _vector.get(x, y).x), (int)round(y + _vector.get(x, y).y));
+				VECTOR_2D<int> r(int(round(x + _vector.get(x, y).x)), int(round(y + _vector.get(x, y).y)));
 				_image_compensated.at(x, y) = _image_prev.get_zeropad(r.x, r.y);
 			}
 		}
@@ -268,7 +268,7 @@ MotionCompensation<T>::create_image_compensated(const ImgVector<bool>* mask)
 				if (mask->get(x, y) == false) {
 					continue;
 				}
-				VECTOR_2D<double> v = _vector.get(x, y);
+				VECTOR_2D<int> v(int(round(_vector.get(x, y).x)), int(round(_vector.get(x, y).y)));
 				_image_compensated.at(x, y) = _image_prev.get_zeropad(x + v.x, y + v.y);
 			}
 		}

@@ -22,7 +22,8 @@ ImgStatistics::ImgStatistics(const ImgStatistics &copy)
 		_data = new double[copy._width * copy._height];
 	}
 	catch (const std::bad_alloc &bad) {
-		std::cerr << "ImgStatistics::ImgStatistics(const ImgStatistics &) error : memory allocation" << std::endl;
+		std::cerr << bad.what() << std::endl
+		    << "ImgStatistics::ImgStatistics(const ImgStatistics &) error : memory allocation" << std::endl;
 		_data = nullptr;
 		return;
 	}
@@ -43,7 +44,8 @@ ImgStatistics::ImgStatistics(int W, int H, double *Img)
 			_data = new double[W * H]();
 		}
 		catch (const std::bad_alloc &bad) {
-			std::cerr << "ImgStatistics::ImgStatistics(int, int, double *) error : memory allocation" << std::endl;
+			std::cerr << bad.what() << std::endl
+			    << "ImgStatistics::ImgStatistics(int, int, double *) error : memory allocation" << std::endl;
 			return;
 		}
 		_width = W;
@@ -73,7 +75,8 @@ ImgStatistics::set(int W, int H, double *Img)
 			_data = new double[W * H]();
 		}
 		catch (const std::bad_alloc &bad) {
-			std::cerr << "ImgStatistics::set(int, int, double *) error : memory allocation" << std::endl;
+			std::cerr << bad.what() << std::endl
+			    << "ImgStatistics::set(int, int, double *) error : memory allocation" << std::endl;
 			return;
 		}
 		_width = W;
@@ -95,7 +98,8 @@ ImgStatistics::copy(const ImgStatistics &copy)
 			tmp_data = new double[copy._width * copy._height];
 		}
 		catch (const std::bad_alloc &bad) {
-			std::cerr << "ImgStatistics::ImgStatistics(const ImgStatistics &) error : memory allocation" << std::endl;
+			std::cerr << bad.what() << std::endl
+			    << "ImgStatistics::ImgStatistics(const ImgStatistics &) error : memory allocation" << std::endl;
 			return *this;
 		}
 		_width = copy._width;
@@ -118,7 +122,8 @@ ImgStatistics::operator=(const ImgStatistics &copy)
 			tmp_data = new double[copy._width * copy._height];
 		}
 		catch (const std::bad_alloc &bad) {
-			std::cerr << "ImgStatistics::ImgStatistics(const ImgStatistics &) error : memory allocation" << std::endl;
+			std::cerr << bad.what() << std::endl
+			    << "ImgStatistics::ImgStatistics(const ImgStatistics &) error : memory allocation" << std::endl;
 			return *this;
 		}
 		_width = copy._width;
@@ -276,7 +281,8 @@ Histogram::Histogram(const Histogram &copy) // copy constructor
 		tmp_hist = new double[copy._bins];
 	}
 	catch (const std::bad_alloc &bad) {
-		std::cerr << "Histogram::Histogram(const Histogram &) error : Cannot allocate memory" << std::endl;
+		std::cerr << bad.what() << std::endl
+		    << "Histogram::Histogram(const Histogram &) error : Cannot allocate memory" << std::endl;
 		throw;
 	}
 	for (int i = 0; i < copy._bins; i++) {
@@ -295,7 +301,8 @@ Histogram::Histogram(int init_bins)
 		tmp_hist = new double[init_bins];
 	}
 	catch (const std::bad_alloc &bad) {
-		std::cerr << "Histogram::copy(const Histogram &) error : Cannot allocate memory" << std::endl;
+		std::cerr << bad.what() << std::endl
+		    << "Histogram::copy(const Histogram &) error : Cannot allocate memory" << std::endl;
 		throw;
 	}
 	for (int i = 0; i < init_bins; i++) {
@@ -327,9 +334,9 @@ Histogram::copy(const Histogram &copy)
 			tmp_hist = new double[copy._bins];
 		}
 		catch (const std::bad_alloc &bad) {
-			std::cerr << "Histogram::copy(const Histogram &) error : Cannot allocate memory" << std::endl;
+			std::cerr << bad.what() << std::endl
+			    << "Histogram::copy(const Histogram &) error : Cannot allocate memory" << std::endl;
 			throw;
-			return *this;
 		}
 		for (int i = 0; i < copy._bins; i++) {
 			tmp_hist[i] = copy._hist[i];
@@ -350,9 +357,9 @@ Histogram::reset(int init_bins)
 			tmp_hist = new double[init_bins];
 		}
 		catch (const std::bad_alloc &bad) {
-			std::cerr << "Histogram::reset(int) error : Cannot allocate memory" << std::endl;
+			std::cerr << bad.what() << std::endl
+			    << "Histogram::reset(int) error : Cannot allocate memory" << std::endl;
 			throw;
-			return *this;
 		}
 		for (int i = 0; i < init_bins; i++) {
 			tmp_hist[i] = .0;

@@ -99,7 +99,7 @@ BlockMatching<T>::at(int x, int y)
 	}
 	assert(0 <= x && x < _width
 	    && 0 <= y && y < _height);
-	return _motion_vector.at((int)floor(x / _block_size), (int)floor(y / _block_size));
+	return _motion_vector.at(int(floor(x / _block_size)), int(floor(y / _block_size)));
 }
 
 
@@ -127,6 +127,6 @@ BlockMatching<T>::get(int x, int y)
 	}
 	assert(0 <= x && x < _width
 	    && 0 <= y && y < _height);
-	return _motion_vector.at((int)floor(x / _block_size), (int)floor(y / _block_size));
+	return _motion_vector.at(int(floor(x / _block_size)), int(floor(y / _block_size)));
 }
 

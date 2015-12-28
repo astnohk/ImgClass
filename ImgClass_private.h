@@ -27,7 +27,8 @@ ImgVector<T>::ImgVector(int W, int H, const T& value)
 			_data = new T[W * H]();
 		}
 		catch (const std::bad_alloc &bad) {
-			std::cerr << "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory" << std::endl;
+			std::cerr << bad.what() << std::endl
+			    << "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory" << std::endl;
 			_data = nullptr;
 			throw;
 		}
@@ -50,7 +51,8 @@ ImgVector<T>::ImgVector(int W, int H, const T* array)
 			_data = new T[W * H]();
 		}
 		catch (const std::bad_alloc &bad) {
-			std::cerr << "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory" << std::endl;
+			std::cerr << bad.what() << std::endl
+			    << "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory" << std::endl;
 			_data = nullptr;
 			throw;
 		}
@@ -76,7 +78,8 @@ ImgVector<T>::ImgVector(const ImgVector<T>& copy)
 			_data = new T[copy._width * copy._height]();
 		}
 		catch (const std::bad_alloc &bad) {
-			std::cerr << "ImgVector::ImgVector(const ImgVector<T>&) : Cannot Allocate Memory" << std::endl;
+			std::cerr << bad.what() << std::endl
+			    << "ImgVector::ImgVector(const ImgVector<T>&) : Cannot Allocate Memory" << std::endl;
 			_data = nullptr;
 			throw;
 		}
@@ -120,7 +123,8 @@ ImgVector<T>::reset(int W, int H, const T& value)
 			_data = new T[W * H]();
 		}
 		catch (const std::bad_alloc &bad) {
-			std::cerr << "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory" << std::endl;
+			std::cerr << bad.what() << std::endl
+			    << "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory" << std::endl;
 			_data = nullptr;
 			throw;
 		}
@@ -145,7 +149,8 @@ ImgVector<T>::reset(int W, int H, const T* array)
 			_data = new T[W * H]();
 		}
 		catch (const std::bad_alloc &bad) {
-			std::cerr << "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory" << std::endl;
+			std::cerr << bad.what() << std::endl
+			    << "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory" << std::endl;
 			_data = nullptr;
 			throw;
 		}
@@ -171,7 +176,8 @@ ImgVector<T>::copy(const ImgVector<T>& vector)
 			tmp_data = new T[vector._width * vector._height]();
 		}
 		catch (const std::bad_alloc &bad) {
-			std::cerr << "ImgVector::copy(const ImgVector<T>&) : Cannot Allocate Memory" << std::endl;
+			std::cerr << bad.what() << std::endl
+			    << "ImgVector::copy(const ImgVector<T>&) : Cannot Allocate Memory" << std::endl;
 			throw;
 			return *this;
 		}
@@ -197,7 +203,8 @@ ImgVector<T>::cast_copy(const ImgVector<RT>& vector)
 			tmp_data = new T[vector.size()]();
 		}
 		catch (const std::bad_alloc &bad) {
-			std::cerr << "ImgVector::operator=(ImgVector<T>&) : Cannot Allocate Memory" << std::endl;
+			std::cerr << bad.what() << std::endl
+			    << "ImgVector::operator=(ImgVector<T>&) : Cannot Allocate Memory" << std::endl;
 			throw;
 			return *this;
 		}
@@ -227,7 +234,8 @@ ImgVector<T>::operator=(const ImgVector<T>& vector)
 			tmp_data = new T[vector._width * vector._height]();
 		}
 		catch (const std::bad_alloc &bad) {
-			std::cerr << "ImgVector::operator=(ImgVector<T>&) : Cannot Allocate Memory" << std::endl;
+			std::cerr << bad.what() << std::endl
+			    << "ImgVector::operator=(ImgVector<T>&) : Cannot Allocate Memory" << std::endl;
 			throw;
 			return *this;
 		}
@@ -323,12 +331,12 @@ ImgVector<T>::at_repeat(int x, int y)
 	if (x >= 0) {
 		x_repeat = x % _width;
 	} else {
-		x_repeat = _width - ((int)std::abs((double)x + 1.0) % _width);
+		x_repeat = _width - (int(std::abs(double(x) + 1.0)) % _width);
 	}
 	if (y >= 0) {
 		y_repeat = y % _height;
 	} else {
-		y_repeat = _height - ((int)std::abs((double)y + 1.0) % _height);
+		y_repeat = _height - (int(std::abs(double(y) + 1.0)) % _height);
 	}
 	return _data[_width * y_repeat + x_repeat];
 }
@@ -345,8 +353,8 @@ ImgVector<T>::at_mirror(int x, int y)
 	if (y < 0) {
 		y = -y - 1;
 	}
-	x_mirror = (int)round(_width - 0.5 - std::fabs(_width - 0.5 - (x % (2 * _width))));
-	y_mirror = (int)round(_height - 0.5 - std::fabs(_height - 0.5 - (y % (2 * _height))));
+	x_mirror = int(round(_width - 0.5 - std::fabs(_width - 0.5 - (x % (2 * _width)))));
+	y_mirror = int(round(_height - 0.5 - std::fabs(_height - 0.5 - (y % (2 * _height)))));
 	return _data[_width * y_mirror + x_mirror];
 }
 
@@ -389,12 +397,12 @@ ImgVector<T>::get_repeat(int x, int y) const
 	if (x >= 0) {
 		x_repeat = x % _width;
 	} else {
-		x_repeat = _width - ((int)std::abs((double)x + 1.0) % _width);
+		x_repeat = _width - (int(std::abs(double(x) + 1.0)) % _width);
 	}
 	if (y >= 0) {
 		y_repeat = y % _height;
 	} else {
-		y_repeat = _height - ((int)std::abs((double)y + 1.0) % _height);
+		y_repeat = _height - (int(std::abs(double(y) + 1.0)) % _height);
 	}
 	return _data[_width * y_repeat + x_repeat];
 }
@@ -411,8 +419,8 @@ ImgVector<T>::get_mirror(int x, int y) const
 	if (y < 0) {
 		y = -y - 1;
 	}
-	x_mirror = (int)round(_width - 0.5 - std::fabs(_width - 0.5 - (x % (2 * _width))));
-	y_mirror = (int)round(_height - 0.5 - std::fabs(_height - 0.5 - (y % (2 * _height))));
+	x_mirror = int(round(_width - 0.5 - std::fabs(_width - 0.5 - (x % (2 * _width)))));
+	y_mirror = int(round(_height - 0.5 - std::fabs(_height - 0.5 - (y % (2 * _height)))));
 	return _data[_width * y_mirror + x_mirror];
 }
 
@@ -435,7 +443,7 @@ ImgVector<T>::get_zeropad_cubic(double x, double y, double B, double C) const
 	for (int m = 0; m < 4; m++) {
 		for (int n = 0; n < 4; n++) {
 			value = value
-			    + this->get_zeropad((int)floor(x), (int)floor(y)) * bicubic_x[n] * bicubic_y[m];
+			    + this->get_zeropad(int(floor(x)), int(floor(y))) * bicubic_x[n] * bicubic_y[m];
 		}
 	}
 	return value;
@@ -456,7 +464,7 @@ ImgVector<T>::get_repeat_cubic(double x, double y, double B, double C) const
 	for (int m = 0; m < 4; m++) {
 		for (int n = 0; n < 4; n++) {
 			value = value
-			    + this->get_repeat((int)floor(x), (int)floor(y)) * bicubic_x[n] * bicubic_y[m];
+			    + this->get_repeat(int(floor(x)), int(floor(y))) * bicubic_x[n] * bicubic_y[m];
 		}
 	}
 	return value;
@@ -477,7 +485,7 @@ ImgVector<T>::get_mirror_cubic(double x, double y, double B, double C) const
 	for (int m = 0; m < 4; m++) {
 		for (int n = 0; n < 4; n++) {
 			value = value
-			    + this->get_mirror((int)floor(x), (int)floor(y)) * bicubic_x[n] * bicubic_y[m];
+			    + this->get_mirror(int(floor(x)), int(floor(y))) * bicubic_x[n] * bicubic_y[m];
 		}
 	}
 	return value;
@@ -628,7 +636,8 @@ ImgVector<T>::crop(int top_left_x, int top_left_y, int crop_width, int crop_heig
 		tmp = new ImgVector<T>;
 	}
 	catch (const std::bad_alloc &bad) {
-		std::cerr << "ImgVector<T>* ImgVector<T>::crop(int, int, int, int) : Cannot allocate memory" << std::endl;
+		std::cerr << bad.what() << std::endl
+		    << "ImgVector<T>* ImgVector<T>::crop(int, int, int, int) : Cannot allocate memory" << std::endl;
 		throw;
 	}
 	// Initialize
@@ -696,23 +705,24 @@ ImgVector<T>::resize_zerohold(int W, int H)
 	}else if (H <= 0) {
 		throw std::out_of_range("ImgVector<T>::resize_zerohold(int, int) : int H");
 	}
-	scale_x = (double)W / _width;
-	scale_y = (double)H / _height;
+	scale_x = double(W) / _width;
+	scale_y = double(H) / _height;
 	try {
 		resized = new T[W * H]();
 	}
 	catch (const std::bad_alloc &bad) {
-		std::cerr << "ImgVector<T>::resize_zerohold(int, int) : Cannot allocate memory" << std::endl;
+		std::cerr << bad.what() << std::endl
+		    << "ImgVector<T>::resize_zerohold(int, int) : Cannot allocate memory" << std::endl;
 		throw;
 	}
-	area_x = ceil((double)_width / W);
-	area_y = ceil((double)_height / H);
+	area_x = ceil(double(_width) / W);
+	area_y = ceil(double(_height) / H);
 	for (y = 0; y < H; y++) {
 		for (x = 0; x < W; x++) {
 			sum = additive_identity;
 			for (m = 0; m < area_y; m++) {
 				for (n = 0; n < area_x; n++) {
-					sum += this->get((int)floor(x / scale_x) + n, (int)floor(y / scale_y) + m);
+					sum += this->get(int(floor(x / scale_x)) + n, int(floor(y / scale_y)) + m);
 				}
 			}
 			resized[W * y + x] = sum / (area_x * area_y);
@@ -735,7 +745,7 @@ ImgVector<T>::resize_zerohold(int W, int H)
 */
 template <class T>
 void
-ImgVector<T>::resize_bicubic(int W, int H, double min, double max, T (*Nearest_Integer_Method)(double &d), double B, double C)
+ImgVector<T>::resize_bicubic(int W, int H, bool saturate, double min, double max, T (*Nearest_Integer_Method)(double &d), double B, double C)
 {
 	T *resized = nullptr;
 	double *conv = nullptr;
@@ -753,8 +763,8 @@ ImgVector<T>::resize_bicubic(int W, int H, double min, double max, T (*Nearest_I
 	} else if (H <= 0) {
 		throw std::out_of_range("ImgVector<T>::resize_bicubic(int, int, double, double, T (*)(double &d), double, double) :int H");
 	}
-	scale_x = (double)W / _width;
-	scale_y = (double)H / _height;
+	scale_x = double(W) / _width;
+	scale_y = double(H) / _height;
 	Tmp.reset(W, _height);
 	// The length of cubic convolution coefficient
 	scale_conv = 1.0;
@@ -763,10 +773,11 @@ ImgVector<T>::resize_bicubic(int W, int H, double min, double max, T (*Nearest_I
 	}
 	try {
 		resized = new T[W * H]();
-		conv = new double[(int)scale_conv * 4]();
+		conv = new double[int(scale_conv * 4)]();
 	}
 	catch (const std::bad_alloc &bad) {
-		std::cerr << "ImgVector<double>::resize_bicubic(int, int) error : Cannot allocate memory" << std::endl;
+		std::cerr << bad.what() << std::endl
+		    << "ImgVector<double>::resize_bicubic(int, int) error : Cannot allocate memory" << std::endl;
 		delete[] resized;
 		delete[] conv;
 		throw;
@@ -775,28 +786,28 @@ ImgVector<T>::resize_bicubic(int W, int H, double min, double max, T (*Nearest_I
 	if (scale_x >= 1.0) {
 		scale_conv = 1.0;
 		L = 4;
-		L_center = floor((L - 1.0) / 2);
+		L_center = int(floor((L - 1.0) / 2.0));
 	} else {
 		scale_conv = 1.0 / scale_x;
-		L = 4 * (int)ceil(scale_conv);
-		L_center = floor((L - 1.0) / 2);
+		L = 4 * int(ceil(scale_conv));
+		L_center = int(floor((L - 1.0) / 2.0));
 	}
 	for (x = 0; x < W; x++) {
 		if (scale_x >= 1.0) {
 			dx = (x - (scale_x - 1.0) / 2.0) / scale_x;
 			for (n = 0; n < L; n++) {
-				conv[n] = ImgVector<T>::cubic((double)(n - L_center) - (dx - floor(dx)), B, C);
+				conv[n] = ImgVector<T>::cubic(double(n - L_center) - (dx - floor(dx)), B, C);
 			}
 		} else {
 			dx = x / scale_x + (1.0 / scale_x - 1.0) / 2.0;
 			for (n = 0; n < L; n++) {
-				conv[n] = ImgVector<T>::cubic(((double)(n - L_center) - (dx - floor(dx))) * scale_x, B, C) / scale_conv;
+				conv[n] = ImgVector<T>::cubic((double(n - L_center) - (dx - floor(dx))) * scale_x, B, C) / scale_conv;
 			}
 		}
 		for (y = 0; y < _height; y++) {
 			sum = 0.0;
 			for (n = 0; n < L; n++) {
-				sum += conv[n] * this->get_mirror((int)floor(dx) + n - L_center, y);
+				sum += conv[n] * this->get_mirror(int(floor(dx)) + n - L_center, y);
 			}
 			Tmp.at(x, y) = sum;
 		}
@@ -805,30 +816,30 @@ ImgVector<T>::resize_bicubic(int W, int H, double min, double max, T (*Nearest_I
 	if (scale_y >= 1.0) {
 		scale_conv = 1.0;
 		L = 4;
-		L_center = floor((L - 1.0) / 2);
+		L_center = int(floor((L - 1.0) / 2.0));
 	} else {
 		scale_conv = 1.0 / scale_y;
-		L = 4 * (int)ceil(scale_conv);
-		L_center = floor((L - 1.0) / 2);
+		L = 4 * int(ceil(scale_conv));
+		L_center = int(floor((L - 1.0) / 2.0));
 	}
 	for (y = 0; y < H; y++) {
 		if (scale_y >= 1.0) {
 			dy = (y - (scale_y - 1.0) / 2.0) / scale_y;
 			for (m = 0; m < L; m++) {
-				conv[m] = ImgVector<T>::cubic((double)(m - L_center) - (dy - floor(dy)), B, C);
+				conv[m] = ImgVector<T>::cubic(double(m - L_center) - (dy - floor(dy)), B, C);
 			}
 		} else {
 			dy = y / scale_y + (1.0 / scale_y - 1.0) / 2.0;
 			for (m = 0; m < L; m++) {
-				conv[m] = ImgVector<T>::cubic(((double)(m - L_center) - (dy - floor(dy))) / scale_conv, B, C) / scale_conv;
+				conv[m] = ImgVector<T>::cubic((double(m - L_center) - (dy - floor(dy))) / scale_conv, B, C) / scale_conv;
 			}
 		}
 		for (x = 0; x < W; x++) {
 			sum = 0.0;
 			for (m = 0; m < L; m++) {
-				sum += conv[m] * Tmp.get_mirror(x, (int)floor(dy) + m - L_center);
+				sum += conv[m] * Tmp.get_mirror(x, int(floor(dy)) + m - L_center);
 			}
-			if (min != max) {
+			if (saturate) {
 				sum = sum >= min ? sum <= max ? sum : max : min;
 			}
 			if (Nearest_Integer_Method != nullptr) {

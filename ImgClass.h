@@ -76,7 +76,7 @@ class ImgVector
 
 		// Resampling
 		void resize_zerohold(int W, int H);
-		void resize_bicubic(int W, int H, double min = 0.0, double max = 0.0, T (*Nearest_Integer_Method)(double &d) = nullptr, double B = (0.0 / 3.0), double C = (1.0 / 2.0));
+		void resize_bicubic(int W, int H, bool saturate = false, double min = 0.0, double max = 0.0, T (*Nearest_Integer_Method)(double &d) = nullptr, double B = (0.0 / 3.0), double C = (1.0 / 2.0));
 
 		double cubic(double x, double B, double C) const;
 

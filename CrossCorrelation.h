@@ -12,15 +12,15 @@ class CrossCorrelation
 		ImgStatistics _img1;
 	public:
 		CrossCorrelation(void);
-		explicit CrossCorrelation(const CrossCorrelation &copy);
-		CrossCorrelation(ImgStatistics &img0, ImgStatistics &img1);
+		explicit CrossCorrelation(const CrossCorrelation& copy);
+		CrossCorrelation(const ImgStatistics& img0, const ImgStatistics& img1);
 		~CrossCorrelation(void);
-		CrossCorrelation& copy(const CrossCorrelation &copy);
-		CrossCorrelation& operator=(const CrossCorrelation &copy);
+		CrossCorrelation& copy(const CrossCorrelation& copy);
+		CrossCorrelation& operator=(const CrossCorrelation& copy);
 		int width(void);
 		int height(void);
-		double NCC(int x, int y, int window_width, int window_height);
-		double TruncatedNCC(int x, int y, int window_width, int window_height);
+		double NCC(const int x, const int y, const int window_width, const int window_height);
+		double TruncatedNCC(const int x, const int y, const int window_width, const int window_height);
 };
 
 #endif

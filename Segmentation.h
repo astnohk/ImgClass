@@ -41,6 +41,8 @@ class Segmentation
 		// Setter
 		void set_kernel(const double kernel_spatial_radius, const double kernel_intensity_radius);
 
+		Segmentation<T>& operator=(const Segmentation<T>& rvalue);
+
 		// Accessor
 		int width(void) const;
 		int height(void) const;

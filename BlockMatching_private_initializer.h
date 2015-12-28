@@ -324,7 +324,7 @@ void
 BlockMatching<T>::get_color_quantized_image(ImgVector<T>* decreased_color_image, const ImgVector<T>& image, const std::vector<std::list<VECTOR_2D<int> > >& connected_regions)
 {
 	decreased_color_image->reset(_width, _height);
-	for (int n = 0; n < connected_regions.size(); n++) {
+	for (unsigned int n = 0; n < connected_regions.size(); n++) {
 		T sum_color = T();
 		for (std::list<VECTOR_2D<int> >::const_iterator ite = connected_regions[n].begin();
 		    ite != connected_regions[n].end();

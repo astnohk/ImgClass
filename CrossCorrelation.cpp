@@ -11,7 +11,7 @@ CrossCorrelation::CrossCorrelation(void)
 {
 }
 
-CrossCorrelation::CrossCorrelation(const CrossCorrelation &copy) // copy constructor
+CrossCorrelation::CrossCorrelation(const CrossCorrelation& copy) // copy constructor
 {
 	_width = copy._width;
 	_height = copy._height;
@@ -19,7 +19,7 @@ CrossCorrelation::CrossCorrelation(const CrossCorrelation &copy) // copy constru
 	_img1.copy(copy._img1);
 }
 
-CrossCorrelation::CrossCorrelation(ImgStatistics &img0, ImgStatistics &img1)
+CrossCorrelation::CrossCorrelation(const ImgStatistics& img0, const ImgStatistics& img1)
 {
 	if (img0.width() != img1.width()
 	    || img0.height() != img1.height()) {
@@ -39,7 +39,7 @@ CrossCorrelation::~CrossCorrelation(void)
 
 
 CrossCorrelation &
-CrossCorrelation::copy(const CrossCorrelation &copy)
+CrossCorrelation::copy(const CrossCorrelation& copy)
 {
 	if (this != &copy) {
 		_img0.copy(copy._img0);
@@ -51,7 +51,7 @@ CrossCorrelation::copy(const CrossCorrelation &copy)
 }
 
 CrossCorrelation &
-CrossCorrelation::operator=(const CrossCorrelation &copy)
+CrossCorrelation::operator=(const CrossCorrelation& copy)
 {
 	if (this != &copy) {
 		_img0.copy(copy._img0);
@@ -81,23 +81,23 @@ CrossCorrelation::height(void)
 
 
 double
-CrossCorrelation::NCC(int x, int y, int window_width, int window_height)
+CrossCorrelation::NCC(const int x, const int y, const int window_width, const int window_height)
 {
 	double std_deviation;
 	double sum = 0.0;
 
 	std_deviation = _img0.std_deviation(x, y, window_width, window_height) * _img1.std_deviation(x, y, window_width, window_height);
-	for (int y = 0; y < window_height; y++) {
-		for (int x = 0; x < window_width; x++) {
-			sum += (_img0.image(x, y) - _img0.mean(x, y, window_width, window_height))
-			    * (_img0.image(x, y) - _img0.mean(x, y, window_width, window_height));
+	for (int m = 0; m < window_height; m++) {
+		for (int n = 0; n < window_width; n++) {
+			sum += (_img0.image(n, m) - _img0.mean(n, m, window_width, window_height))
+			    * (_img0.image(n, m) - _img0.mean(n, m, window_width, window_height));
 		}
 	}
 	return sum / std_deviation;
 }
 
 double
-CrossCorrelation::TruncatedNCC(int x, int y, int window_width, int window_height)
+CrossCorrelation::TruncatedNCC(const int x, const int y, const int window_width, const int window_height)
 {
 	return std::min(1.0, 1.0 - this->NCC(x, y, window_width, window_height));
 }

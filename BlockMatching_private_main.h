@@ -265,7 +265,7 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range)
 		for (int y_diff = y_start; y_diff <= y_end; y_diff++) {
 			for (int x_diff = x_start; x_diff <= x_end; x_diff++) {
 				std::vector<VECTOR_2D<int> > region;
-				region = get_nearest_color_regions(_connected_regions_next[n], x_diff, y_diff);
+				region = get_nearest_color_region(_connected_regions_next[n], x_diff, y_diff);
 
 				VECTOR_2D<double> v_tmp(x_diff, y_diff);
 				SAD = (this->*SAD_func)(
@@ -296,7 +296,7 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range)
 		{
 			double ratio = double(++finished_regions) / _connected_regions_next.size();
 			if (round(ratio * 1000.0) > progress) {
-				progress = round(ratio * 1000.0); // Take account of Over-Run
+				progress = static_cast<unsigned int>(round(ratio * 1000.0)); // Take account of Over-Run
 				printf("\r %5.1f%%\x1b[1A\n", progress * 0.1);
 			}
 		}
@@ -378,21 +378,28 @@ BlockMatching<ImgClass::Lab>::grad_prev(const int top_left_x, const int top_left
 
 
 // ----- Others -----
+template <class T>
 std::vector<VECTOR_2D<int> >
-BlockMatching<T>::get_nearest_color_regions(const ImgVector<T>& image, const std::list<VECTOR_2D<int> >& connected_region, const int x_diff, const int y_diff)
+BlockMatching<T>::get_nearest_color_region(const std::list<VECTOR_2D<int> >& connected_region, const int x_diff, const int y_diff)
 {
 	std::vector<VECTOR_2D<int> > region;
-	std::list<T> overlapping_regions;
+	std::list<int> overlapping_regions;
 
 	// Collect neighborhood regions
 	for (std::list<VECTOR_2D<int> >::const_iterator ite_region = connected_region.begin();
-	    ite != connected_region.end();
-	    ++ite) {
-		for (std::list<T>::iterator ite = overlapping_regions.begin();
+	    ite_region != connected_region.end();
+	    ++ite_region) {
+		VECTOR_2D<int> r(ite_region->x + x_diff, ite_region->y + y_diff);
+		if (r.x < 0 && _width <= r.x
+		    && r.y < 0 && _height <= r.y) {
+			continue;
+		}
+		// Get overlapped region IDs
+		for (std::list<int>::iterator ite = overlapping_regions.begin();
 		    ite != overlapping_regions.end();
 		    ++ite) {
-			if (*ite == image.get_zeropad(ite_region->x, ite_region->y)) {
-				overlapping_regions.push_back(image.get_zeropad(ite_region->x, ite_region->y));
+			if (*ite == _region_map_prev.get(r.x, r.y)) {
+				overlapping_regions.push_back(_region_map_prev.get(r.x, r.y));
 				break;
 			}
 		}

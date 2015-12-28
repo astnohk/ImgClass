@@ -85,12 +85,14 @@ class BlockMatching
 		void block_matching_arbitrary_shaped(const int search_range);
 		// Interpolate skipped Motion Vectors
 		void vector_interpolation(const std::list<VECTOR_2D<int> >& flat_blocks, ImgVector<bool>* estimated);
-		double MAD(const int x_l, const int y_l, const int x_r, const int y_r, const int block_width, const int block_height, const ImgVector<T>& limage, const ImgVector<T>& rimage);
+		std::vector<VECTOR_2D<int> > get_nearest_color_region(const std::list<VECTOR_2D<int> >& connected_region, const int x_diff, const int y_diff);
+
 		// Get gradients
 		ImgVector<VECTOR_2D<double> >* grad_prev(const int top_left_x, const int top_left_y, const int crop_width, const int crop_height);
 
 		// Correlation function
-		double SAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
+		double MAD(const int x_l, const int y_l, const int x_r, const int y_r, const int block_width, const int block_height, const ImgVector<T>& limage, const ImgVector<T>& rimage);
+
 		double MAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
 		double ZNCC(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
 		// Center color weighted

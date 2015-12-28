@@ -53,12 +53,7 @@ const ImgClass::Lab operator-(ImgClass::Lab color);
 
 // Comparator
 bool operator==(const ImgClass::Lab& lcolor, const ImgClass::Lab& rcolor);
-bool operator==(const ImgClass::Lab& lcolor, const double& rvalue);
-bool operator==(const double& lvalue, const ImgClass::Lab& rcolor);
-
 bool operator!=(const ImgClass::Lab& lcolor, const ImgClass::Lab& rcolor);
-bool operator!=(const ImgClass::Lab& lcolor, const double& rvalue);
-bool operator!=(const double& lvalue, const ImgClass::Lab& rcolor);
 
 bool operator<(const ImgClass::Lab& lcolor, const double& rvalue);
 bool operator<(const double& lvalue, const ImgClass::Lab& rcolor);

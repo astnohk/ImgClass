@@ -298,11 +298,15 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 	}
 	pel_list.resize(num);
 	// Compute Mean Shift vector
+#ifdef _OPENMP
 #pragma omp parallel for schedule(dynamic)
+#endif
 	for (int y = 0; y < _height; y++) {
 		for (int x = 0; x < _width; x++) {
 			_shift_vector.at(x, y) = MeanShift(x, y, pel_list, Iter_Max);
-			VECTOR_2D<int> r(round(_shift_vector.get(x, y).x), round(_shift_vector.get(x, y).y));
+			VECTOR_2D<int> r(
+			    static_cast<int>(round(_shift_vector.get(x, y).x)),
+			    static_cast<int>(round(_shift_vector.get(x, y).y)));
 			// Check if the shift vector do NOT point on out of bounds
 			if (r.x < 0) {
 				_shift_vector.at(x, y).x = 0;
@@ -451,7 +455,7 @@ Segmentation<T>::small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >
 			for (std::list<VECTOR_2D<int> >::iterator ite = regions_vector->at(n).begin();
 			    ite != regions_vector->at(n).end();
 			    ++ite) {
-				_segmentation_map.at(ite->x, ite->y) = concatenate_target;
+				_segmentation_map.at(ite->x, ite->y) = static_cast<int>(concatenate_target);
 				_color_quantized_image.at(ite->x, ite->y) = _color_quantized_image.get(r.x, r.y);
 			}
 			// splice the list
@@ -563,7 +567,7 @@ Segmentation<ImgClass::RGB>::MeanShift(const int x, const int y, std::vector<VEC
 		for (unsigned int n = 0; n < pel_list.size(); n++) {
 			VECTOR_2D<double> r(u.x + pel_list[n].x, u.y + pel_list[n].y);
 			if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height) {
-				ImgClass::RGB diff(_image.get(r.x, r.y) - center);
+				ImgClass::RGB diff(_image.get(int(r.x), int(r.y)) - center);
 				if (norm_squared(diff) <= radius_intensity_squared) {
 					double coeff = 1.0 - (
 					    norm_squared(diff) / radius_intensity_squared
@@ -610,7 +614,7 @@ Segmentation<ImgClass::Lab>::MeanShift(const int x, const int y, std::vector<VEC
 		for (unsigned int n = 0; n < pel_list.size(); n++) {
 			VECTOR_2D<double> r(u.x + pel_list[n].x, u.y + pel_list[n].y);
 			if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height) {
-				ImgClass::Lab diff(_image.get(r.x, r.y) - center);
+				ImgClass::Lab diff(_image.get(int(r.x), int(r.y)) - center);
 				diff.L /= 4.0; // Difference of Lighting is not so important in segmentation
 				if (norm_squared(diff) <= radius_intensity_squared) {
 					double coeff = 1.0 - (

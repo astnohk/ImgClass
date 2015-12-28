@@ -1,9 +1,9 @@
 /*
  * by default use CIELAB-CIEXYZ conversions
  */
-#include <iostream>
-
+#include <cfloat>
 #include <cmath>
+#include <iostream>
 #include <stdexcept>
 
 #include "Lab.h"
@@ -193,70 +193,21 @@ operator-(ImgClass::Lab color)
 bool
 operator==(const ImgClass::Lab& lcolor, const ImgClass::Lab& rcolor)
 {
-	if (lcolor.L == rcolor.L
-	    && lcolor.a == rcolor.a
-	    && lcolor.b == rcolor.b) {
+	if (fabs(lcolor.L - rcolor.L) <= DBL_EPSILON
+	    && fabs(lcolor.a - rcolor.a) <= DBL_EPSILON
+	    && fabs(lcolor.b - rcolor.b) <= DBL_EPSILON) {
 		return true;
 	} else {
 		return false;
 	}
 }
-
-bool
-operator==(const ImgClass::Lab& lcolor, const double& rvalue)
-{
-	if (lcolor.L == rvalue
-	    && lcolor.a == rvalue
-	    && lcolor.b == rvalue) {
-		return true;
-	} else {
-		return false;
-	}
-}
-
-bool
-operator==(const double& lvalue, const ImgClass::Lab& rcolor)
-{
-	if (lvalue == rcolor.L
-	    && lvalue == rcolor.a
-	    && lvalue == rcolor.b) {
-		return true;
-	} else {
-		return false;
-	}
-}
-
 
 bool
 operator!=(const ImgClass::Lab& lcolor, const ImgClass::Lab& rcolor)
 {
-	if (lcolor.L != rcolor.L
-	    || lcolor.a != rcolor.a
-	    || lcolor.b != rcolor.b) {
-		return true;
-	} else {
-		return false;
-	}
-}
-
-bool
-operator!=(const ImgClass::Lab& lcolor, const double& rvalue)
-{
-	if (lcolor.L != rvalue
-	    || lcolor.a != rvalue
-	    || lcolor.b != rvalue) {
-		return true;
-	} else {
-		return false;
-	}
-}
-
-bool
-operator!=(const double& lvalue, const ImgClass::Lab& rcolor)
-{
-	if (lvalue != rcolor.L
-	    || lvalue != rcolor.a
-	    || lvalue != rcolor.b) {
+	if (fabs(lcolor.L - rcolor.L) > DBL_EPSILON
+	    || fabs(lcolor.a - rcolor.a) > DBL_EPSILON
+	    || fabs(lcolor.b - rcolor.b) > DBL_EPSILON) {
 		return true;
 	} else {
 		return false;

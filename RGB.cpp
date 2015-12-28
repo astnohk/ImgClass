@@ -1,3 +1,4 @@
+#include <cfloat>
 #include <cmath>
 #include <stdexcept>
 
@@ -282,9 +283,9 @@ operator/(const double& lvalue, const ImgClass::RGB& rcolor)
 bool
 operator==(const ImgClass::RGB& lcolor, const ImgClass::RGB& rcolor)
 {
-	if (lcolor.R == rcolor.R
-	    && lcolor.G == rcolor.G
-	    && lcolor.B == rcolor.B) {
+	if (fabs(lcolor.R - rcolor.R) <= DBL_EPSILON
+	    && fabs(lcolor.G - rcolor.G) <= DBL_EPSILON
+	    && fabs(lcolor.B - rcolor.B) <= DBL_EPSILON) {
 		return true;
 	} else {
 		return false;
@@ -294,9 +295,9 @@ operator==(const ImgClass::RGB& lcolor, const ImgClass::RGB& rcolor)
 bool
 operator!=(const ImgClass::RGB& lcolor, const ImgClass::RGB& rcolor)
 {
-	if (lcolor.R != rcolor.R
-	    || lcolor.G != rcolor.G
-	    || lcolor.B != rcolor.B) {
+	if (fabs(lcolor.R - rcolor.R) > DBL_EPSILON
+	    || fabs(lcolor.G - rcolor.G) > DBL_EPSILON
+	    || fabs(lcolor.B - rcolor.B) > DBL_EPSILON) {
 		return true;
 	} else {
 		return false;

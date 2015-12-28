@@ -64,7 +64,9 @@ BlockMatching<T>::block_matching_lattice(const int search_range)
 	double grad_prev_max_min_x = grad_prev_x.max() - grad_prev_x.min();
 	double grad_prev_max_min_y = grad_prev_y.max() - grad_prev_y.min();
 	// Compute Motion Vectors
+#ifdef _OPENMP
 #pragma omp parallel for
+#endif
 	for (int Y_b = 0; Y_b < _cells_height; Y_b++) {
 		int y_b = Y_b * _block_size;
 		for (int X_b = 0; X_b < _cells_width; X_b++) {
@@ -164,7 +166,9 @@ BlockMatching<T>::block_matching_dense_lattice(const int search_range)
 	// Initialize
 	_motion_vector.reset(_width, _height);
 	// Compute Motion Vectors
+#ifdef _OPENMP
 #pragma omp parallel for
+#endif
 	for (int y_c = 0; y_c < _cells_height; y_c++) {
 		int y_b = y_c - _block_size / 2;
 		for (int x_c = 0; x_c < _cells_width; x_c++) {
@@ -253,7 +257,9 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range)
 	printf("   0.0%%\x1b[1A\n");
 #endif
 	// Compute Motion Vectors
+#ifdef _OPENMP
 #pragma omp parallel for schedule(dynamic)
+#endif
 	for (unsigned int n = 0; n < _connected_regions_next.size(); n++) {
 		VECTOR_2D<double> MV(.0, .0);
 
@@ -292,7 +298,9 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range)
 			_motion_vector.at(ite->x, ite->y) = MV;
 		}
 #ifndef NO_DEBUG_IMG_CLASS
+#ifdef _OPENMP
 #pragma omp critical
+#endif
 		{
 			double ratio = double(++finished_regions) / _connected_regions_next.size();
 			if (round(ratio * 1000.0) > progress) {

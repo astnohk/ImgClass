@@ -291,7 +291,7 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 	for (int m = int(round(-_kernel_spatial)); m <= round(_kernel_spatial); m++) {
 		for (int n = int(round(-_kernel_spatial)); n <= round(_kernel_spatial); n++) {
 			if (n * n + m * m <= SQUARE(_kernel_spatial)) {
-				pel_list[num] = (VECTOR_2D<int>){n, m};
+				pel_list[num] = VECTOR_2D<int>(n, m);
 				num++;
 			}
 		}
@@ -344,7 +344,7 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 				for (std::list<VECTOR_2D<int> >::iterator ite = regions_list.back().begin();
 				    ite != regions_list.back().end();
 				    ++ite) {
-					vector_converge_map.at(ite->x, ite->y) = num_region;
+					vector_converge_map.at(ite->x, ite->y) = static_cast<int>(num_region);
 				}
 				num_region++;
 			}
@@ -356,7 +356,7 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 	for (int y = 0; y < _shift_vector.height(); y++) {
 		for (int x = 0; x < _shift_vector.width(); x++) {
 			VECTOR_2D<int> r(int(round(_shift_vector.get(x, y).x)), int(round(_shift_vector.get(x, y).y)));
-			int n_region = vector_converge_map.get_zeropad(r.x, r.y);
+			unsigned int n_region = static_cast<unsigned int>(vector_converge_map.get_zeropad(r.x, r.y));
 			regions_vector[n_region].push_back(VECTOR_2D<int>(x, y));
 		}
 	}
@@ -365,7 +365,7 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 		for (std::list<VECTOR_2D<int> >::iterator ite = regions_vector[n].begin();
 		    ite != regions_vector[n].end();
 		    ++ite) {
-			_segmentation_map.at(ite->x, ite->y) = n;
+			_segmentation_map.at(ite->x, ite->y) = static_cast<int>(n);
 		}
 	}
 	// Eliminate small connected regions
@@ -386,7 +386,7 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 	// Set _segmentation_map by _regions No.
 	for (unsigned int n = 0; n < _regions.size(); n++) {
 		for (unsigned int i = 0; i < _regions[n].size(); i++) {
-			_segmentation_map.at(_regions[n][i].x, _regions[n][i].y) = n;
+			_segmentation_map.at(_regions[n][i].x, _regions[n][i].y) = static_cast<int>(n);
 		}
 	}
 	// Make color-quantized image
@@ -440,7 +440,7 @@ Segmentation<T>::small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >
 					    && (dist = this->distance(center_color, _image.get(r.x, r.y))) < min) {
 						check = true;
 						min = dist;
-						concatenate_target = _segmentation_map.get(r.x, r.y);
+						concatenate_target = static_cast<unsigned int>(_segmentation_map.get(r.x, r.y));
 					}
 				}
 			}

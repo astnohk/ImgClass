@@ -288,8 +288,8 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 	}
 	// Make pixel list
 	unsigned int num = 0;
-	for (int m = int(round(-_kernel_spatial)); m <= round(_kernel_spatial); m++) {
-		for (int n = int(round(-_kernel_spatial)); n <= round(_kernel_spatial); n++) {
+	for (int m = -int(ceil(_kernel_spatial)); m <= int(ceil(_kernel_spatial)); m++) {
+		for (int n = -int(ceil(_kernel_spatial)); n <= int(ceil(_kernel_spatial)); n++) {
 			if (n * n + m * m <= SQUARE(_kernel_spatial)) {
 				pel_list[num] = VECTOR_2D<int>(n, m);
 				num++;
@@ -499,13 +499,11 @@ template <class T>
 const VECTOR_2D<double>
 Segmentation<T>::MeanShift(const int x, const int y, std::vector<VECTOR_2D<int> >& pel_list, int Iter_Max)
 {
-	VECTOR_2D<double> u;
-	double intensity;
-
+	const double radius_spatial_squared = SQUARE(_kernel_spatial);
+	const double radius_intensity_squared = SQUARE(_kernel_intensity);
 	// Initialize
-	u.x = x;
-	u.y = y;
-	intensity = _image.get(x, y);
+	VECTOR_2D<double> u(static_cast<double>(x), static_cast<double>(y));
+	double intensity = _image.get(x, y);
 	// Iterate until it converge
 	for (int i = 0; i < Iter_Max; i++) {
 		double N = 0.0;
@@ -519,11 +517,10 @@ Segmentation<T>::MeanShift(const int x, const int y, std::vector<VECTOR_2D<int> 
 			if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height) {
 				double intensity_diff = _image.get(r.x, r.y) - intensity;
 
-				if (fabs(intensity_diff) <= _kernel_intensity) {
+				if (SQUARE(intensity_diff) <= radius_intensity_squared) {
 					double coeff = 1.0 - (
-					    SQUARE(intensity_diff / _kernel_intensity)
-					    * ((SQUARE(pel_list[n].x) + SQUARE(pel_list[n].y)) / SQUARE(_kernel_spatial))
-					    );
+					    SQUARE(intensity_diff) / radius_intensity_squared
+					    * (SQUARE(pel_list[n].x) + SQUARE(pel_list[n].y)) / radius_spatial_squared);
 					N += coeff;
 					sum_intensity_diff += intensity_diff * coeff;
 					sum_d.x += pel_list[n].x * coeff;
@@ -534,11 +531,10 @@ Segmentation<T>::MeanShift(const int x, const int y, std::vector<VECTOR_2D<int> 
 		intensity += sum_intensity_diff / N;
 		d_tmp.x = sum_d.x / N;
 		d_tmp.y = sum_d.y / N;
+		u += d_tmp;
 		if (norm(d_tmp) < 0.01) {
-			u += d_tmp;
 			break;
 		}
-		u += d_tmp;
 	}
 	return u;
 }
@@ -553,8 +549,10 @@ template <> // Specialized for ImgClass::RGB<double>
 const VECTOR_2D<double>
 Segmentation<ImgClass::RGB>::MeanShift(const int x, const int y, std::vector<VECTOR_2D<int> >& pel_list, int Iter_Max)
 {
+	const double radius_spatial_squared = SQUARE(_kernel_spatial);
+	const double radius_intensity_squared = SQUARE(_kernel_intensity);
 	// Initialize
-	VECTOR_2D<int> u(x, y);
+	VECTOR_2D<double> u(static_cast<double>(x), static_cast<double>(y));
 	ImgClass::RGB center(_image.get(x, y));
 	// Iterate until it converge
 	for (int i = 0; i < Iter_Max; i++) {
@@ -562,17 +560,14 @@ Segmentation<ImgClass::RGB>::MeanShift(const int x, const int y, std::vector<VEC
 		ImgClass::RGB sum_diff(0.0, 0.0, 0.0);
 		VECTOR_2D<double> sum_d(0.0, 0.0);
 		VECTOR_2D<double> d_tmp;
-
 		for (unsigned int n = 0; n < pel_list.size(); n++) {
-			VECTOR_2D<int> r(u.x + pel_list[n].x, u.y + pel_list[n].y);
-
+			VECTOR_2D<double> r(u.x + pel_list[n].x, u.y + pel_list[n].y);
 			if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height) {
 				ImgClass::RGB diff(_image.get(r.x, r.y) - center);
-
-				if (norm_squared(diff) <= _kernel_intensity * _kernel_intensity) {
+				if (norm_squared(diff) <= radius_intensity_squared) {
 					double coeff = 1.0 - (
-					    (norm_squared(diff) / SQUARE(_kernel_intensity))
-					    * ((SQUARE(pel_list[n].x) + SQUARE(pel_list[n].y)) / SQUARE(_kernel_spatial)));
+					    norm_squared(diff) / radius_intensity_squared
+					    * (SQUARE(pel_list[n].x) + SQUARE(pel_list[n].y)) / radius_spatial_squared);
 					N += coeff;
 					sum_diff += diff * coeff;
 					sum_d += VECTOR_2D<double>(pel_list[n]) * coeff;
@@ -582,12 +577,10 @@ Segmentation<ImgClass::RGB>::MeanShift(const int x, const int y, std::vector<VEC
 		center += sum_diff / N;
 		d_tmp.x = sum_d.x / N;
 		d_tmp.y = sum_d.y / N;
-		std::cout << sum_d.x << ", " << sum_d.y << std::endl;
+		u += d_tmp;
 		if (norm(d_tmp) < 0.01) {
-			u += d_tmp;
 			break;
 		}
-		u += d_tmp;
 	}
 	return u;
 }
@@ -602,8 +595,11 @@ template <> // Specialized for ImgClass::Lab
 const VECTOR_2D<double>
 Segmentation<ImgClass::Lab>::MeanShift(const int x, const int y, std::vector<VECTOR_2D<int> >& pel_list, int Iter_Max)
 {
+	const double radius_spatial_squared = SQUARE(_kernel_spatial);
+	const double radius_intensity_squared = SQUARE(100.0 * _kernel_intensity);
+
 	// Initialize
-	VECTOR_2D<int> u(x, y);
+	VECTOR_2D<double> u(static_cast<double>(x), static_cast<double>(y));
 	ImgClass::Lab center = _image.get(x, y);
 	// Iterate until it converge
 	for (int i = 0; i < Iter_Max; i++) {
@@ -611,19 +607,15 @@ Segmentation<ImgClass::Lab>::MeanShift(const int x, const int y, std::vector<VEC
 		ImgClass::Lab sum_diff(0.0, 0.0, 0.0);
 		VECTOR_2D<double> sum_d(0.0, 0.0);
 		VECTOR_2D<double> d_tmp;
-
 		for (unsigned int n = 0; n < pel_list.size(); n++) {
-			VECTOR_2D<int> r(u.x + pel_list[n].x, u.y + pel_list[n].y);
-
+			VECTOR_2D<double> r(u.x + pel_list[n].x, u.y + pel_list[n].y);
 			if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height) {
 				ImgClass::Lab diff(_image.get(r.x, r.y) - center);
 				diff.L /= 4.0; // Difference of Lighting is not so important in segmentation
-
-				if (norm_squared(diff) <= (100 * _kernel_intensity) * (100 * _kernel_intensity)) {
+				if (norm_squared(diff) <= radius_intensity_squared) {
 					double coeff = 1.0 - (
-					    (norm_squared(diff) / SQUARE(100 * _kernel_intensity))
-					    * ((SQUARE(pel_list[n].x) + SQUARE(pel_list[n].y)) / SQUARE(_kernel_spatial))
-					    );
+					    norm_squared(diff) / radius_intensity_squared
+					    * (SQUARE(pel_list[n].x) + SQUARE(pel_list[n].y)) / radius_spatial_squared);
 					N += coeff;
 					sum_diff += diff * coeff;
 					sum_d += VECTOR_2D<double>(pel_list[n]) * coeff;
@@ -633,11 +625,10 @@ Segmentation<ImgClass::Lab>::MeanShift(const int x, const int y, std::vector<VEC
 		center += sum_diff / N;
 		d_tmp.x = sum_d.x / N;
 		d_tmp.y = sum_d.y / N;
+		u += d_tmp;
 		if (norm(d_tmp) < 0.01) {
-			u += d_tmp;
 			break;
 		}
-		u += d_tmp;
 	}
 	return u;
 }

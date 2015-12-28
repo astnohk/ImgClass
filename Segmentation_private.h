@@ -129,16 +129,16 @@ template <class T>
 Segmentation<T> &
 Segmentation<T>::operator=(const Segmentation<T>& rvalue)
 {
-	_width = segmentation._width;
-	_height = segmentation._height;
-	_kernel_spatial = segmentation._kernel_spatial;
-	_kernel_intensity = segmentation._kernel_intensity;
+	_width = rvalue._width;
+	_height = rvalue._height;
+	_kernel_spatial = rvalue._kernel_spatial;
+	_kernel_intensity = rvalue._kernel_intensity;
 
-	_image.copy(segmentation._image);
-	_color_quantized_image.copy(segmentation._color_quantized_image);
-	_shift_vector.copy(segmentation._shift_vector);
-	_segmentation_map.copy(segmentation._segmentation_map);
-	_regions.assign(segmentation._regions.begin(), segmentation._regions.end());
+	_image.copy(rvalue._image);
+	_color_quantized_image.copy(rvalue._color_quantized_image);
+	_shift_vector.copy(rvalue._shift_vector);
+	_segmentation_map.copy(rvalue._segmentation_map);
+	_regions.assign(rvalue._regions.begin(), rvalue._regions.end());
 	return *this;
 }
 

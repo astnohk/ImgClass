@@ -138,25 +138,25 @@ ImgStatistics::operator=(const ImgStatistics &copy)
 }
 
 double &
-ImgStatistics::image(int x, int y)
+ImgStatistics::image(int x, int y) const
 {
 	return _data[_width * y + x];
 }
 
 int
-ImgStatistics::width(void)
+ImgStatistics::width(void) const
 {
 	return _width;
 }
 
 int
-ImgStatistics::height(void)
+ImgStatistics::height(void) const
 {
 	return _height;
 }
 
 double
-ImgStatistics::mean(void)
+ImgStatistics::mean(void) const
 {
 	double sum = 0.0;
 
@@ -169,7 +169,7 @@ ImgStatistics::mean(void)
 }
 
 double
-ImgStatistics::mean(int center_x, int center_y, int window_width, int window_height)
+ImgStatistics::mean(int center_x, int center_y, int window_width, int window_height) const
 {
 	double sum = 0.0;
 
@@ -190,7 +190,7 @@ ImgStatistics::mean(int center_x, int center_y, int window_width, int window_hei
 }
 
 double
-ImgStatistics::variance(void)
+ImgStatistics::variance(void) const
 {
 	double sum = 0.0;
 	double mu;
@@ -203,7 +203,7 @@ ImgStatistics::variance(void)
 }
 
 double
-ImgStatistics::std_deviation(void)
+ImgStatistics::std_deviation(void) const
 {
 	double sum = 0.0;
 	double mu;
@@ -216,7 +216,7 @@ ImgStatistics::std_deviation(void)
 }
 
 double
-ImgStatistics::variance(int center_x, int center_y, int window_width, int window_height)
+ImgStatistics::variance(int center_x, int center_y, int window_width, int window_height) const
 {
 	double sum = 0.0;
 	double mu;
@@ -240,7 +240,7 @@ ImgStatistics::variance(int center_x, int center_y, int window_width, int window
 }
 
 double
-ImgStatistics::std_deviation(int center_x, int center_y, int window_width, int window_height)
+ImgStatistics::std_deviation(int center_x, int center_y, int window_width, int window_height) const
 {
 	double sum = 0.0;
 	double mu;

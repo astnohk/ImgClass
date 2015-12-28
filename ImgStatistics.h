@@ -25,17 +25,17 @@ class ImgStatistics
 		ImgStatistics& copy(const ImgStatistics &copy);
 		ImgStatistics& operator=(const ImgStatistics &copy);
 
-		double& image(int x, int y);
+		double& image(int x, int y) const;
 
-		int width(void);
-		int height(void);
+		int width(void) const;
+		int height(void) const;
 
-		double mean();
-		double mean(int start_x, int start_y, int end_x, int end_y);
-		double variance();
-		double variance(int x, int y, int window_width, int window_height);
-		double std_deviation(void);
-		double std_deviation(int x, int y, int window_width, int window_height);
+		double mean() const;
+		double mean(int start_x, int start_y, int end_x, int end_y) const;
+		double variance() const;
+		double variance(int x, int y, int window_width, int window_height) const;
+		double std_deviation(void) const;
+		double std_deviation(int x, int y, int window_width, int window_height) const;
 };
 
 

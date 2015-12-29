@@ -254,7 +254,7 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range)
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_BLOCKMATCHING)
 	unsigned int finished_regions = 0;
 	unsigned int progress = .0;
-	printf("   0.0%%\x1b[1A\n");
+	printf(" Block Matching :   0.0%%\x1b[1A\n");
 #endif
 	// Compute Motion Vectors
 #ifdef _OPENMP
@@ -305,11 +305,14 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range)
 			double ratio = double(++finished_regions) / _connected_regions_next.size();
 			if (round(ratio * 1000.0) > progress) {
 				progress = static_cast<unsigned int>(round(ratio * 1000.0)); // Take account of Over-Run
-				printf("\r %5.1f%%\x1b[1A\n", progress * 0.1);
+				printf("\r Block Matching : %5.1f%%\x1b[1A\n", progress * 0.1);
 			}
 		}
 #endif
 	}
+#if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_BLOCKMATCHING)
+	printf("\n Block Matching : Finished\n");
+#endif
 }
 
 

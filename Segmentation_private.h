@@ -505,6 +505,7 @@ Segmentation<T>::MeanShift(const int x, const int y, std::vector<VECTOR_2D<int> 
 {
 	const double radius_spatial_squared = SQUARE(_kernel_spatial);
 	const double radius_intensity_squared = SQUARE(_kernel_intensity);
+	const double displacement_min = SQUARE(0.01);
 	// Initialize
 	VECTOR_2D<double> u(static_cast<double>(x), static_cast<double>(y));
 	double intensity = _image.get(x, y);
@@ -513,30 +514,27 @@ Segmentation<T>::MeanShift(const int x, const int y, std::vector<VECTOR_2D<int> 
 		double N = 0.0;
 		double sum_intensity_diff = 0.0;
 		VECTOR_2D<double> sum_d(0.0, 0.0);
-		VECTOR_2D<double> d_tmp;
-
 		for (unsigned int n = 0; n < pel_list.size(); n++) {
-			VECTOR_2D<double> r(u.x + pel_list[n].x, u.y + pel_list[n].y);
-
+			VECTOR_2D<int> r(
+			    static_cast<int>(round(u.x) + pel_list[n].x),
+			    static_cast<int>(round(u.y) + pel_list[n].y));
 			if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height) {
 				double intensity_diff = _image.get(r.x, r.y) - intensity;
-
-				if (SQUARE(intensity_diff) <= radius_intensity_squared) {
-					double coeff = 1.0 - (
-					    SQUARE(intensity_diff) / radius_intensity_squared
-					    * (SQUARE(pel_list[n].x) + SQUARE(pel_list[n].y)) / radius_spatial_squared);
+				VECTOR_2D<double> d(r.x - u.x, r.y - u.y);
+				double ratio_intensity = SQUARE(intensity_diff) / radius_intensity_squared;
+				double ratio_spatial = norm_squared(d) / radius_spatial_squared;
+				if (ratio_intensity <= 1.0 && ratio_spatial <= 1.0) {
+					double coeff = 1.0 - (ratio_intensity * ratio_spatial);
 					N += coeff;
 					sum_intensity_diff += intensity_diff * coeff;
-					sum_d.x += pel_list[n].x * coeff;
-					sum_d.y += pel_list[n].y * coeff;
+					sum_d += d * coeff;
 				}
 			}
 		}
 		intensity += sum_intensity_diff / N;
-		d_tmp.x = sum_d.x / N;
-		d_tmp.y = sum_d.y / N;
-		u += d_tmp;
-		if (norm(d_tmp) < 0.01) {
+		VECTOR_2D<double> displacement(sum_d.x / N, sum_d.y / N);
+		u += displacement;
+		if (norm_squared(displacement) < displacement_min) {
 			break;
 		}
 	}
@@ -555,6 +553,7 @@ Segmentation<ImgClass::RGB>::MeanShift(const int x, const int y, std::vector<VEC
 {
 	const double radius_spatial_squared = SQUARE(_kernel_spatial);
 	const double radius_intensity_squared = SQUARE(_kernel_intensity);
+	const double displacement_min = SQUARE(0.01);
 	// Initialize
 	VECTOR_2D<double> u(static_cast<double>(x), static_cast<double>(y));
 	ImgClass::RGB center(_image.get(x, y));
@@ -563,26 +562,27 @@ Segmentation<ImgClass::RGB>::MeanShift(const int x, const int y, std::vector<VEC
 		double N = 0.0;
 		ImgClass::RGB sum_diff(0.0, 0.0, 0.0);
 		VECTOR_2D<double> sum_d(0.0, 0.0);
-		VECTOR_2D<double> d_tmp;
 		for (unsigned int n = 0; n < pel_list.size(); n++) {
-			VECTOR_2D<double> r(u.x + pel_list[n].x, u.y + pel_list[n].y);
+			VECTOR_2D<int> r(
+			    static_cast<int>(round(u.x) + pel_list[n].x),
+			    static_cast<int>(round(u.y) + pel_list[n].y));
 			if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height) {
-				ImgClass::RGB diff(_image.get(int(r.x), int(r.y)) - center);
-				if (norm_squared(diff) <= radius_intensity_squared) {
-					double coeff = 1.0 - (
-					    norm_squared(diff) / radius_intensity_squared
-					    * (SQUARE(pel_list[n].x) + SQUARE(pel_list[n].y)) / radius_spatial_squared);
+				ImgClass::RGB diff(_image.get(r.x, r.y) - center);
+				VECTOR_2D<double> d(r.x - u.x, r.y - u.y);
+				double ratio_intensity = norm_squared(diff) / radius_intensity_squared;
+				double ratio_spatial = norm_squared(d) / radius_spatial_squared;
+				if (ratio_intensity <= 1.0 && ratio_spatial <= 1.0) {
+					double coeff = 1.0 - (ratio_intensity * ratio_spatial);
 					N += coeff;
 					sum_diff += diff * coeff;
-					sum_d += VECTOR_2D<double>(pel_list[n]) * coeff;
+					sum_d += d * coeff;
 				}
 			}
 		}
 		center += sum_diff / N;
-		d_tmp.x = sum_d.x / N;
-		d_tmp.y = sum_d.y / N;
-		u += d_tmp;
-		if (norm(d_tmp) < 0.01) {
+		VECTOR_2D<double> displacement(sum_d.x / N, sum_d.y / N);
+		u += displacement;
+		if (norm_squared(displacement) < displacement_min) {
 			break;
 		}
 	}
@@ -601,6 +601,7 @@ Segmentation<ImgClass::Lab>::MeanShift(const int x, const int y, std::vector<VEC
 {
 	const double radius_spatial_squared = SQUARE(_kernel_spatial);
 	const double radius_intensity_squared = SQUARE(100.0 * _kernel_intensity);
+	const double displacement_min = SQUARE(0.01);
 
 	// Initialize
 	VECTOR_2D<double> u(static_cast<double>(x), static_cast<double>(y));
@@ -610,27 +611,28 @@ Segmentation<ImgClass::Lab>::MeanShift(const int x, const int y, std::vector<VEC
 		double N = 0.0;
 		ImgClass::Lab sum_diff(0.0, 0.0, 0.0);
 		VECTOR_2D<double> sum_d(0.0, 0.0);
-		VECTOR_2D<double> d_tmp;
 		for (unsigned int n = 0; n < pel_list.size(); n++) {
-			VECTOR_2D<double> r(u.x + pel_list[n].x, u.y + pel_list[n].y);
+			VECTOR_2D<int> r(
+			    static_cast<int>(round(u.x) + pel_list[n].x),
+			    static_cast<int>(round(u.y) + pel_list[n].y));
 			if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height) {
-				ImgClass::Lab diff(_image.get(int(r.x), int(r.y)) - center);
+				ImgClass::Lab diff(_image.get(r.x, r.y) - center);
 				diff.L /= 4.0; // Difference of Lighting is not so important in segmentation
-				if (norm_squared(diff) <= radius_intensity_squared) {
-					double coeff = 1.0 - (
-					    norm_squared(diff) / radius_intensity_squared
-					    * (SQUARE(pel_list[n].x) + SQUARE(pel_list[n].y)) / radius_spatial_squared);
+				VECTOR_2D<double> d(r.x - u.x, r.y - u.y);
+				double ratio_intensity = norm_squared(diff) / radius_intensity_squared;
+				double ratio_spatial = norm_squared(d) / radius_spatial_squared;
+				if (ratio_intensity <= 1.0 && ratio_spatial <= 1.0) {
+					double coeff = 1.0 - (ratio_intensity * ratio_spatial);
 					N += coeff;
 					sum_diff += diff * coeff;
-					sum_d += VECTOR_2D<double>(pel_list[n]) * coeff;
+					sum_d += d * coeff;
 				}
 			}
 		}
 		center += sum_diff / N;
-		d_tmp.x = sum_d.x / N;
-		d_tmp.y = sum_d.y / N;
-		u += d_tmp;
-		if (norm(d_tmp) < 0.01) {
+		VECTOR_2D<double> displacement(sum_d.x / N, sum_d.y / N);
+		u += displacement;
+		if (norm_squared(displacement) < displacement_min) {
 			break;
 		}
 	}

@@ -112,7 +112,7 @@ ImgVector<T>::clear(void)
 
 template <class T>
 void
-ImgVector<T>::reset(int W, int H, const T& value)
+ImgVector<T>::reset(const int W, const int H, const T& value)
 {
 	delete[] _data;
 	_data = nullptr;
@@ -120,11 +120,11 @@ ImgVector<T>::reset(int W, int H, const T& value)
 	_height = 0;
 	if (W > 0 && H > 0) {
 		try {
-			_data = new T[W * H]();
+			_data = new T[W * H];
 		}
-		catch (const std::bad_alloc &bad) {
+		catch (const std::bad_alloc& bad) {
 			std::cerr << bad.what() << std::endl
-			    << "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory" << std::endl;
+			    << "ImgVector::reset(const int, const int, const T&) : Cannot Allocate Memory" << std::endl;
 			_data = nullptr;
 			throw;
 		}
@@ -138,7 +138,7 @@ ImgVector<T>::reset(int W, int H, const T& value)
 
 template <class T>
 void
-ImgVector<T>::reset(int W, int H, const T* array)
+ImgVector<T>::reset(const int W, const int H, const T* array)
 {
 	delete[] _data;
 	_data = nullptr;
@@ -150,7 +150,7 @@ ImgVector<T>::reset(int W, int H, const T* array)
 		}
 		catch (const std::bad_alloc &bad) {
 			std::cerr << bad.what() << std::endl
-			    << "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory" << std::endl;
+			    << "ImgVector::reset(const int, const int, const T*) : Cannot Allocate Memory" << std::endl;
 			_data = nullptr;
 			throw;
 		}
@@ -162,6 +162,44 @@ ImgVector<T>::reset(int W, int H, const T* array)
 			}
 		}
 	}
+}
+
+
+template <class T>
+void
+ImgVector<T>::resize(const int W, const int H, const T& value)
+{
+	T *new_data = nullptr;
+	if (W > 0 && H > 0) {
+		try {
+			new_data = new T[W * H];
+		}
+		catch (const std::bad_alloc& bad) {
+			std::cerr << bad.what() << std::endl
+			    << "ImgVector::resize(const int, const int, const T&) : Cannot Allocate Memory" << std::endl;
+			_data = nullptr;
+			throw;
+		}
+		for (int y = 0; y < H; y++) {
+			if (y < _height) {
+				for (int x = 0; x < W; x++) {
+					if (x < _width) {
+						new_data[W * y + x] = _data[_width * y + x];
+					} else {
+						new_data[W * y + x] = value;
+					}
+				}
+			} else {
+				for (int x = 0; x < W; x++) {
+					new_data[W * y + x] = value;
+				}
+			}
+		}
+	}
+	delete[] _data;
+	_data = new_data;
+	_width = W;
+	_height = H;
 }
 
 
@@ -220,9 +258,6 @@ ImgVector<T>::cast_copy(const ImgVector<RT>& vector)
 }
 
 
-
-
-// ----- Operators -----
 template <class T>
 ImgVector<T> &
 ImgVector<T>::operator=(const ImgVector<T>& vector)
@@ -253,6 +288,7 @@ ImgVector<T>::operator=(const ImgVector<T>& vector)
 
 
 
+// ----- Accessors -----
 template <class T>
 int
 ImgVector<T>::width(void) const

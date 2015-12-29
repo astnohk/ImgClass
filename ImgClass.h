@@ -14,6 +14,7 @@ class ImgVector
 		T *_data;
 		int _width;
 		int _height;
+
 	public:
 		ImgVector(void);
 		ImgVector(int W, int H, const T& value = T());
@@ -23,8 +24,9 @@ class ImgVector
 		virtual ~ImgVector(void);
 
 		void clear(void);
-		void reset(int W, int H, const T& value = T());
-		void reset(int W, int H, const T* array);
+		void reset(const int W, const int H, const T& value = T());
+		void reset(const int W, const int H, const T* array);
+		void resize(const int W, const int H, const T& value = T());
 
 		ImgVector<T>& copy(const ImgVector<T>& vector);
 		template<class RT> ImgVector<T>& cast_copy(const ImgVector<RT>& vector);

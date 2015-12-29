@@ -22,6 +22,7 @@ class Segmentation
 		ImgVector<T> _image;
 		ImgVector<T> _color_quantized_image;
 		ImgVector<VECTOR_2D<double> > _shift_vector;
+		ImgVector<int> _vector_converge_map;
 		ImgVector<int> _segmentation_map;
 		std::vector<std::vector<VECTOR_2D<int> > > _regions;
 

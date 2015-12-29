@@ -251,7 +251,7 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range)
 	}
 	// MV are expanded on entire image pixels
 	_motion_vector.reset(_width, _height);
-#ifndef NO_DEBUG_IMG_CLASS
+#if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_BLOCKMATCHING)
 	unsigned int finished_regions = 0;
 	unsigned int progress = .0;
 	printf("   0.0%%\x1b[1A\n");
@@ -297,7 +297,7 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range)
 		    ++ite) {
 			_motion_vector.at(ite->x, ite->y) = MV;
 		}
-#ifndef NO_DEBUG_IMG_CLASS
+#if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_BLOCKMATCHING)
 #ifdef _OPENMP
 #pragma omp critical
 #endif

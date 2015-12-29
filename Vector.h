@@ -70,6 +70,7 @@ template<class Type, class Tval> VECTOR_2D<Type> operator*(const Tval& lvalue, V
 template<class Type, class Tval> VECTOR_2D<Type> operator/(VECTOR_2D<Type> lvector, const Tval& rvalue);
 
 // Arithmetic
+template<class Type> double norm_squared(const VECTOR_2D<Type>& vector);
 template<class Type> double norm(const VECTOR_2D<Type>& vector);
 template<class Type> double arg(const VECTOR_2D<Type>& vector);
 template<class Type> VECTOR_2D<Type> floor(const VECTOR_2D<Type> &vector);

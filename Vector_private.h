@@ -223,10 +223,16 @@ operator/(VECTOR_2D<Type> lvector, const Tval& rvalue)
 
 template <class Type>
 double
-norm(const VECTOR_2D<Type> &vector)
+norm_squared(const VECTOR_2D<Type> &value)
 {
-	VECTOR_2D<double> v(vector);
-	return sqrt(v.x * v.x + v.y * v.y);
+	return value.x * value.x + value.y * value.y;
+}
+
+template <class Type>
+double
+norm(const VECTOR_2D<Type> &value)
+{
+	return sqrt(value.x * value.x + value.y * value.y);
 }
 
 template <class Type>

@@ -49,6 +49,7 @@ class Segmentation
 		int height(void) const;
 
 		const ImgVector<T>& ref_color_quantized_image(void) const;
+		const ImgVector<int>& ref_vector_converge_map(void) const;
 		const ImgVector<int>& ref_segmentation_map(void) const;
 		const ImgVector<VECTOR_2D<double> >& ref_shift_vector(void) const;
 		const std::vector<std::list<VECTOR_2D<int> > >& ref_regions(void) const;
@@ -66,7 +67,7 @@ class Segmentation
 		int get_mirror(int x, int y) const;
 
 		// Mean Shift segmentation
-		void Segmentation_MeanShift(const int Iter_Max = 128, const unsigned int Min_Number_of_Pixels = 16, const int Search_Range = 4);
+		void Segmentation_MeanShift(const int Iter_Max = 128, const unsigned int Min_Number_of_Pixels = 16, const int Search_Range = 2);
 
 	protected:
 		const VECTOR_2D<double> MeanShift(const int x, const int y, std::vector<VECTOR_2D<int> >& pel_list, int Iter_Max);

@@ -156,6 +156,13 @@ Segmentation<T>::ref_color_quantized_image(void) const
 
 template <class T>
 const ImgVector<int> &
+Segmentation<T>::ref_vector_converge_map(void) const
+{
+	return _vector_converge_map;
+}
+
+template <class T>
+const ImgVector<int> &
 Segmentation<T>::ref_segmentation_map(void) const
 {
 	return _segmentation_map;
@@ -300,6 +307,11 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 	// Initialize vector converge map
 	_vector_converge_map.reset(_width, _height, 0);
 	// Compute Mean Shift vector
+#if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_SEGMENTATION)
+	unsigned int finished = 0;
+	unsigned int progress = .0;
+	printf(" Mean-Shift method :   0.0%%\x1b[1A\n");
+#endif
 #ifdef _OPENMP
 #pragma omp parallel for schedule(dynamic)
 #endif
@@ -326,8 +338,23 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 			}
 			// Check converge point
 			_vector_converge_map.at(r.x, r.y) = -1;
+#if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_SEGMENTATION)
+#ifdef _OPENMP
+#pragma omp critical
+#endif
+		{
+			double ratio = double(++finished) / _image.size();
+			if (round(ratio * 1000.0) > progress) {
+				progress = static_cast<unsigned int>(round(ratio * 1000.0)); // Take account of Over-Run
+				printf("\r Mean-Shift method : %5.1f%%\x1b[1A\n", progress * 0.1);
+			}
+		}
+#endif
 		}
 	}
+#if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_SEGMENTATION)
+	printf("\n Mean-Shift method : Finished\n");
+#endif
 	// Collect connected region
 	num_region = 1; // To consider the out of image as region #0
 	for (int y = 0; y < _height; y++) {
@@ -426,10 +453,11 @@ Segmentation<T>::small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >
 		}
 	}
 	// Concatenate small regions
-	for (unsigned int n = 0; n < small_regions.size(); n++) {
+	for (unsigned int n = 0; n < regions_vector->size(); n++) {
 		if (small_regions[n] == false) {
 			continue;
 		}
+		// Search nearest neighbor of the small region
 		T center_color = _image.get(regions_vector->at(n).begin()->x, regions_vector->at(n).begin()->y);
 		unsigned int concatenate_target = n;
 		double min = DBL_MAX;
@@ -453,7 +481,7 @@ Segmentation<T>::small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >
 				}
 			}
 		}
-		if (check) {
+		if (check) { // Concatenate small region to neighborhood region
 			// Update _segmentation_map
 			VECTOR_2D<int> r = regions_vector->at(concatenate_target).front();
 			for (std::list<VECTOR_2D<int> >::iterator ite = regions_vector->at(n).begin();

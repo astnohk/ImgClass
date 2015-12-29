@@ -17,8 +17,8 @@ class ImgVector
 
 	public:
 		ImgVector(void);
-		ImgVector(int W, int H, const T& value = T());
-		ImgVector(int W, int H, const T* array);
+		ImgVector(const int W, const int H, const T& value = T());
+		ImgVector(const int W, const int H, const T* array);
 		explicit ImgVector(const ImgVector<T>& copy); // Copy constructor
 
 		virtual ~ImgVector(void);
@@ -43,50 +43,51 @@ class ImgVector
 		T* data(void) const;
 
 		// Reference to the pixel
-		T& operator[](int n);
-		T& at(int n);
-		T& at(int x, int y);
-		T& at_repeat(int x, int y);
-		T& at_mirror(int x, int y);
+		T& operator[](const int n);
+		T& at(const int n);
+		T& at(const int x, const int y);
+		T& at_repeat(const int x, const int y);
+		T& at_mirror(const int x, const int y);
 
 		// Get image intencity
-		const T get(int n) const; // return const to avoid to mistake get() for at()
-		const T get(int x, int y) const;
+		const T get(const int n) const; // return const to avoid to mistake get() for at()
+		const T get(const int x, const int y) const;
 
-		const T get_zeropad(int x, int y) const;
-		const T get_repeat(int x, int y) const;
-		const T get_mirror(int x, int y) const;
+		const T get_zeropad(const int x, const int y) const;
+		const T get_repeat(const int x, const int y) const;
+		const T get_mirror(const int x, const int y) const;
 
-		const T get_zeropad_cubic(double x, double y, double B = 0.0, double C = (1.0 / 2.0)) const;
-		const T get_repeat_cubic(double x, double y, double B = 0.0, double C = (1.0 / 2.0)) const;
-		const T get_mirror_cubic(double x, double y, double B = 0.0, double C = (1.0 / 2.0)) const;
+		const T get_zeropad_cubic(const double& x, const double& y, const double& B = 0.0, const double& C = (1.0 / 2.0)) const;
+		const T get_repeat_cubic(const double& x, const double& y, const double& B = 0.0, const double& C = (1.0 / 2.0)) const;
+		const T get_mirror_cubic(const double& x, const double& y, const double& B = 0.0, const double& C = (1.0 / 2.0)) const;
 
 		const T min(void) const;
 		const T max(void) const;
-		const T min(int top_left_x, int top_left_y, int crop_width, int crop_height) const;
-		const T max(int top_left_x, int top_left_y, int crop_width, int crop_height) const;
+		const T min(const int top_left_x, const int top_left_y, const int crop_width, const int crop_height) const;
+		const T max(const int top_left_x, const int top_left_y, const int crop_width, const int crop_height) const;
 
 		const T variance(void) const;
 		const T variance(const int top_left_x, const int top_left_y, const int crop_width, const int crop_height) const;
 
 		// Cropping
-		ImgVector<T>* crop(int top_left_x, int top_left_y, int crop_width, int crop_height) const;
+		ImgVector<T>* crop(const int top_left_x, const int top_left_y, const int crop_width, const int crop_height) const;
 
 		// Simple image processing
 		void contrast_stretching(const T& Min, const T& Max);
 		void map(T (*func)(T &value));
 
 		// Resampling
-		void resize_zerohold(int W, int H);
-		void resize_bicubic(int W, int H, bool saturate = false, double min = 0.0, double max = 0.0, T (*Nearest_Integer_Method)(double &d) = nullptr, double B = (0.0 / 3.0), double C = (1.0 / 2.0));
-
-		double cubic(double x, double B, double C) const;
+		void resize_zerohold(const int W, const int H);
+		void resize_bicubic(const int W, const int H, const bool saturate = false, const double min = 0.0, const double max = 0.0, T (*Nearest_Integer_Method)(double &d) = nullptr, const double B = (0.0 / 3.0), const double C = (1.0 / 2.0));
 
 		// Operators
 		template<class RT> ImgVector<T>& operator+=(const RT& val);
 		template<class RT> ImgVector<T>& operator-=(const RT& val);
 		template<class RT> ImgVector<T>& operator*=(const RT& val);
 		template<class RT> ImgVector<T>& operator/=(const RT& val);
+
+	protected:
+		double cubic(const double x, const double B, const double C) const;
 };
 
 #include "ImgClass_private.h"

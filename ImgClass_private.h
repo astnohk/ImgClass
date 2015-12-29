@@ -17,7 +17,7 @@ ImgVector<T>::ImgVector(void)
 
 
 template <class T>
-ImgVector<T>::ImgVector(int W, int H, const T& value)
+ImgVector<T>::ImgVector(const int W, const int H, const T& value)
 {
 	_data = nullptr;
 	_width = 0;
@@ -41,7 +41,7 @@ ImgVector<T>::ImgVector(int W, int H, const T& value)
 }
 
 template <class T>
-ImgVector<T>::ImgVector(int W, int H, const T* array)
+ImgVector<T>::ImgVector(const int W, const int H, const T* array)
 {
 	_data = nullptr;
 	_width = 0;
@@ -337,14 +337,14 @@ ImgVector<T>::data(void) const
 
 template <class T>
 T &
-ImgVector<T>::operator[](int n)
+ImgVector<T>::operator[](const int n)
 {
 	return _data[n];
 }
 
 template <class T>
 T &
-ImgVector<T>::at(int n)
+ImgVector<T>::at(const int n)
 {
 	assert(0 <= n && n < _width * _height);
 	return _data[n];
@@ -352,7 +352,7 @@ ImgVector<T>::at(int n)
 
 template <class T>
 T &
-ImgVector<T>::at(int x, int y)
+ImgVector<T>::at(const int x, const int y)
 {
 	assert(0 <= x && x < _width && 0 <= y && y < _height);
 	return _data[_width * y + x];
@@ -360,7 +360,7 @@ ImgVector<T>::at(int x, int y)
 
 template <class T>
 T &
-ImgVector<T>::at_repeat(int x, int y)
+ImgVector<T>::at_repeat(const int x, const int y)
 {
 	int x_repeat, y_repeat;
 
@@ -379,25 +379,26 @@ ImgVector<T>::at_repeat(int x, int y)
 
 template <class T>
 T &
-ImgVector<T>::at_mirror(int x, int y)
+ImgVector<T>::at_mirror(const int x, const int y)
 {
-	int x_mirror, y_mirror;
+	int x_mirror = x;
+	int y_mirror = y;
 
-	if (x < 0) {
-		x = -x - 1; // Mirroring over negative has offset
+	if (x_mirror < 0) {
+		x_mirror = -x_mirror - 1; // should be set the offset when Mirroring over negative
 	}
-	if (y < 0) {
-		y = -y - 1;
+	if (y_mirror < 0) {
+		y_mirror = -y_mirror - 1;
 	}
-	x_mirror = int(round(_width - 0.5 - std::fabs(_width - 0.5 - (x % (2 * _width)))));
-	y_mirror = int(round(_height - 0.5 - std::fabs(_height - 0.5 - (y % (2 * _height)))));
+	x_mirror = int(round(_width - 0.5 - std::fabs(_width - 0.5 - (x_mirror % (2 * _width)))));
+	y_mirror = int(round(_height - 0.5 - std::fabs(_height - 0.5 - (y_mirror % (2 * _height)))));
 	return _data[_width * y_mirror + x_mirror];
 }
 
 
 template <class T>
 const T
-ImgVector<T>::get(int n) const
+ImgVector<T>::get(const int n) const
 {
 	assert(0 <= n && n < _width * _height);
 	return _data[n];
@@ -405,7 +406,7 @@ ImgVector<T>::get(int n) const
 
 template <class T>
 const T
-ImgVector<T>::get(int x, int y) const
+ImgVector<T>::get(const int x, const int y) const
 {
 	assert(0 <= x && x < _width && 0 <= y && y < _height);
 	return _data[_width * y + x];
@@ -413,7 +414,7 @@ ImgVector<T>::get(int x, int y) const
 
 template <class T>
 const T
-ImgVector<T>::get_zeropad(int x, int y) const
+ImgVector<T>::get_zeropad(const int x, const int y) const
 {
 	T zero = T();
 
@@ -426,7 +427,7 @@ ImgVector<T>::get_zeropad(int x, int y) const
 
 template <class T>
 const T
-ImgVector<T>::get_repeat(int x, int y) const
+ImgVector<T>::get_repeat(const int x, const int y) const
 {
 	int x_repeat, y_repeat;
 
@@ -445,18 +446,19 @@ ImgVector<T>::get_repeat(int x, int y) const
 
 template <class T>
 const T
-ImgVector<T>::get_mirror(int x, int y) const
+ImgVector<T>::get_mirror(const int x, const int y) const
 {
-	int x_mirror, y_mirror;
+	int x_mirror = x;
+	int y_mirror = y;
 
-	if (x < 0) {
-		x = -x - 1; // Mirroring over negative has offset
+	if (x_mirror < 0) {
+		x_mirror = -x_mirror - 1; // should be set the offset when Mirroring over negative
 	}
-	if (y < 0) {
-		y = -y - 1;
+	if (y_mirror < 0) {
+		y_mirror = -y_mirror - 1;
 	}
-	x_mirror = int(round(_width - 0.5 - std::fabs(_width - 0.5 - (x % (2 * _width)))));
-	y_mirror = int(round(_height - 0.5 - std::fabs(_height - 0.5 - (y % (2 * _height)))));
+	x_mirror = int(round(_width - 0.5 - std::fabs(_width - 0.5 - (x_mirror % (2 * _width)))));
+	y_mirror = int(round(_height - 0.5 - std::fabs(_height - 0.5 - (y_mirror % (2 * _height)))));
 	return _data[_width * y_mirror + x_mirror];
 }
 
@@ -466,7 +468,7 @@ ImgVector<T>::get_mirror(int x, int y) const
 // Get continuous function interpolated by bicubic
 template <class T>
 const T
-ImgVector<T>::get_zeropad_cubic(double x, double y, double B, double C) const
+ImgVector<T>::get_zeropad_cubic(const double& x, const double& y, const double& B, const double& C) const
 {
 	double bicubic_x[4];
 	double bicubic_y[4];
@@ -487,7 +489,7 @@ ImgVector<T>::get_zeropad_cubic(double x, double y, double B, double C) const
 
 template <class T>
 const T
-ImgVector<T>::get_repeat_cubic(double x, double y, double B, double C) const
+ImgVector<T>::get_repeat_cubic(const double& x, const double& y, const double& B, const double& C) const
 {
 	double bicubic_x[4];
 	double bicubic_y[4];
@@ -508,7 +510,7 @@ ImgVector<T>::get_repeat_cubic(double x, double y, double B, double C) const
 
 template <class T>
 const T
-ImgVector<T>::get_mirror_cubic(double x, double y, double B, double C) const
+ImgVector<T>::get_mirror_cubic(const double& x, const double& y, const double& B, const double& C) const
 {
 	double bicubic_x[4];
 	double bicubic_y[4];
@@ -565,7 +567,7 @@ ImgVector<T>::max(void) const
 
 template <class T>
 const T
-ImgVector<T>::min(int top_left_x, int top_left_y, int crop_width, int crop_height) const
+ImgVector<T>::min(const int top_left_x, const int top_left_y, const int crop_width, const int crop_height) const
 {
 	if (_width <= 0 || _height <= 0) {
 		throw std::logic_error("T ImgVector<T>::min(void) : vector is empty");
@@ -589,7 +591,7 @@ ImgVector<T>::min(int top_left_x, int top_left_y, int crop_width, int crop_heigh
 
 template <class T>
 const T
-ImgVector<T>::max(int top_left_x, int top_left_y, int crop_width, int crop_height) const
+ImgVector<T>::max(const int top_left_x, const int top_left_y, const int crop_width, const int crop_height) const
 {
 	if (_width <= 0 || _height <= 0) {
 		throw std::logic_error("T ImgVector<T>::max(void) : vector is empty");
@@ -617,7 +619,7 @@ ImgVector<T>::max(int top_left_x, int top_left_y, int crop_width, int crop_heigh
 // ----- Statistics -----
 template <class T>
 const T
-ImgVector<T>::variance() const
+ImgVector<T>::variance(void) const
 {
 	double N = double(_width * _height);
 	T sum_squared = .0;
@@ -659,7 +661,7 @@ ImgVector<T>::variance(const int top_left_x, const int top_left_y, const int cro
 // ----- Image Operation -----
 template <class T>
 ImgVector<T> *
-ImgVector<T>::crop(int top_left_x, int top_left_y, int crop_width, int crop_height) const
+ImgVector<T>::crop(const int top_left_x, const int top_left_y, const int crop_width, const int crop_height) const
 {
 	ImgVector<T>* tmp = nullptr;
 
@@ -724,7 +726,7 @@ ImgVector<T>::contrast_stretching(const T& Min, const T& Max)
 
 template <class T>
 void
-ImgVector<T>::resize_zerohold(int W, int H)
+ImgVector<T>::resize_zerohold(const int W, const int H)
 {
 	T *resized = nullptr;
 	T additive_identity = T();
@@ -781,7 +783,7 @@ ImgVector<T>::resize_zerohold(int W, int H)
 */
 template <class T>
 void
-ImgVector<T>::resize_bicubic(int W, int H, bool saturate, double min, double max, T (*Nearest_Integer_Method)(double &d), double B, double C)
+ImgVector<T>::resize_bicubic(const int W, const int H, const bool saturate, const double min, const double max, T (*Nearest_Integer_Method)(double &d), const double B, const double C)
 {
 	T *resized = nullptr;
 	double *conv = nullptr;
@@ -895,7 +897,7 @@ ImgVector<T>::resize_bicubic(int W, int H, bool saturate, double min, double max
 
 template <class T>
 double
-ImgVector<T>::cubic(double x, double B, double C) const
+ImgVector<T>::cubic(const double x, const double B, const double C) const
 {
 	double x_abs = fabs(x);
 

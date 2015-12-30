@@ -169,35 +169,54 @@ template <class T>
 void
 ImgVector<T>::resize(const int W, const int H, const T& value)
 {
-	T *new_data = nullptr;
 	if (W > 0 && H > 0) {
-		try {
-			new_data = new T[W * H];
-		}
-		catch (const std::bad_alloc& bad) {
-			std::cerr << bad.what() << std::endl
-			    << "ImgVector::resize(const int, const int, const T&) : Cannot Allocate Memory" << std::endl;
-			_data = nullptr;
-			throw;
-		}
-		for (int y = 0; y < H; y++) {
-			if (y < _height) {
+		if (W * H > _width * _height) { // New size is greater than previous size
+			T *new_data = nullptr;
+			try {
+				new_data = new T[W * H];
+			}
+			catch (const std::bad_alloc& bad) {
+				std::cerr << bad.what() << std::endl
+				    << "ImgVector::resize(const int, const int, const T&) : Cannot Allocate Memory" << std::endl;
+				_data = nullptr;
+				throw;
+			}
+			for (int y = 0; y < H; y++) {
 				for (int x = 0; x < W; x++) {
-					if (x < _width) {
+					if (y < _height && x < _width) {
 						new_data[W * y + x] = _data[_width * y + x];
 					} else {
 						new_data[W * y + x] = value;
 					}
 				}
-			} else {
+			}
+			delete[] _data;
+			_data = new_data;
+		} else if (W > _width) { // New size is less than or equal to previous but new_width > previous_width
+			for (int y = H - 1; y >= 0; y--) {
+				for (int x = W - 1; x >= 0; x--) {
+					if (y < _height && x < _width) {
+						_data[W * y + x] = _data[_width * y + x];
+					} else {
+						_data[W * y + x] = value;
+					}
+				}
+			}
+		} else {
+			for (int y = 0; y < H; y++) {
 				for (int x = 0; x < W; x++) {
-					new_data[W * y + x] = value;
+					if (y < _height && x < _width) {
+						_data[W * y + x] = _data[_width * y + x];
+					} else {
+						_data[W * y + x] = value;
+					}
 				}
 			}
 		}
+	} else {
+		delete[] _data;
+		_data = nullptr;
 	}
-	delete[] _data;
-	_data = new_data;
 	_width = W;
 	_height = H;
 }

@@ -104,6 +104,7 @@ class BlockMatching
 		double ZNCC_region_nearest_intensity(const int x_diff_prev, const int y_diff_prev, const std::list<VECTOR_2D<int> >& region);
 };
 
+double norm_squared(const double& value);
 double norm(const double& value);
 
 #include "BlockMatching_private_initializer.h"

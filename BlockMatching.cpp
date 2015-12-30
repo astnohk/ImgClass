@@ -448,6 +448,12 @@ BlockMatching<ImgClass::Lab>::ZNCC_region_nearest_intensity(const int x_diff_pre
 
 // ----- Global function -----
 double
+norm_squared(const double& value)
+{
+	return value * value;
+}
+
+double
 norm(const double& value)
 {
 	return fabs(value);

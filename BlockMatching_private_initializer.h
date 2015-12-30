@@ -245,6 +245,7 @@ BlockMatching<T>::BlockMatching(const BlockMatching& copy)
 	_connected_regions_next.assign(copy._connected_regions_next.begin(), copy._connected_regions_next.end());
 
 	_motion_vector.copy(copy._motion_vector);
+	_motion_vector_next.copy(copy._motion_vector_next);
 }
 
 
@@ -296,6 +297,7 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& imag
 	_connected_regions_next.clear();
 
 	_motion_vector.clear();
+	_motion_vector_next.clear();
 
 	// Normalize the image
 	image_normalizer();
@@ -339,6 +341,7 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& imag
 	_connected_regions_next.clear();
 
 	_motion_vector.clear();
+	_motion_vector_next.clear();
 
 	// Normalize the image
 	image_normalizer();
@@ -382,6 +385,7 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<int>& re
 	_region_map_next.clear();
 
 	_motion_vector.clear();
+	_motion_vector_next.clear();
 	// Normalize the image
 	image_normalizer();
 	// Extract connected regions from region_map
@@ -432,6 +436,7 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<int>& re
 	_region_map_next.copy(region_map_next);
 
 	_motion_vector.clear();
+	_motion_vector_next.clear();
 	// Normalize the image
 	image_normalizer();
 	// Extract connected regions from region_map

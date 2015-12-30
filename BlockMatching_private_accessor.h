@@ -69,6 +69,16 @@ BlockMatching<T>::ref_motion_vector(void)
 }
 
 template <class T>
+ImgVector<VECTOR_2D<double> > &
+BlockMatching<T>::ref_motion_vector_next(void)
+{
+	if (_motion_vector.isNULL()) {
+		this->block_matching();
+	}
+	return _motion_vector_next;
+}
+
+template <class T>
 VECTOR_2D<double> &
 BlockMatching<T>::operator[](int n)
 {

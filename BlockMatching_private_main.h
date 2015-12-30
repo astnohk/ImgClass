@@ -50,7 +50,12 @@ BlockMatching<T>::block_matching_lattice(const int search_range)
 		throw std::logic_error("void BlockMatching<T>::block_matching(const int) : _block_size < 0");
 	}
 	// Initialize
+	// Reset Motion Vector
 	_motion_vector.reset(_cells_width, _cells_height);
+	if (_image_next.isNULL() == false) {
+		_motion_vector_next.reset(_width, _height);
+	}
+	// Compute global gradients of the image
 	ImgVector<VECTOR_2D<double> >* grad_prev = this->grad_image(_image_prev, 0, 0, _image_prev.width(), _image_prev.height());
 	ImgVector<double> grad_prev_x(grad_prev->width(), grad_prev->height());
 	ImgVector<double> grad_prev_y(grad_prev->width(), grad_prev->height());
@@ -169,6 +174,9 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range)
 	}
 	// MV are expanded on entire image pixels
 	_motion_vector.reset(_width, _height);
+	if (_image_next.isNULL() == false) {
+		_motion_vector_next.reset(_width, _height);
+	}
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_BLOCKMATCHING)
 	unsigned int finished_regions = 0;
 	unsigned int progress = .0;
@@ -180,48 +188,58 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range)
 #endif
 	for (unsigned int n = 0; n < _connected_regions_current.size(); n++) {
 		VECTOR_2D<double> MV(.0, .0);
+		std::vector<ImgVector<T> *> reference_images;
+		std::vector<ImgVector<VECTOR_2D<double> > *> motion_vectors;
 
-		// Compute initial value
-		double MAD = (this->*MAD_func)(
-		    _image_prev, _image_current,
-		    x_start, y_start,
-		    _connected_regions_current[n]);
-		double ZNCC = (this->*NCC_func)(
-		    _image_prev, _image_current,
-		    x_start, y_start,
-		    _connected_regions_current[n]);
-		double E_min = coeff_MAD * MAD + coeff_ZNCC * (1.0 - ZNCC);
-		// Search minimum value
-		for (int y_diff = y_start; y_diff <= y_end; y_diff++) {
-			for (int x_diff = x_start; x_diff <= x_end; x_diff++) {
-				std::vector<VECTOR_2D<int> > region;
-//				region = get_nearest_color_region(_image_prev, _connected_regions_current[n], x_diff, y_diff);
+		// Set reference_images
+		reference_images.push_back(&_image_prev);
+		motion_vectors.push_back(&_motion_vector);
+		if (_image_next.isNULL() == false) {
+			reference_images.push_back(&_image_next);
+			motion_vectors.push_back(&_motion_vector_next);
+		}
+		for (int ref = 0; ref < reference_images.size(); ref++) {
+			// Compute initial value
+			double MAD = (this->*MAD_func)(
+			    *(reference_images[ref]), _image_current,
+			    x_start, y_start,
+			    _connected_regions_current[n]);
+			double ZNCC = (this->*NCC_func)(
+			    *(reference_images[ref]), _image_current,
+			    x_start, y_start,
+			    _connected_regions_current[n]);
+			double E_min = coeff_MAD * MAD + coeff_ZNCC * (1.0 - ZNCC);
+			// Search minimum value
+			for (int y_diff = y_start; y_diff <= y_end; y_diff++) {
+				for (int x_diff = x_start; x_diff <= x_end; x_diff++) {
+					std::vector<VECTOR_2D<int> > region;
 
-				VECTOR_2D<double> v_tmp(x_diff, y_diff);
-				MAD = (this->*MAD_func)(
-				    _image_prev, _image_current,
-				    x_diff, y_diff,
-				    _connected_regions_current[n]);
-				ZNCC = (this->*NCC_func)(
-				    _image_prev, _image_current,
-				    x_diff, y_diff,
-				    _connected_regions_current[n]);
-				double E_tmp = coeff_MAD * MAD + coeff_ZNCC * (1.0 - ZNCC);
-				if (E_tmp < E_min) {
-					E_min = E_tmp;
-					MV = v_tmp;
-				} else if (fabs(E_tmp - E_min) < 1E-6) {
-					if (norm(MV) >= norm(v_tmp)) {
+					VECTOR_2D<double> v_tmp(x_diff, y_diff);
+					MAD = (this->*MAD_func)(
+					    *(reference_images[ref]), _image_current,
+					    x_diff, y_diff,
+					    _connected_regions_current[n]);
+					ZNCC = (this->*NCC_func)(
+					    *(reference_images[ref]), _image_current,
+					    x_diff, y_diff,
+					    _connected_regions_current[n]);
+					double E_tmp = coeff_MAD * MAD + coeff_ZNCC * (1.0 - ZNCC);
+					if (E_tmp < E_min) {
 						E_min = E_tmp;
 						MV = v_tmp;
+					} else if (fabs(E_tmp - E_min) < 1E-6) {
+						if (norm(MV) >= norm(v_tmp)) {
+							E_min = E_tmp;
+							MV = v_tmp;
+						}
 					}
 				}
 			}
-		}
-		for (std::list<VECTOR_2D<int> >::iterator ite = _connected_regions_current[n].begin();
-		    ite != _connected_regions_current[n].end();
-		    ++ite) {
-			_motion_vector.at(ite->x, ite->y) = MV;
+			for (std::list<VECTOR_2D<int> >::iterator ite = _connected_regions_current[n].begin();
+			    ite != _connected_regions_current[n].end();
+			    ++ite) {
+				motion_vectors[ref]->at(ite->x, ite->y) = MV;
+			}
 		}
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_BLOCKMATCHING)
 #ifdef _OPENMP
@@ -310,58 +328,6 @@ BlockMatching<T>::grad_image(const ImgVector<T>& image, const int top_left_x, co
 template <>
 ImgVector<VECTOR_2D<double> > *
 BlockMatching<ImgClass::Lab>::grad_image(const ImgVector<ImgClass::Lab>& image, const int top_left_x, const int top_left_y, const int crop_width, const int crop_height);
-
-
-
-
-// ----- Others -----
-template <class T>
-std::vector<VECTOR_2D<int> >
-BlockMatching<T>::get_nearest_color_region(const std::list<VECTOR_2D<int> >& connected_region, const int x_diff, const int y_diff)
-{
-	std::vector<VECTOR_2D<int> > region;
-	std::list<int> overlapping_regions;
-
-	// Collect neighborhood regions
-	for (std::list<VECTOR_2D<int> >::const_iterator ite_region = connected_region.begin();
-	    ite_region != connected_region.end();
-	    ++ite_region) {
-		VECTOR_2D<int> r(ite_region->x + x_diff, ite_region->y + y_diff);
-		if (r.x < 0 && _width <= r.x
-		    && r.y < 0 && _height <= r.y) {
-			continue;
-		}
-		int num = _region_map_prev.get(r.x, r.y);
-		if (overlapping_regions.size() == 0) {
-			overlapping_regions.push_back(num);
-		} else {
-			// Get overlapped region IDs
-			std::list<int>::iterator ite = overlapping_regions.begin();
-			for (;
-			    ite != overlapping_regions.end();
-			    ++ite) {
-				if (*ite == num) {
-					break;
-				}
-			}
-			if (ite != overlapping_regions.end()) {
-				overlapping_regions.push_back(num);
-			}
-		}
-	}
-	// Select neighborhood regions which has near colors to the region and covers connected_region greater than 9%
-	T color_current = _color_quantized_current.get(connected_region.front().x, connected_region.front().y);
-	double min = DBL_MAX;
-	for (std::list<int>::const_iterator ite = overlapping_regions.begin();
-	    ite != overlapping_regions.end();
-	    ++ite) {
-		VECTOR_2D<int> r = _connected_regions_prev[*ite].front();
-		if (norm_squared(color_current - _color_quantized_prev.get(r.x, r.y)) < min) {
-			min = norm_squared(color_current - _color_quantized_prev.get(r.x, r.y));
-		}
-	}
-	return region;
-}
 
 
 

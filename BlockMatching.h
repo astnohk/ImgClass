@@ -36,6 +36,7 @@ class BlockMatching
 		ImgVector<T> _color_quantized_current;
 		ImgVector<T> _color_quantized_next;
 		ImgVector<VECTOR_2D<double> > _motion_vector;
+		ImgVector<VECTOR_2D<double> > _motion_vector_next;
 		// For arbitrary shaped block matching
 		std::vector<std::list<VECTOR_2D<int> > > _connected_regions_prev;
 		std::vector<std::list<VECTOR_2D<int> > > _connected_regions_current;
@@ -68,6 +69,7 @@ class BlockMatching
 
 		// Get reference
 		ImgVector<VECTOR_2D<double> >& ref_motion_vector(void);
+		ImgVector<VECTOR_2D<double> >& ref_motion_vector_next(void);
 		VECTOR_2D<double>& operator[](int n);
 		VECTOR_2D<double>& at(int x, int y);
 		VECTOR_2D<double>& at_block(int x, int y);
@@ -92,7 +94,6 @@ class BlockMatching
 		void block_matching_arbitrary_shaped(const int search_range);
 		// Interpolate skipped Motion Vectors
 		void vector_interpolation(const std::list<VECTOR_2D<int> >& flat_blocks, ImgVector<bool>* estimated);
-		std::vector<VECTOR_2D<int> > get_nearest_color_region(const std::list<VECTOR_2D<int> >& connected_region, const int x_diff, const int y_diff);
 
 		// Get gradients
 		ImgVector<VECTOR_2D<double> >* grad_image(const ImgVector<T>& image, const int top_left_x, const int top_left_y, const int crop_width, const int crop_height);

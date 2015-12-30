@@ -27,28 +27,36 @@ class BlockMatching
 		int _cells_width;
 		int _cells_height;
 		ImgVector<T> _image_prev;
+		ImgVector<T> _image_current; // Base image for motion estimation
 		ImgVector<T> _image_next;
 		ImgVector<int> _region_map_prev;
+		ImgVector<int> _region_map_current;
 		ImgVector<int> _region_map_next;
 		ImgVector<T> _color_quantized_prev;
+		ImgVector<T> _color_quantized_current;
 		ImgVector<T> _color_quantized_next;
 		ImgVector<VECTOR_2D<double> > _motion_vector;
 		// For arbitrary shaped block matching
 		std::vector<std::list<VECTOR_2D<int> > > _connected_regions_prev;
+		std::vector<std::list<VECTOR_2D<int> > > _connected_regions_current;
 		std::vector<std::list<VECTOR_2D<int> > > _connected_regions_next;
 
 	public:
 		// Constructors
 		BlockMatching(void);
 		explicit BlockMatching(const BlockMatching& copy);
-		BlockMatching(const ImgVector<T>& image_prev, const ImgVector<T>& image_next, const int BlockSize, const bool dense = false);
-		BlockMatching(const ImgVector<T>& image_prev, const ImgVector<T>& image_next, const ImgVector<int>& region_prev, const ImgVector<int>& region_next);
+		BlockMatching(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const int BlockSize);
+		BlockMatching(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const ImgVector<T>& image_next, const int BlockSize);
+		BlockMatching(const ImgVector<T>& image_prev, const ImgVector<int>& region_prev, const ImgVector<T>& image_current, const ImgVector<int>& region_current);
+		BlockMatching(const ImgVector<T>& image_prev, const ImgVector<int>& region_prev, const ImgVector<T>& image_current, const ImgVector<int>& region_current, const ImgVector<T>& image_next, const ImgVector<int>& region_next);
 		// Destructor
 		virtual ~BlockMatching(void);
 
 		// Resetter
-		void reset(const ImgVector<T>& image_prev, const ImgVector<T>& image_next, const int BlockSize, const bool dense = false);
-		void reset(const ImgVector<T>& image_prev, const ImgVector<T>& image_next, const ImgVector<int>& region_prev, const ImgVector<int>& region_next);
+		void reset(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const int BlockSize);
+		void reset(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const ImgVector<T>& image_next, const int BlockSize);
+		void reset(const ImgVector<T>& image_prev, const ImgVector<int>& region_prev, const ImgVector<T>& image_current, const ImgVector<int>& region_current);
+		void reset(const ImgVector<T>& image_prev, const ImgVector<int>& region_prev, const ImgVector<T>& image_current, const ImgVector<int>& region_current, const ImgVector<T>& image_next, const ImgVector<int>& region_next);
 
 		// Get state
 		int width(void) const;
@@ -81,27 +89,25 @@ class BlockMatching
 
 		// Main method of block_matching
 		void block_matching_lattice(const int search_range);
-		void block_matching_dense_lattice(const int search_range);
 		void block_matching_arbitrary_shaped(const int search_range);
 		// Interpolate skipped Motion Vectors
 		void vector_interpolation(const std::list<VECTOR_2D<int> >& flat_blocks, ImgVector<bool>* estimated);
 		std::vector<VECTOR_2D<int> > get_nearest_color_region(const std::list<VECTOR_2D<int> >& connected_region, const int x_diff, const int y_diff);
 
 		// Get gradients
-		ImgVector<VECTOR_2D<double> >* grad_prev(const int top_left_x, const int top_left_y, const int crop_width, const int crop_height);
+		ImgVector<VECTOR_2D<double> >* grad_image(const ImgVector<T>& image, const int top_left_x, const int top_left_y, const int crop_width, const int crop_height);
 
 		// Correlation function
 		double MAD(const int x_l, const int y_l, const int x_r, const int y_r, const int block_width, const int block_height, const ImgVector<T>& limage, const ImgVector<T>& rimage);
 
-		double MAD(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
-		double ZNCC(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
-		// Center color weighted
-		double MAD_centered(const int x_prev, const int y_prev, const int x_next, const int y_next, const int block_width, const int block_height);
+		double MAD(const int x_prev, const int y_prev, const int x_current, const int y_current, const int block_width, const int block_height);
+		double ZNCC(const int x_prev, const int y_prev, const int x_current, const int y_current, const int block_width, const int block_height);
 		// Arbitrary shaped correlation function
-		double MAD_region(const int x_diff_prev, const int y_diff_prev, const std::list<VECTOR_2D<int> >& region);
-		double ZNCC_region(const int x_diff_prev, const int y_diff_prev, const std::list<VECTOR_2D<int> >& region);
-		double MAD_region_nearest_intensity(const int x_diff_prev, const int y_diff_prev, const std::list<VECTOR_2D<int> >& region);
-		double ZNCC_region_nearest_intensity(const int x_diff_prev, const int y_diff_prev, const std::list<VECTOR_2D<int> >& region);
+		double MAD_region(const ImgVector<T>& reference, const ImgVector<T>& current, const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_current);
+		double ZNCC_region(const ImgVector<T>& reference, const ImgVector<T>& current, const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_current);
+		// Arbitrary shaped correlation function with nearest intensity restricted
+		double MAD_region_nearest_intensity(const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_current);
+		double ZNCC_region_nearest_intensity(const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_current);
 };
 
 double norm_squared(const double& value);

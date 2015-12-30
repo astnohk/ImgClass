@@ -12,17 +12,22 @@ class MotionCompensation
 		int _width;
 		int _height;
 		ImgVector<T> _image_prev;
+		ImgVector<T> _image_current;
 		ImgVector<T> _image_next;
 		ImgVector<T> _image_compensated;
-		ImgVector<VECTOR_2D<double> > _vector;
+		ImgVector<VECTOR_2D<double> > _vector_prev;
+		ImgVector<VECTOR_2D<double> > _vector_next;
+
 	public:
 		MotionCompensation(void);
 		explicit MotionCompensation(const MotionCompensation& copy); // copy constructor
-		MotionCompensation(const ImgVector<T>& image_prev, const ImgVector<T>& image_next, const ImgVector<VECTOR_2D<double> >& vector);
+		MotionCompensation(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const ImgVector<VECTOR_2D<double> >& vector_prev);
+		MotionCompensation(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const ImgVector<T>& image_next, const ImgVector<VECTOR_2D<double> >& vector_prev, const ImgVector<VECTOR_2D<double> >& vector_next);
 		~MotionCompensation(void);
 
 		MotionCompensation& copy(const MotionCompensation& copy);
-		MotionCompensation& set(const ImgVector<T>& image_prev, const ImgVector<T>& image_next, const ImgVector<VECTOR_2D<double> >& vector);
+		MotionCompensation& set(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const ImgVector<VECTOR_2D<double> >& vector_prev);
+		MotionCompensation& set(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const ImgVector<T>& image_next, const ImgVector<VECTOR_2D<double> >& vector_prev, const ImgVector<VECTOR_2D<double> >& vector_next);
 
 		// Accessor
 		// * parameter
@@ -30,7 +35,8 @@ class MotionCompensation
 		int height(void) const;
 
 		// * reference
-		const ImgVector<VECTOR_2D<double> >& ref_vector(void);
+		const ImgVector<VECTOR_2D<double> >& ref_vector_prev(void);
+		const ImgVector<VECTOR_2D<double> >& ref_vector_next(void);
 		const ImgVector<T>& ref_image_compensated(void);
 
 		T& at_image_compensated(int x, int y);
@@ -39,12 +45,16 @@ class MotionCompensation
 		// * original image intensity
 		T get_image_prev(int n) const;
 		T get_image_prev(int x, int y) const;
+		T get_image_current(int n) const;
+		T get_image_current(int x, int y) const;
 		T get_image_next(int n) const;
 		T get_image_next(int x, int y) const;
 		// * vector
 		// returns with qualifier const to avoid to mistake get_vector() for at_vector()
-		const VECTOR_2D<double> get_vector(int n) const;
-		const VECTOR_2D<double> get_vector(int x, int y) const;
+		const VECTOR_2D<double> get_vector_prev(int n) const;
+		const VECTOR_2D<double> get_vector_prev(int x, int y) const;
+		const VECTOR_2D<double> get_vector_next(int n) const;
+		const VECTOR_2D<double> get_vector_next(int x, int y) const;
 		// * compensated image
 		T get_image_compensated(int n);
 		T get_image_compensated(int x, int y);

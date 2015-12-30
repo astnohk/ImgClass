@@ -104,11 +104,20 @@ BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<
 	_region_map_prev.copy(region_map_prev);
 	_region_map_next.copy(region_map_next);
 	// Normalize the image
+#if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_BLOCKMATCHING)
+	std::cout << " Block Matching : Normalize the input images" << std::endl;
+#endif
 	image_normalizer();
 	// Extract connected regions from region_map
+#if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_BLOCKMATCHING)
+	std::cout << " Block Matching : Collect connected region from region map" << std::endl;
+#endif
 	get_connected_region_list(&_connected_regions_prev, region_map_prev);
 	get_connected_region_list(&_connected_regions_next, region_map_next);
 	// Get decreased image
+#if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_BLOCKMATCHING)
+	std::cout << " Block Matching : Get color quantized image" << std::endl;
+#endif
 	get_color_quantized_image(&_color_quantized_prev, _image_prev, _connected_regions_prev);
 	get_color_quantized_image(&_color_quantized_next, _image_next, _connected_regions_next);
 }

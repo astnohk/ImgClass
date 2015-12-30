@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cfloat>
 #include <cmath>
 #include <cstdio>
 #include <iostream>
@@ -240,10 +241,10 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range)
 
 	const double coeff_SAD = 1.0;
 	const double coeff_ZNCC = 1.0;
-	//double (BlockMatching<T>::*SAD_func)(const int, const int, const std::list<VECTOR_2D<int> >&) = &BlockMatching<T>::MAD_region;
-	//double (BlockMatching<T>::*NCC_func)(const int, const int, const std::list<VECTOR_2D<int> >&) = &BlockMatching<T>::ZNCC_region;
-	double (BlockMatching<T>::*SAD_func)(const int, const int, const std::list<VECTOR_2D<int> >&) = &BlockMatching<T>::MAD_region_nearest_intensity;
-	double (BlockMatching<T>::*NCC_func)(const int, const int, const std::list<VECTOR_2D<int> >&) = &BlockMatching<T>::ZNCC_region_nearest_intensity;
+	double (BlockMatching<T>::*SAD_func)(const int, const int, const std::list<VECTOR_2D<int> >&) = &BlockMatching<T>::MAD_region;
+	double (BlockMatching<T>::*NCC_func)(const int, const int, const std::list<VECTOR_2D<int> >&) = &BlockMatching<T>::ZNCC_region;
+	//double (BlockMatching<T>::*SAD_func)(const int, const int, const std::list<VECTOR_2D<int> >&) = &BlockMatching<T>::MAD_region_nearest_intensity;
+	//double (BlockMatching<T>::*NCC_func)(const int, const int, const std::list<VECTOR_2D<int> >&) = &BlockMatching<T>::ZNCC_region_nearest_intensity;
 
 	if (this->isNULL()) {
 		std::cerr << "void BlockMatching<T>::block_matching_region(const ImgVector<int>*, const int) : this is NULL" << std::endl;
@@ -271,7 +272,7 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range)
 		for (int y_diff = y_start; y_diff <= y_end; y_diff++) {
 			for (int x_diff = x_start; x_diff <= x_end; x_diff++) {
 				std::vector<VECTOR_2D<int> > region;
-				region = get_nearest_color_region(_connected_regions_next[n], x_diff, y_diff);
+//				region = get_nearest_color_region(_connected_regions_next[n], x_diff, y_diff);
 
 				VECTOR_2D<double> v_tmp(x_diff, y_diff);
 				SAD = (this->*SAD_func)(
@@ -405,17 +406,35 @@ BlockMatching<T>::get_nearest_color_region(const std::list<VECTOR_2D<int> >& con
 		    && r.y < 0 && _height <= r.y) {
 			continue;
 		}
-		// Get overlapped region IDs
-		for (std::list<int>::iterator ite = overlapping_regions.begin();
-		    ite != overlapping_regions.end();
-		    ++ite) {
-			if (*ite == _region_map_prev.get(r.x, r.y)) {
-				overlapping_regions.push_back(_region_map_prev.get(r.x, r.y));
-				break;
+		int num = _region_map_prev.get(r.x, r.y);
+		if (overlapping_regions.size() == 0) {
+			overlapping_regions.push_back(num);
+		} else {
+			// Get overlapped region IDs
+			std::list<int>::iterator ite = overlapping_regions.begin();
+			for (;
+			    ite != overlapping_regions.end();
+			    ++ite) {
+				if (*ite == num) {
+					break;
+				}
+			}
+			if (ite != overlapping_regions.end()) {
+				overlapping_regions.push_back(num);
 			}
 		}
 	}
 	// Select neighborhood regions which has near colors to the region and covers connected_region greater than 9%
+	T color_next = _color_quantized_next.get(connected_region.front().x, connected_region.front().y);
+	double min = DBL_MAX;
+	for (std::list<int>::const_iterator ite = overlapping_regions.begin();
+	    ite != overlapping_regions.end();
+	    ++ite) {
+		VECTOR_2D<int> r = _connected_regions_prev[*ite].front();
+		if (norm_squared(color_next - _color_quantized_prev.get(r.x, r.y)) < min) {
+			min = norm_squared(color_next - _color_quantized_prev.get(r.x, r.y));
+		}
+	}
 	return region;
 }
 

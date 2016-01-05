@@ -29,10 +29,10 @@ class Segmentation
 	public:
 		// Constructor
 		Segmentation(void);
-		Segmentation(const ImgVector<T>& image, const double kernel_spatial_radius = 8.0, const double kernel_intensity_radius = 12.0 / 255.0);
+		Segmentation(const ImgVector<T>& image, const double kernel_spatial_radius = 8.0, const double kernel_intensity_radius = 8.0 / 255.0);
 		explicit Segmentation(const Segmentation<T>& segmentation); // Copy constructor
 
-		Segmentation<T>& reset(const ImgVector<T>& image, const double kernel_spatial_radius = 8.0, const double kernel_intensity_radius = 12.0 / 255.0);
+		Segmentation<T>& reset(const ImgVector<T>& image, const double kernel_spatial_radius = 8.0, const double kernel_intensity_radius = 8.0 / 255.0);
 
 		Segmentation<T>& copy(const Segmentation<T>& segmentation);
 
@@ -67,10 +67,11 @@ class Segmentation
 		int get_mirror(int x, int y) const;
 
 		// Mean Shift segmentation
-		void Segmentation_MeanShift(const int Iter_Max = 128, const unsigned int Min_Number_of_Pixels = 16, const int Search_Range = 2);
+		void Segmentation_MeanShift(const int Iter_Max = 128, const unsigned int Min_Number_of_Pixels = 16, const int Search_Range = 1);
 
 	protected:
 		const VECTOR_2D<double> MeanShift(const int x, const int y, std::vector<VECTOR_2D<int> >& pel_list, int Iter_Max);
+		unsigned int collect_regions_in_segmentation_map(std::vector<std::list<VECTOR_2D<int> > >* regions_vector);
 		unsigned int small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >* regions_vector, const unsigned int Min_Number_of_Pixels, const int search_range);
 
 		double distance(const T& lcolor, const T& rcolor); // Calculate distance depends on each color space

@@ -287,8 +287,6 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 	std::vector<VECTOR_2D<int> > pel_list;
 	std::list<std::list<VECTOR_2D<int> > > regions_list(0);
 	std::vector<std::list<VECTOR_2D<int> > > regions_vector(0);
-	unsigned int num_region = 0;
-	unsigned int num_small_region = 0;
 
 	if (_width <= 0 || _height <= 0) {
 		return;
@@ -355,44 +353,47 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_SEGMENTATION)
 	printf("\n Mean-Shift method : Finished\n");
 #endif
-	// Collect connected region
-	num_region = 1; // To consider the out of image as region #0
-	for (int y = 0; y < _height; y++) {
-		for (int x = 0; x < _width; x++) {
-			if (_vector_converge_map.get(x, y) < 0) {
-				VECTOR_2D<int> r(x, y);
-				regions_list.push_back(std::list<VECTOR_2D<int> >(1, r));
-				for (std::list<VECTOR_2D<int> >::iterator ite = regions_list.back().begin();
-				    ite != regions_list.back().end();
-				    ++ite) {
-					for (int k = 0; k < 8; k++) { // Search 8-adjacent
-						r.x = ite->x + adjacent[k].x;
-						r.y = ite->y + adjacent[k].y;
-						if (_vector_converge_map.get_zeropad(r.x, r.y) < 0) {
-							_vector_converge_map.at(r.x, r.y) = 0; // eliminate collected point from map
-							regions_list.back().push_back(r);
+	// Collect converged points
+	{
+		int num = 1;
+		for (int y = 0; y < _height; y++) {
+			for (int x = 0; x < _width; x++) {
+				if (_vector_converge_map.get(x, y) < 0) {
+					VECTOR_2D<int> r(x, y);
+					regions_list.push_back(std::list<VECTOR_2D<int> >(1, r));
+					for (std::list<VECTOR_2D<int> >::iterator ite = regions_list.back().begin();
+					    ite != regions_list.back().end();
+					    ++ite) {
+						for (int k = 0; k < 8; k++) { // Search 8-adjacent
+							r.x = ite->x + adjacent[k].x;
+							r.y = ite->y + adjacent[k].y;
+							if (_vector_converge_map.get_zeropad(r.x, r.y) < 0) {
+								_vector_converge_map.at(r.x, r.y) = 0; // eliminate collected point from map
+								regions_list.back().push_back(r);
+							}
 						}
 					}
+					for (std::list<VECTOR_2D<int> >::iterator ite = regions_list.back().begin();
+					    ite != regions_list.back().end();
+					    ++ite) {
+						_vector_converge_map.at(ite->x, ite->y) = static_cast<int>(num);
+					}
+					num++;
 				}
-				for (std::list<VECTOR_2D<int> >::iterator ite = regions_list.back().begin();
-				    ite != regions_list.back().end();
-				    ++ite) {
-					_vector_converge_map.at(ite->x, ite->y) = static_cast<int>(num_region);
-				}
-				num_region++;
 			}
 		}
 	}
-	// Pick all pixels related to limit points and Make the list of regions
 	regions_list.clear();
-	regions_vector.resize(num_region);
+	// Pick all pixels related to limit points and Make the list of regions
 	for (int y = 0; y < _shift_vector.height(); y++) {
 		for (int x = 0; x < _shift_vector.width(); x++) {
 			VECTOR_2D<int> r(int(round(_shift_vector.get(x, y).x)), int(round(_shift_vector.get(x, y).y)));
 			unsigned int n_region = static_cast<unsigned int>(_vector_converge_map.get_zeropad(r.x, r.y));
-			regions_vector[n_region].push_back(VECTOR_2D<int>(x, y));
+			_segmentation_map.at(x, y) = n_region;
 		}
 	}
+	// Collect connected regions from Mean-Shift filtered image
+	unsigned int num_region = collect_regions_in_segmentation_map(&regions_vector);
 	// Set _segmentation_map by _regions No.
 	for (unsigned int n = 0; n < regions_vector.size(); n++) {
 		for (std::list<VECTOR_2D<int> >::iterator ite = regions_vector[n].begin();
@@ -401,9 +402,14 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 			_segmentation_map.at(ite->x, ite->y) = static_cast<int>(n);
 		}
 	}
+#if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_SEGMENTATION)
+	printf(" Mean-Shift method : Eliminate small regions\n");
+#endif
 	// Eliminate small connected regions
-	num_small_region = small_region_eliminate(&regions_vector, Min_Number_of_Pixels, Search_Range);
-	// ----- Output -----
+	unsigned int num_small_region = small_region_eliminate(&regions_vector, Min_Number_of_Pixels, Search_Range);
+#if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_SEGMENTATION)
+	printf(" Mean-Shift method : the number of regions %u -> %u\n", num_region, num_region - num_small_region);
+#endif
 	// Copy connected regions list
 	num_region -= num_small_region;
 	_regions.resize(num_region);
@@ -416,7 +422,7 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 			}
 		}
 	}
-	// Set _segmentation_map by _regions No.
+	// Reset _segmentation_map by _regions No.
 	for (unsigned int n = 0; n < _regions.size(); n++) {
 		for (unsigned int i = 0; i < _regions[n].size(); i++) {
 			_segmentation_map.at(_regions[n][i].x, _regions[n][i].y) = static_cast<int>(n);
@@ -437,6 +443,58 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 
 template <class T>
 unsigned int
+Segmentation<T>::collect_regions_in_segmentation_map(std::vector<std::list<VECTOR_2D<int> > >* vector)
+{
+	const VECTOR_2D<int> adjacent[8] = {
+	    VECTOR_2D<int>(-1, -1), VECTOR_2D<int>(0, -1), VECTOR_2D<int>(1, -1),
+	    VECTOR_2D<int>(-1, 0), VECTOR_2D<int>(1, 0),
+	    VECTOR_2D<int>(-1, 1), VECTOR_2D<int>(0, 1), VECTOR_2D<int>(1, 1)};
+	std::list<std::list<VECTOR_2D<int> > > list(0);
+	ImgVector<bool> collected(_width, _height, false);
+
+	unsigned int num_region = 0;
+	for (int y = 0; y < _height; y++) {
+		for (int x = 0; x < _width; x++) {
+			if (collected.get(x, y)) {
+				continue;
+			}
+			VECTOR_2D<int> r(x, y);
+			collected.at(x, y) = true;
+			int N = _segmentation_map.get(r.x, r.y);
+			list.push_back(std::list<VECTOR_2D<int> >(1, r));
+			num_region++;
+			// Search connected regions with 8-adjacent
+			for (std::list<VECTOR_2D<int> >::iterator ite = list.back().begin();
+			    ite != list.back().end();
+			    ++ite) {
+				for (int k = 0; k < 8; k++) {
+					r.x = ite->x + adjacent[k].x;
+					r.y = ite->y + adjacent[k].y;
+					if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height
+					    && collected.get(r.x, r.y) == false
+					    && _segmentation_map.get(r.x, r.y) == N) {
+						collected.at(r.x, r.y) = true;
+						list.back().push_back(r);
+					}
+				}
+			}
+		}
+	}
+	vector->resize(num_region);
+	{
+		unsigned int N = 0;
+		for (std::list<std::list<VECTOR_2D<int> > >::iterator ite = list.begin();
+		    ite != list.end();
+		    ++ite) {
+			vector->at(N).assign(ite->begin(), ite->end());
+			N++;
+		}
+	}
+	return num_region;
+}
+
+template <class T>
+unsigned int
 Segmentation<T>::small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >* regions_vector, const unsigned int Min_Number_of_Pixels, const int search_range)
 {
 	std::vector<bool> small_regions(regions_vector->size(), false);
@@ -444,12 +502,9 @@ Segmentation<T>::small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >
 
 	// Check small regions
 	for (unsigned int n = 0; n < regions_vector->size(); n++) {
-		if (regions_vector->at(n).size() < Min_Number_of_Pixels) {
-			for (std::list<VECTOR_2D<int> >::iterator ite = regions_vector->at(n).begin();
-			    ite != regions_vector->at(n).end();
-			    ++ite) {
-				small_regions[n] = true;
-			}
+		if (regions_vector->at(n).size() < Min_Number_of_Pixels
+		    && regions_vector->at(n).size() > 0) {
+			small_regions[n] = true;
 		}
 	}
 	// Concatenate small regions
@@ -457,6 +512,7 @@ Segmentation<T>::small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >
 		if (small_regions[n] == false) {
 			continue;
 		}
+		num_small_region++; // Count the number of small regions here because some regions may become larger on this routine
 		// Search nearest neighbor of the small region
 		T center_color = _image.get(regions_vector->at(n).begin()->x, regions_vector->at(n).begin()->y);
 		unsigned int concatenate_target = n;
@@ -481,7 +537,7 @@ Segmentation<T>::small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >
 				}
 			}
 		}
-		if (check) { // Concatenate small region to neighborhood region
+		if (check) { // Concatenate small region to the neighborhood region
 			// Update _segmentation_map
 			VECTOR_2D<int> r = regions_vector->at(concatenate_target).front();
 			for (std::list<VECTOR_2D<int> >::iterator ite = regions_vector->at(n).begin();
@@ -492,6 +548,11 @@ Segmentation<T>::small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >
 			}
 			// splice the list
 			regions_vector->at(concatenate_target).splice(regions_vector->at(concatenate_target).end(), regions_vector->at(n));
+			// Uncheck the region which has became larger
+			if (small_regions[concatenate_target]
+			    && regions_vector->at(n).size() >= Min_Number_of_Pixels) {
+				small_regions[concatenate_target] = false;
+			}
 		}
 	}
 	return num_small_region;

@@ -288,8 +288,10 @@ BlockMatching<ImgClass::RGB>::ZNCC_region(const ImgVector<ImgClass::RGB>& refere
 		    , current.get_zeropad(ite->x, ite->y));
 	}
 	// Calculate Covariance
-	return (N * sum_sq_reference_current - inner_prod(sum_reference, sum_current))
-	    / (sqrt(N * sum_sq_reference - inner_prod(sum_reference, sum_reference)) * sqrt(N * sum_sq_current - inner_prod(sum_current, sum_current)) + 1.0E-10);
+	return (N * sum_sq_reference_current - inner_prod(sum_reference, sum_current)) /
+	    (sqrt((N * sum_sq_reference - inner_prod(sum_reference, sum_reference))
+	    * (N * sum_sq_current - inner_prod(sum_current, sum_current)))
+	    + 1.0E-10);
 }
 
 template <>
@@ -325,8 +327,10 @@ BlockMatching<ImgClass::Lab>::ZNCC_region(const ImgVector<ImgClass::Lab>& refere
 		    , current.get_zeropad(ite->x, ite->y));
 	}
 	// Calculate Covariance
-	return (N * sum_sq_reference_current - inner_prod(sum_reference, sum_current))
-	    / (sqrt(N * sum_sq_reference - inner_prod(sum_reference, sum_reference)) * sqrt(N * sum_sq_current - inner_prod(sum_current, sum_current)) + 1.0E-10);
+	return (N * sum_sq_reference_current - inner_prod(sum_reference, sum_current)) /
+	    (sqrt((N * sum_sq_reference - inner_prod(sum_reference, sum_reference))
+	    * (N * sum_sq_current - inner_prod(sum_current, sum_current)))
+	    + 1.0E-10);
 }
 
 
@@ -408,8 +412,10 @@ BlockMatching<ImgClass::RGB>::ZNCC_region_nearest_intensity(const int x_diff_pre
 		sum_sq_prev_current += coeff * inner_prod(color_prev, color_current);
 	}
 	// Calculate Covariance
-	return (N * sum_sq_prev_current - inner_prod(sum_prev, sum_current))
-	    / (sqrt(N * sum_sq_prev - inner_prod(sum_prev, sum_prev)) * sqrt(N * sum_sq_current - inner_prod(sum_current, sum_current)) + 1.0E-10);
+	return (N * sum_sq_prev_current - inner_prod(sum_prev, sum_current)) /
+	    (sqrt((N * sum_sq_prev - inner_prod(sum_prev, sum_prev))
+	    * (N * sum_sq_current - inner_prod(sum_current, sum_current)))
+	    + 1.0E-10);
 }
 
 template <>
@@ -443,8 +449,10 @@ BlockMatching<ImgClass::Lab>::ZNCC_region_nearest_intensity(const int x_diff_pre
 		sum_sq_prev_current += coeff * inner_prod(color_prev, color_current);
 	}
 	// Calculate Covariance
-	return (N * sum_sq_prev_current - inner_prod(sum_prev, sum_current))
-	    / (sqrt(N * sum_sq_prev - inner_prod(sum_prev, sum_prev)) * sqrt(N * sum_sq_current - inner_prod(sum_current, sum_current)) + 1.0E-10);
+	return (N * sum_sq_prev_current - inner_prod(sum_prev, sum_current)) /
+	    (sqrt((N * sum_sq_prev - inner_prod(sum_prev, sum_prev))
+	    * (N * sum_sq_current - inner_prod(sum_current, sum_current)))
+	    + 1.0E-10);
 }
 
 

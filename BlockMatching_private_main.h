@@ -17,12 +17,12 @@
 // ----- Algorithm -----
 template <class T>
 void
-BlockMatching<T>::block_matching(const int search_range)
+BlockMatching<T>::block_matching(const int search_range, const double coeff_MAD, const double coeff_ZNCC)
 {
 	if (_connected_regions_current.size() > 0) {
-		block_matching_arbitrary_shaped(search_range);
+		block_matching_arbitrary_shaped(search_range, coeff_MAD, coeff_ZNCC);
 	} else {
-		block_matching_lattice(search_range);
+		block_matching_lattice(search_range, coeff_MAD, coeff_ZNCC);
 	}
 }
 
@@ -31,10 +31,8 @@ BlockMatching<T>::block_matching(const int search_range)
 
 template <class T>
 void
-BlockMatching<T>::block_matching_lattice(const int search_range)
+BlockMatching<T>::block_matching_lattice(const int search_range, const double coeff_MAD, const double coeff_ZNCC)
 {
-	const double coeff_MAD = 1.0;
-	const double coeff_ZNCC = 10.0;
 	double (BlockMatching<T>::*MAD_func)(const int, const int, const int, const int, const int, const int) = &BlockMatching<T>::MAD;
 	double (BlockMatching<T>::*NCC_func)(const int, const int, const int, const int, const int, const int) = &BlockMatching<T>::ZNCC;
 
@@ -154,15 +152,13 @@ BlockMatching<T>::block_matching_lattice(const int search_range)
 
 template <class T>
 void
-BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range)
+BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range, const double coeff_MAD, const double coeff_ZNCC)
 {
 	const int x_start = -search_range / 2;
 	const int x_end = search_range / 2;
 	const int y_start = -search_range / 2;
 	const int y_end = search_range / 2;
 
-	const double coeff_MAD = 1.0;
-	const double coeff_ZNCC = 1.0;
 	double (BlockMatching<T>::*MAD_func)(const ImgVector<T>&, const ImgVector<T>&, const int, const int, const std::list<VECTOR_2D<int> >&) = &BlockMatching<T>::MAD_region;
 	double (BlockMatching<T>::*NCC_func)(const ImgVector<T>&, const ImgVector<T>&, const int, const int, const std::list<VECTOR_2D<int> >&) = &BlockMatching<T>::ZNCC_region;
 	//double (BlockMatching<T>::*MAD_func)(const ImgVector<T>&, const ImgVector<T>&, const int, const int, const std::list<VECTOR_2D<int> >&) = &BlockMatching<T>::MAD_region_nearest_intensity;
@@ -403,7 +399,10 @@ BlockMatching<T>::ZNCC(const int x_prev, const int y_prev, const int x_current, 
 			sum_sq_prev_current += _image_prev.get_zeropad(x_prev + x, y_prev + y) * _image_current.get_zeropad(x_current + x, y_current + y);
 		}
 	}
-	return (N * sum_sq_prev_current - sum_prev * sum_current) / (sqrt(N * sum_sq_prev - sum_prev * sum_prev) * sqrt(N * sum_sq_current - sum_current * sum_current) + 1E-10);
+	return (N * sum_sq_prev_current - sum_prev * sum_current) /
+	    (sqrt((N * sum_sq_prev - sum_prev * sum_prev)
+	    * (N * sum_sq_current - sum_current * sum_current))
+	    + 1.0E-10);
 }
 
 template <>
@@ -476,8 +475,10 @@ BlockMatching<T>::ZNCC_region(const ImgVector<T>& reference, const ImgVector<T>&
 		    * current.get_zeropad(ite->x, ite->y);
 	}
 	// Calculate Covariance
-	return (N * sum_sq_reference_current - sum_reference * sum_current)
-	    / (sqrt(N * sum_sq_reference - sum_reference * sum_reference) * sqrt(N * sum_sq_current - sum_current * sum_current));
+	return (N * sum_sq_reference_current - sum_reference * sum_current) /
+	    (sqrt((N * sum_sq_reference - sum_reference * sum_reference)
+	    * (N * sum_sq_current - sum_current * sum_current))
+	    + 1.0E-10);
 }
 
 template <>
@@ -565,8 +566,10 @@ BlockMatching<T>::ZNCC_region_nearest_intensity(const int x_diff, const int y_di
 		    * _image_current.get_zeropad(ite->x, ite->y);
 	}
 	// Calculate Covariance
-	return (N * sum_sq_prev_current - sum_prev * sum_current)
-	    / (sqrt(N * sum_sq_prev - sum_prev * sum_prev) * sqrt(N * sum_sq_current - sum_current * sum_current));
+	return (N * sum_sq_prev_current - sum_prev * sum_current) /
+	    (sqrt((N * sum_sq_prev - sum_prev * sum_prev)
+	    * (N * sum_sq_current - sum_current * sum_current))
+	    + 1.0E-10);
 }
 
 template <>

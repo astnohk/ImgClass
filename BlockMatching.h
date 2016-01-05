@@ -81,7 +81,7 @@ class BlockMatching
 
 		// Block Matching methods
 		// Search in the range of [-floor(search_range / 2), floor(search_range / 2)]
-		void block_matching(const int search_range = 41);
+		void block_matching(const int search_range = 41, const double coeff_MAD = 1.0, const double coeff_ZNCC = 0.0);
 
 	protected:
 		void image_normalizer(void);
@@ -90,8 +90,8 @@ class BlockMatching
 		void get_color_quantized_image(ImgVector<T>* decreased_color_image, const ImgVector<T>& image, const std::vector<std::list<VECTOR_2D<int> > >& connected_regions);
 
 		// Main method of block_matching
-		void block_matching_lattice(const int search_range);
-		void block_matching_arbitrary_shaped(const int search_range);
+		void block_matching_lattice(const int search_range, const double coeff_MAD, const double coeff_ZNCC);
+		void block_matching_arbitrary_shaped(const int search_range, const double coeff_MAD, const double coeff_ZNCC);
 		// Interpolate skipped Motion Vectors
 		void vector_interpolation(const std::list<VECTOR_2D<int> >& flat_blocks, ImgVector<bool>* estimated);
 

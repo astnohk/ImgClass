@@ -461,6 +461,10 @@ template <class T>
 void
 BlockMatching<T>::get_connected_region_list(std::vector<std::list<VECTOR_2D<int> > >* connected_regions, const ImgVector<int>& region_map)
 {
+	const VECTOR_2D<int> adjacent[8] = {
+	    VECTOR_2D<int>(-1, -1), VECTOR_2D<int>(0, -1), VECTOR_2D<int>(1, -1),
+	    VECTOR_2D<int>(-1, 0), VECTOR_2D<int>(1, 0),
+	    VECTOR_2D<int>(-1, 1), VECTOR_2D<int>(0, 1), VECTOR_2D<int>(1, 1)};
 	std::list<std::list<VECTOR_2D<int> > > tmp_list;
 	ImgVector<int> region_map_tmp(region_map);
 	// Clear the vector
@@ -477,29 +481,13 @@ BlockMatching<T>::get_connected_region_list(std::vector<std::list<VECTOR_2D<int>
 				for (std::list<VECTOR_2D<int> >::const_iterator ite = tmp_list.back().begin();
 				    ite != tmp_list.back().end();
 				    ++ite) {
-					if (region_map_tmp.get_zeropad(ite->x + 1, ite->y) == num) {
-						region_map_tmp.at(ite->x + 1, ite->y) = 0;
-						r.x = ite->x + 1;
-						r.y = ite->y;
-						tmp_list.back().push_back(r);
-					}
-					if (region_map_tmp.get_zeropad(ite->x, ite->y + 1) == num) {
-						region_map_tmp.at(ite->x, ite->y + 1) = 0;
-						r.x = ite->x;
-						r.y = ite->y + 1;
-						tmp_list.back().push_back(r);
-					}
-					if (region_map_tmp.get_zeropad(ite->x - 1, ite->y) == num) {
-						region_map_tmp.at(ite->x - 1, ite->y) = 0;
-						r.x = ite->x - 1;
-						r.y = ite->y;
-						tmp_list.back().push_back(r);
-					}
-					if (region_map_tmp.get_zeropad(ite->x, ite->y + 1) == num) {
-						region_map_tmp.at(ite->x, ite->y + 1) = 0;
-						r.x = ite->x;
-						r.y = ite->y + 1;
-						tmp_list.back().push_back(r);
+					for (int k = 0; k < 8; k++) {
+						r.x = ite->x + adjacent[k].x;
+						r.y = ite->y + adjacent[k].y;
+						if (region_map_tmp.get_zeropad(r.x, r.y) == num) {
+							region_map_tmp.at(r.x, r.y) = 0;
+							tmp_list.back().push_back(r);
+						}
 					}
 				}
 			}

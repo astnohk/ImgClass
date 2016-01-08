@@ -244,7 +244,7 @@ MotionCompensation<T>::ref_vector_next(void)
 
 template <class T>
 const ImgVector<T> &
-MotionCompensation<T>::ref_image_compensated(void)
+MotionCompensation<T>::ref_image_compensated(void) const
 {
 	if (motion_compensated == false) {
 		this->create_image_compensated();
@@ -255,7 +255,7 @@ MotionCompensation<T>::ref_image_compensated(void)
 
 template <class T>
 T &
-MotionCompensation<T>::at_image_compensated(int x, int y)
+MotionCompensation<T>::at_image_compensated(int x, int y) const
 {
 	if (motion_compensated == false) {
 		this->create_image_compensated();
@@ -265,7 +265,7 @@ MotionCompensation<T>::at_image_compensated(int x, int y)
 
 template <class T>
 T &
-MotionCompensation<T>::operator[](int n) // Get reference to the compensated image[n]
+MotionCompensation<T>::operator[](int n) const // Get reference to the compensated image[n]
 {
 	if (motion_compensated == false) {
 		this->create_image_compensated();

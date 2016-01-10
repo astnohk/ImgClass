@@ -35,7 +35,8 @@ class BlockMatching
 		ImgVector<T> _color_quantized_prev;
 		ImgVector<T> _color_quantized_current;
 		ImgVector<T> _color_quantized_next;
-		ImgVector<VECTOR_2D<double> > _motion_vector;
+		ImgVector<Vector_ST<double> > _motion_vector_time;
+		ImgVector<VECTOR_2D<double> > _motion_vector_prev;
 		ImgVector<VECTOR_2D<double> > _motion_vector_next;
 		// For arbitrary shaped block matching
 		std::vector<std::list<VECTOR_2D<int> > > _connected_regions_prev;
@@ -68,16 +69,25 @@ class BlockMatching
 		bool isNULL(void) const;
 
 		// Get reference
-		ImgVector<VECTOR_2D<double> >& ref_motion_vector(void);
+		ImgVector<Vector_ST<double> >& ref_motion_vector_time(void);
+		ImgVector<VECTOR_2D<double> >& ref_motion_vector_prev(void);
 		ImgVector<VECTOR_2D<double> >& ref_motion_vector_next(void);
 		VECTOR_2D<double>& operator[](int n);
-		VECTOR_2D<double>& at(int x, int y);
-		VECTOR_2D<double>& at_block(int x, int y);
+		Vector_ST<double>& at(int x, int y);
+		VECTOR_2D<double>& at_prev(int x, int y);
+		VECTOR_2D<double>& at_next(int x, int y);
+		Vector_ST<double>& at_block(int x, int y);
+		VECTOR_2D<double>& at_block_prev(int x, int y);
+		VECTOR_2D<double>& at_block_next(int x, int y);
 
 		// Get data
 		// returns const to avoid to mistake get() for at()
-		const VECTOR_2D<double> get(int x, int y); // NOT const method because it will make new motion vector when it haven't done block matching
-		const VECTOR_2D<double> get_block(int x, int y); // NOT const method because it will make new motion vector when it haven't done block matching
+		const Vector_ST<double> get(int x, int y); // NOT const method because it will make new motion vector when it haven't done block matching
+		const VECTOR_2D<double> get_prev(int x, int y); // NOT const method because it will make new motion vector when it haven't done block matching
+		const VECTOR_2D<double> get_next(int x, int y); // NOT const method because it will make new motion vector when it haven't done block matching
+		const Vector_ST<double> get_block(int x, int y); // NOT const method because it will make new motion vector when it haven't done block matching
+		const VECTOR_2D<double> get_block_prev(int x, int y); // NOT const method because it will make new motion vector when it haven't done block matching
+		const VECTOR_2D<double> get_block_next(int x, int y); // NOT const method because it will make new motion vector when it haven't done block matching
 
 		// Block Matching methods
 		// Search in the range of [-floor(search_range / 2), floor(search_range / 2)]

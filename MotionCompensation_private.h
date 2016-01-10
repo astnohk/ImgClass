@@ -31,7 +31,7 @@ MotionCompensation<T>::MotionCompensation(const MotionCompensation &copy) // cop
 
 
 template <class T>
-MotionCompensation<T>::MotionCompensation(const ImgVector<T> &image_prev, const ImgVector<T> &image_current, const ImgVector<VECTOR_2D<double> > &vector_prev)
+MotionCompensation<T>::MotionCompensation(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const ImgVector<VECTOR_2D<double> >& vector_prev)
 {
 	motion_compensated = false;
 	_width = 0;
@@ -122,9 +122,10 @@ MotionCompensation<T>::copy(const MotionCompensation &copy)
 	_image_prev.copy(copy._image_prev);
 	_image_current.copy(copy._image_current);
 	_image_next.copy(copy._image_next);
-	_image_compensated.copy(copy._image_compensated);
 	_vector_prev.copy(copy._vector_prev);
 	_vector_next.copy(copy._vector_next);
+
+	_image_compensated.copy(copy._image_compensated);
 	return *this;
 }
 

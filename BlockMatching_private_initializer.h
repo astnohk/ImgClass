@@ -244,7 +244,8 @@ BlockMatching<T>::BlockMatching(const BlockMatching& copy)
 	_connected_regions_current.assign(copy._connected_regions_current.begin(), copy._connected_regions_current.end());
 	_connected_regions_next.assign(copy._connected_regions_next.begin(), copy._connected_regions_next.end());
 
-	_motion_vector.copy(copy._motion_vector);
+	_motion_vector_time.copy(copy._motion_vector_time);
+	_motion_vector_prev.copy(copy._motion_vector_prev);
 	_motion_vector_next.copy(copy._motion_vector_next);
 }
 
@@ -296,7 +297,8 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& imag
 	_connected_regions_current.clear();
 	_connected_regions_next.clear();
 
-	_motion_vector.clear();
+	_motion_vector_time.clear();
+	_motion_vector_prev.clear();
 	_motion_vector_next.clear();
 
 	// Normalize the image
@@ -340,7 +342,8 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& imag
 	_connected_regions_current.clear();
 	_connected_regions_next.clear();
 
-	_motion_vector.clear();
+	_motion_vector_time.clear();
+	_motion_vector_prev.clear();
 	_motion_vector_next.clear();
 
 	// Normalize the image
@@ -384,7 +387,8 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<int>& re
 	_region_map_current.copy(region_map_current);
 	_region_map_next.clear();
 
-	_motion_vector.clear();
+	_motion_vector_time.clear();
+	_motion_vector_prev.clear();
 	_motion_vector_next.clear();
 	// Normalize the image
 	image_normalizer();
@@ -435,7 +439,8 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<int>& re
 	_region_map_current.copy(region_map_current);
 	_region_map_next.copy(region_map_next);
 
-	_motion_vector.clear();
+	_motion_vector_time.clear();
+	_motion_vector_prev.clear();
 	_motion_vector_next.clear();
 	// Normalize the image
 	image_normalizer();

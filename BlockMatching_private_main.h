@@ -49,9 +49,10 @@ BlockMatching<T>::block_matching_lattice(const int search_range, const double co
 	}
 	// Initialize
 	// Reset Motion Vector
-	_motion_vector.reset(_cells_width, _cells_height);
+	_motion_vector_time.reset(_cells_width, _cells_height);
+	_motion_vector_prev.reset(_cells_width, _cells_height);
 	if (_image_next.isNULL() == false) {
-		_motion_vector_next.reset(_width, _height);
+		_motion_vector_next.reset(_cells_width, _cells_height);
 	}
 	// Compute global gradients of the image
 	ImgVector<VECTOR_2D<double> >* grad_prev = this->grad_image(_image_prev, 0, 0, _image_prev.width(), _image_prev.height());
@@ -90,7 +91,7 @@ BlockMatching<T>::block_matching_lattice(const int search_range, const double co
 				} else {
 					flat_blocks.push_back(VECTOR_2D<int>(X_b, Y_b));
 				}
-				_motion_vector.at(X_b, Y_b) = 0;
+				_motion_vector_prev.at(X_b, Y_b) = 0;
 				continue;
 			}
 			estimated.at(X_b, Y_b) = true;
@@ -142,11 +143,16 @@ BlockMatching<T>::block_matching_lattice(const int search_range, const double co
 					}
 				}
 			}
-			_motion_vector.at(X_b, Y_b) = MV;
+			_motion_vector_prev.at(X_b, Y_b) = MV;
 		}
 	}
 	// Interpolate Motion Vector on skipped blocks
 	vector_interpolation(flat_blocks, &estimated);
+	for (int n = 0; n < _motion_vector_prev.size(); n++) {
+		_motion_vector_time[n].x = _motion_vector_prev[n].x;
+		_motion_vector_time[n].y = _motion_vector_prev[n].y;
+		_motion_vector_time[n].t = -1;
+	}
 }
 
 
@@ -169,7 +175,8 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range, const 
 		throw std::logic_error("void BlockMatching<T>::block_matching_region(const ImgVector<int>*, const int) : this is NULL");
 	}
 	// MV are expanded on entire image pixels
-	_motion_vector.reset(_width, _height);
+	_motion_vector_time.reset(_width, _height);
+	_motion_vector_prev.reset(_width, _height);
 	if (_image_next.isNULL() == false) {
 		_motion_vector_next.reset(_width, _height);
 	}
@@ -189,12 +196,12 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range, const 
 
 		// Set reference_images
 		reference_images.push_back(&_image_prev);
-		motion_vectors.push_back(&_motion_vector);
+		motion_vectors.push_back(&_motion_vector_prev);
 		if (_image_next.isNULL() == false) {
 			reference_images.push_back(&_image_next);
 			motion_vectors.push_back(&_motion_vector_next);
 		}
-		for (int ref = 0; ref < reference_images.size(); ref++) {
+		for (unsigned int ref = 0; ref < reference_images.size(); ref++) {
 			// Compute initial value
 			double MAD = (this->*MAD_func)(
 			    *(reference_images[ref]), _image_current,
@@ -250,6 +257,11 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range, const 
 		}
 #endif
 	}
+	for (int n = 0; n < _motion_vector_prev.size(); n++) {
+		_motion_vector_time[n].x = _motion_vector_prev[n].x;
+		_motion_vector_time[n].y = _motion_vector_prev[n].y;
+		_motion_vector_time[n].t = -1;
+	}
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_BLOCKMATCHING)
 	printf("\n Block Matching : Finished\n");
 #endif
@@ -276,22 +288,22 @@ BlockMatching<T>::vector_interpolation(const std::list<VECTOR_2D<int> >& flat_bl
 		// Compare 4 adjacent
 		if (estimated->get_mirror(X_b, Y_b - 1)
 		    && (MAD_tmp = this->MAD(x_b, y_b, x_b, y_b - _block_size, _block_size, _block_size, _image_prev, _image_prev)) < MAD_min) {
-			_motion_vector.at(X_b, Y_b) = _motion_vector.get_mirror(X_b, Y_b - 1);
+			_motion_vector_prev.at(X_b, Y_b) = _motion_vector_prev.get_mirror(X_b, Y_b - 1);
 			MAD_min = MAD_tmp;
 		}
 		if (estimated->get_mirror(X_b - 1, Y_b)
 		    && (MAD_tmp = this->MAD(x_b, y_b, x_b - _block_size, y_b, _block_size, _block_size, _image_prev, _image_prev)) < MAD_min) {
-			_motion_vector.at(X_b, Y_b) = _motion_vector.get_mirror(X_b - 1, Y_b);
+			_motion_vector_prev.at(X_b, Y_b) = _motion_vector_prev.get_mirror(X_b - 1, Y_b);
 			MAD_min = MAD_tmp;
 		}
 		if (estimated->get_mirror(X_b, Y_b + 1)
 		    && (MAD_tmp = this->MAD(x_b, y_b, x_b, y_b + _block_size, _block_size, _block_size, _image_prev, _image_prev)) < MAD_min) {
-			_motion_vector.at(X_b, Y_b) = _motion_vector.get_mirror(X_b, Y_b + 1);
+			_motion_vector_prev.at(X_b, Y_b) = _motion_vector_prev.get_mirror(X_b, Y_b + 1);
 			MAD_min = MAD_tmp;
 		}
 		if (estimated->get_mirror(X_b + 1, Y_b)
 		    && (MAD_tmp = this->MAD(x_b, y_b, x_b + _block_size, y_b, _block_size, _block_size, _image_prev, _image_prev)) < MAD_min) {
-			_motion_vector.at(X_b, Y_b) = _motion_vector.get_mirror(X_b + 1, Y_b);
+			_motion_vector_prev.at(X_b, Y_b) = _motion_vector_prev.get_mirror(X_b + 1, Y_b);
 			MAD_min = MAD_tmp;
 		}
 		estimated->at(X_b, Y_b) = true;

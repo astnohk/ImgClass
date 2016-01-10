@@ -14,9 +14,10 @@ class MotionCompensation
 		ImgVector<T> _image_prev;
 		ImgVector<T> _image_current;
 		ImgVector<T> _image_next;
-		ImgVector<T> _image_compensated;
 		ImgVector<VECTOR_2D<double> > _vector_prev;
 		ImgVector<VECTOR_2D<double> > _vector_next;
+
+		ImgVector<T> _image_compensated;
 
 	public:
 		MotionCompensation(void);

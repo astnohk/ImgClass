@@ -7,7 +7,6 @@
 template <class T>
 MotionCompensation<T>::MotionCompensation(void)
 {
-	motion_compensated = false;
 	_width = 0;
 	_height = 0;
 }
@@ -15,7 +14,6 @@ MotionCompensation<T>::MotionCompensation(void)
 template <class T>
 MotionCompensation<T>::MotionCompensation(const MotionCompensation &copy) // copy constructor
 {
-	motion_compensated = copy.motion_compensated;
 	_width = copy._width;
 	_height = copy._height;
 
@@ -33,7 +31,6 @@ MotionCompensation<T>::MotionCompensation(const MotionCompensation &copy) // cop
 template <class T>
 MotionCompensation<T>::MotionCompensation(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const ImgVector<VECTOR_2D<double> >& vector_prev)
 {
-	motion_compensated = false;
 	_width = 0;
 	_height = 0;
 	if (image_prev.isNULL()) {
@@ -61,12 +58,12 @@ MotionCompensation<T>::MotionCompensation(const ImgVector<T>& image_prev, const 
 		}
 	}
 	_image_compensated.reset(_width, _height);
+	this->create_image_compensated();
 }
 
 template <class T>
 MotionCompensation<T>::MotionCompensation(const ImgVector<T> &image_prev, const ImgVector<T> &image_current, const ImgVector<T> &image_next, const ImgVector<VECTOR_2D<double> > &vector_prev, const ImgVector<VECTOR_2D<double> > &vector_next)
 {
-	motion_compensated = false;
 	_width = 0;
 	_height = 0;
 	if (image_prev.isNULL()) {
@@ -103,6 +100,7 @@ MotionCompensation<T>::MotionCompensation(const ImgVector<T> &image_prev, const 
 		}
 	}
 	_image_compensated.reset(_width, _height);
+	this->create_image_compensated();
 }
 
 
@@ -116,7 +114,6 @@ template <class T>
 MotionCompensation<T> &
 MotionCompensation<T>::copy(const MotionCompensation &copy)
 {
-	motion_compensated = copy.motion_compensated;
 	_width = copy._width;
 	_height = copy._height;
 	_image_prev.copy(copy._image_prev);
@@ -142,7 +139,6 @@ MotionCompensation<T>::set(const ImgVector<T>& image_prev, const ImgVector<T>& i
 		throw std::invalid_argument("MotionCompensation& MotionCompensation<T>::set(const ImgVector<double>&, const ImgVector<double>&, const ImgVector<VECTOR_2D<double> >&) : vector_prev is empty");
 	}
 
-	motion_compensated = false;
 	_width = image_prev.width();
 	_height = image_prev.height();
 
@@ -165,6 +161,7 @@ MotionCompensation<T>::set(const ImgVector<T>& image_prev, const ImgVector<T>& i
 		}
 	}
 	_image_compensated.reset(_width, _height);
+	this->create_image_compensated();
 	return *this;
 }
 
@@ -184,7 +181,6 @@ MotionCompensation<T>::set(const ImgVector<T>& image_prev, const ImgVector<T>& i
 		throw std::invalid_argument("MotionCompensation& MotionCompensation<T>::set(const ImgVector<double>&, const ImgVector<double>&, const ImgVector<VECTOR_2D<double> >&) : vector_next is empty");
 	}
 
-	motion_compensated = false;
 	_width = image_prev.width();
 	_height = image_prev.height();
 
@@ -208,6 +204,7 @@ MotionCompensation<T>::set(const ImgVector<T>& image_prev, const ImgVector<T>& i
 		}
 	}
 	_image_compensated.reset(_width, _height);
+	this->create_image_compensated();
 	return *this;
 }
 
@@ -231,14 +228,14 @@ MotionCompensation<T>::height(void) const
 // Reference
 template <class T>
 const ImgVector<VECTOR_2D<double> > &
-MotionCompensation<T>::ref_vector_prev(void)
+MotionCompensation<T>::ref_vector_prev(void) const
 {
 	return _vector_prev;
 }
 
 template <class T>
 const ImgVector<VECTOR_2D<double> > &
-MotionCompensation<T>::ref_vector_next(void)
+MotionCompensation<T>::ref_vector_next(void) const
 {
 	return _vector_next;
 }
@@ -247,9 +244,6 @@ template <class T>
 const ImgVector<T> &
 MotionCompensation<T>::ref_image_compensated(void) const
 {
-	if (motion_compensated == false) {
-		this->create_image_compensated();
-	}
 	return _image_compensated;
 }
 
@@ -258,9 +252,6 @@ template <class T>
 T &
 MotionCompensation<T>::at_image_compensated(int x, int y) const
 {
-	if (motion_compensated == false) {
-		this->create_image_compensated();
-	}
 	return _image_compensated[_width * y + x];
 }
 
@@ -268,9 +259,6 @@ template <class T>
 T &
 MotionCompensation<T>::operator[](int n) const // Get reference to the compensated image[n]
 {
-	if (motion_compensated == false) {
-		this->create_image_compensated();
-	}
 	return _image_compensated[n];
 }
 
@@ -349,22 +337,16 @@ MotionCompensation<T>::get_vector_next(int x, int y) const
 
 template <class T>
 T
-MotionCompensation<T>::get_image_compensated(int n)
+MotionCompensation<T>::get_image_compensated(int n) const
 {
-	if (motion_compensated == false) {
-		this->create_image_compensated();
-	}
 	assert(0 <= n && n < _width * _height);
 	return _image_compensated.get(n);
 }
 
 template <class T>
 T
-MotionCompensation<T>::get_image_compensated(int x, int y)
+MotionCompensation<T>::get_image_compensated(int x, int y) const
 {
-	if (motion_compensated == false) {
-		this->create_image_compensated();
-	}
 	assert(0 <= x && x < _width && 0 <= y && y < _height);
 	return _image_compensated.get(x, y);
 }
@@ -393,7 +375,6 @@ MotionCompensation<T>::create_image_compensated(const ImgVector<bool>* mask)
 				_image_compensated.at(x, y) = _image_prev.get_zeropad(r.x, r.y);
 			}
 		}
-		motion_compensated = true;
 	} else {
 		_image_compensated.copy(_image_current); // Initialize with Original image (image_current)
 		for (int y = 0; y < _height; y++) {
@@ -405,7 +386,6 @@ MotionCompensation<T>::create_image_compensated(const ImgVector<bool>* mask)
 				_image_compensated.at(x, y) = _image_prev.get_zeropad(x + v.x, y + v.y);
 			}
 		}
-		motion_compensated = true;
 	}
 }
 
@@ -431,7 +411,6 @@ MotionCompensation<T>::create_image_compensated_forward(const ImgVector<bool>* m
 				_image_compensated.at(x, y) = _image_prev.get_zeropad(x + v.x, y + v.y);
 			}
 		}
-		motion_compensated = true;
 	} else {
 		_image_compensated.copy(_image_current); // Initialize with Original image (image_current)
 		for (int y = 0; y < _height; y++) {
@@ -443,7 +422,6 @@ MotionCompensation<T>::create_image_compensated_forward(const ImgVector<bool>* m
 				_image_compensated.at(x, y) = _image_prev.get_zeropad(x + v.x, y + v.y);
 			}
 		}
-		motion_compensated = true;
 	}
 }
 
@@ -465,7 +443,6 @@ MotionCompensation<T>::create_image_estimated(const double estimate_time, const 
 				_image_compensated.at(x, y) = _image_prev.get_zeropad(x + v.x, y + v.y);
 			}
 		}
-		motion_compensated = true;
 	} else {
 		_image_compensated.copy(_image_current); // Initialize with Original image (image_current)
 		for (int y = 0; y < _height; y++) {
@@ -477,7 +454,6 @@ MotionCompensation<T>::create_image_estimated(const double estimate_time, const 
 				_image_compensated.at(x, y) = _image_prev.get_zeropad(x + v.x, y + v.y);
 			}
 		}
-		motion_compensated = true;
 	}
 }
 

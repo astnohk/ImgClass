@@ -8,7 +8,6 @@ template <class T>
 class MotionCompensation
 {
 	private:
-		bool motion_compensated;
 		int _width;
 		int _height;
 		ImgVector<T> _image_prev;
@@ -36,8 +35,8 @@ class MotionCompensation
 		int height(void) const;
 
 		// * reference
-		const ImgVector<VECTOR_2D<double> >& ref_vector_prev(void);
-		const ImgVector<VECTOR_2D<double> >& ref_vector_next(void);
+		const ImgVector<VECTOR_2D<double> >& ref_vector_prev(void) const;
+		const ImgVector<VECTOR_2D<double> >& ref_vector_next(void) const;
 
 		const ImgVector<T>& ref_image_compensated(void) const;
 		T& at_image_compensated(int x, int y) const;
@@ -57,8 +56,8 @@ class MotionCompensation
 		const VECTOR_2D<double> get_vector_next(int n) const;
 		const VECTOR_2D<double> get_vector_next(int x, int y) const;
 		// * compensated image
-		T get_image_compensated(int n);
-		T get_image_compensated(int x, int y);
+		T get_image_compensated(int n) const;
+		T get_image_compensated(int x, int y) const;
 
 		// Motion compensation methods
 		void create_image_compensated(const ImgVector<bool>* mask = nullptr);

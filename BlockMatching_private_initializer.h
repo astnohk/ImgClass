@@ -471,15 +471,15 @@ BlockMatching<T>::get_connected_region_list(std::vector<std::list<VECTOR_2D<int>
 	    VECTOR_2D<int>(-1, 0), VECTOR_2D<int>(1, 0),
 	    VECTOR_2D<int>(-1, 1), VECTOR_2D<int>(0, 1), VECTOR_2D<int>(1, 1)};
 	std::list<std::list<VECTOR_2D<int> > > tmp_list;
-	ImgVector<int> region_map_tmp(region_map);
+	ImgVector<bool> collected(_width, _height, false);
 	// Clear the vector
 	connected_regions->clear();
 
-	for (int y = 0; y < region_map_tmp.height(); y++) {
-		for (int x = 0; x < region_map_tmp.width(); x++) {
-			if (region_map_tmp.get(x, y) > 0) {
-				int num = region_map_tmp.get(x, y);
-				region_map_tmp.at(x, y) = 0;
+	for (int y = 0; y < _height; y++) {
+		for (int x = 0; x < _width; x++) {
+			if (collected.get(x, y) == false) {
+				int num = region_map.get(x, y);
+				collected.at(x, y) = true;
 				tmp_list.push_back(std::list<VECTOR_2D<int> >(0)); // Add new region pixel list
 				VECTOR_2D<int> r(x, y);
 				tmp_list.back().push_back(r); // Add first element
@@ -489,8 +489,10 @@ BlockMatching<T>::get_connected_region_list(std::vector<std::list<VECTOR_2D<int>
 					for (int k = 0; k < 8; k++) {
 						r.x = ite->x + adjacent[k].x;
 						r.y = ite->y + adjacent[k].y;
-						if (region_map_tmp.get_zeropad(r.x, r.y) == num) {
-							region_map_tmp.at(r.x, r.y) = 0;
+						if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height
+						    && collected.get(r.x, r.y) == false
+						    && region_map.get(r.x, r.y) == num) {
+							collected.at(r.x, r.y) = true;
 							tmp_list.back().push_back(r);
 						}
 					}

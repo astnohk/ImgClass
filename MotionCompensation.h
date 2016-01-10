@@ -38,10 +38,10 @@ class MotionCompensation
 		// * reference
 		const ImgVector<VECTOR_2D<double> >& ref_vector_prev(void);
 		const ImgVector<VECTOR_2D<double> >& ref_vector_next(void);
-		const ImgVector<T>& ref_image_compensated(void);
 
-		T& at_image_compensated(int x, int y);
-		T& operator[](int n); // Get reference to compensated_image
+		const ImgVector<T>& ref_image_compensated(void) const;
+		T& at_image_compensated(int x, int y) const;
+		T& operator[](int n) const; // Get reference to compensated_image
 
 		// * original image intensity
 		T get_image_prev(int n) const;

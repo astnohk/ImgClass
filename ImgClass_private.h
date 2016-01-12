@@ -229,19 +229,22 @@ ImgVector<T>::copy(const ImgVector<T>& vector)
 	if (this != &vector
 	    && vector._width > 0 && vector._height > 0) {
 		T *tmp_data = nullptr;
-		try {
-			tmp_data = new T[vector._width * vector._height]();
-		}
-		catch (const std::bad_alloc &bad) {
-			std::cerr << bad.what() << std::endl
-			    << "ImgVector::copy(const ImgVector<T>&) : Cannot Allocate Memory" << std::endl;
-			throw;
-			return *this;
+
+		if (_width * _height < vector.size()) {
+			try {
+				tmp_data = new T[vector._width * vector._height]();
+			}
+			catch (const std::bad_alloc &bad) {
+				std::cerr << bad.what() << std::endl
+				    << "ImgVector::copy(const ImgVector<T>&) : Cannot Allocate Memory" << std::endl;
+				throw;
+				return *this;
+			}
+			delete[] _data;
+			_data = tmp_data;
 		}
 		_width = vector._width;
 		_height = vector._height;
-		delete[] _data;
-		_data = tmp_data;
 		for (int i = 0; i < _width * _height; i++) {
 			_data[i] = vector._data[i];
 		}
@@ -256,19 +259,22 @@ ImgVector<T>::cast_copy(const ImgVector<RT>& vector)
 {
 	if (vector.width() > 0 && vector.height() > 0) {
 		T *tmp_data = nullptr;
-		try {
-			tmp_data = new T[vector.size()]();
-		}
-		catch (const std::bad_alloc &bad) {
-			std::cerr << bad.what() << std::endl
-			    << "ImgVector::operator=(ImgVector<T>&) : Cannot Allocate Memory" << std::endl;
-			throw;
-			return *this;
+
+		if (_width * _height < vector.size()) {
+			try {
+				tmp_data = new T[vector.size()]();
+			}
+			catch (const std::bad_alloc &bad) {
+				std::cerr << bad.what() << std::endl
+				    << "ImgVector::operator=(ImgVector<T>&) : Cannot Allocate Memory" << std::endl;
+				throw;
+				return *this;
+			}
+			delete[] _data;
+			_data = tmp_data;
 		}
 		_width = vector.width();
 		_height = vector.height();
-		delete[] _data;
-		_data = tmp_data;
 		for (int i = 0; i < _width * _height; i++) {
 			_data[i] = T(vector.get(i)); // copy with cast
 		}
@@ -284,19 +290,22 @@ ImgVector<T>::operator=(const ImgVector<T>& vector)
 	if (this != &vector
 	    && vector._width > 0 && vector._height > 0) {
 		T *tmp_data = nullptr;
-		try {
-			tmp_data = new T[vector._width * vector._height]();
-		}
-		catch (const std::bad_alloc &bad) {
-			std::cerr << bad.what() << std::endl
-			    << "ImgVector::operator=(ImgVector<T>&) : Cannot Allocate Memory" << std::endl;
-			throw;
-			return *this;
+
+		if (_width * _height < vector.size()) {
+			try {
+				tmp_data = new T[vector._width * vector._height]();
+			}
+			catch (const std::bad_alloc &bad) {
+				std::cerr << bad.what() << std::endl
+				    << "ImgVector::operator=(ImgVector<T>&) : Cannot Allocate Memory" << std::endl;
+				throw;
+				return *this;
+			}
+			delete[] _data;
+			_data = tmp_data;
 		}
 		_width = vector._width;
 		_height = vector._height;
-		delete[] _data;
-		_data = tmp_data;
 		for (int i = 0; i < _width * _height; i++) {
 			_data[i] = vector._data[i]; // copy with cast
 		}

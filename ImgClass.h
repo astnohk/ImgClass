@@ -78,8 +78,8 @@ class ImgVector
 		void map(T (*func)(T &value));
 
 		// Resampling (Change the data of *this)
-		void resize_zerohold(const int Width, const int Height);
-		void resize_bicubic(const int Width, const int Height, const bool saturate = false, const double min = 0.0, const double max = 0.0, T (*Nearest_Integer_Method)(double &d) = nullptr, const double B = (0.0 / 3.0), const double C = (1.0 / 2.0));
+		void resample_zerohold(const int Width, const int Height);
+		void resample_bicubic(const int Width, const int Height, const bool saturate = false, const double min = 0.0, const double max = 0.0, T (*Nearest_Integer_Method)(double &d) = nullptr, const double B = (0.0 / 3.0), const double C = (1.0 / 2.0));
 
 		// Operators
 		template<class RT> ImgVector<T>& operator+=(const RT& rvalue);

@@ -29,7 +29,7 @@ ImgVector<T>::ImgVector(const int Width, const int Height, const T& value)
 		try {
 			_data = new T[_reserved_size];
 		}
-		catch (const std::bad_alloc &bad) {
+		catch (const std::bad_alloc& bad) {
 			std::cerr << bad.what() << std::endl
 			    << "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory" << std::endl;
 			_data = nullptr;
@@ -55,7 +55,7 @@ ImgVector<T>::ImgVector(const int Width, const int Height, const T* array)
 		try {
 			_data = new T[_reserved_size];
 		}
-		catch (const std::bad_alloc &bad) {
+		catch (const std::bad_alloc& bad) {
 			std::cerr << bad.what() << std::endl
 			    << "ImgVector::ImgVector(T *, int, int) : Cannot Allocate Memory" << std::endl;
 			_data = nullptr;
@@ -122,10 +122,9 @@ ImgVector<T>::reserve(const int Width, const int Height)
 			throw;
 		}
 		_reserved_size = new_size;
-		for (int y = 0; y < _height; y++) {
-			for (int x = 0; x < _width; x++) {
-				new_data[size_t(_width) * size_t(y) + size_t(x)] =
-				    _data[size_t(_width) * size_t(y) + size_t(x)];
+		for (size_t y = 0; y < size_t(_height); y++) {
+			for (size_t x = 0; x < size_t(_width); x++) {
+				new_data[size_t(_width) * y + x] = _data[size_t(_width) * y + x];
 			}
 		}
 		delete[] _data;
@@ -220,13 +219,13 @@ ImgVector<T>::resize(const int Width, const int Height, const T& value)
 				    << "ImgVector::resize(const int, const int, const T&) : Cannot Allocate Memory" << std::endl;
 				throw;
 			}
-			for (int y = 0; y < Height; y++) {
-				for (int x = 0; x < Width; x++) {
-					if (y < _height && x < _width) {
-						new_data[size_t(Width) * size_t(y) + size_t(x)] =
-						    _data[size_t(_width) * size_t(y) + size_t(x)];
+			for (size_t y = 0; y < size_t(Height); y++) {
+				for (size_t x = 0; x < size_t(Width); x++) {
+					if (y < size_t(_height) && x < size_t(_width)) {
+						new_data[size_t(Width) * y + x] =
+						    _data[size_t(_width) * y + x];
 					} else {
-						new_data[size_t(Width) * size_t(y) + size_t(x)] = value;
+						new_data[size_t(Width) * y + x] = value;
 					}
 				}
 			}
@@ -234,24 +233,22 @@ ImgVector<T>::resize(const int Width, const int Height, const T& value)
 			_data = new_data;
 			_reserved_size = new_size;
 		} else if (Width > _width) { // New size is less than or equal to previous but new_width > previous_width
-			for (int y = Height - 1; y >= 0; y--) {
-				for (int x = Width - 1; x >= 0; x--) {
-					if (y < _height && x < _width) {
-						_data[size_t(Width) * size_t(y) + size_t(x)] =
-						    _data[size_t(_width) * size_t(y) + size_t(x)];
+			for (size_t y = size_t(Height) - 1; y >= 0; y--) {
+				for (size_t x = size_t(Width) - 1; x >= 0; x--) {
+					if (y < size_t(_height) && x < size_t(_width)) {
+						_data[size_t(Width) * y + x] = _data[size_t(_width) * y + x];
 					} else {
-						_data[size_t(Width) * size_t(y) + size_t(x)] = value;
+						_data[size_t(Width) * y + x] = value;
 					}
 				}
 			}
 		} else {
-			for (int y = 0; y < Height; y++) {
-				for (int x = 0; x < Width; x++) {
-					if (y < _height && x < _width) {
-						_data[size_t(Width) * size_t(y) + size_t(x)] =
-						    _data[size_t(_width) * size_t(y) + size_t(x)];
+			for (size_t y = 0; y < size_t(Height); y++) {
+				for (size_t x = 0; x < size_t(Width); x++) {
+					if (y < size_t(_height) && x < size_t(_width)) {
+						_data[size_t(Width) * y + x] = _data[size_t(_width) * y + x];
 					} else {
-						_data[size_t(Width) * size_t(y) + size_t(x)] = value;
+						_data[size_t(Width) * y + x] = value;
 					}
 				}
 			}
@@ -432,26 +429,26 @@ T &
 ImgVector<T>::at(const int x, const int y)
 {
 	assert(0 <= x && x < _width && 0 <= y && y < _height);
-	return _data[_width * y + x];
+	return _data[size_t(_width) * size_t(y) + size_t(x)];
 }
 
 template <class T>
 T &
 ImgVector<T>::at_repeat(const int x, const int y)
 {
-	int x_repeat, y_repeat;
+	size_t x_repeat, y_repeat;
 
 	if (x >= 0) {
-		x_repeat = x % _width;
+		x_repeat = static_cast<size_t>(x % _width);
 	} else {
-		x_repeat = _width - (int(std::abs(double(x) + 1.0)) % _width);
+		x_repeat = static_cast<size_t>(_width - (int(std::abs(double(x) + 1.0)) % _width));
 	}
 	if (y >= 0) {
-		y_repeat = y % _height;
+		y_repeat = static_cast<size_t>(y % _height);
 	} else {
-		y_repeat = _height - (int(std::abs(double(y) + 1.0)) % _height);
+		y_repeat = static_cast<size_t>(_height - (int(std::abs(double(y) + 1.0)) % _height));
 	}
-	return _data[_width * y_repeat + x_repeat];
+	return _data[size_t(_width) * y_repeat + x_repeat];
 }
 
 template <class T>
@@ -469,7 +466,7 @@ ImgVector<T>::at_mirror(const int x, const int y)
 	}
 	x_mirror = int(round(_width - 0.5 - std::fabs(_width - 0.5 - (x_mirror % (2 * _width)))));
 	y_mirror = int(round(_height - 0.5 - std::fabs(_height - 0.5 - (y_mirror % (2 * _height)))));
-	return _data[_width * y_mirror + x_mirror];
+	return _data[size_t(_width) * size_t(y_mirror) + size_t(x_mirror)];
 }
 
 
@@ -486,7 +483,7 @@ const T
 ImgVector<T>::get(const int x, const int y) const
 {
 	assert(0 <= x && x < _width && 0 <= y && y < _height);
-	return _data[_width * y + x];
+	return _data[size_t(_width) * size_t(y) + size_t(x)];
 }
 
 template <class T>
@@ -498,7 +495,7 @@ ImgVector<T>::get_zeropad(const int x, const int y) const
 	if (x < 0 || _width <= x || y < 0 || _height <= y) {
 		return zero;
 	} else {
-		return _data[_width * y + x];
+		return _data[size_t(_width) * size_t(y) + size_t(x)];
 	}
 }
 
@@ -506,19 +503,19 @@ template <class T>
 const T
 ImgVector<T>::get_repeat(const int x, const int y) const
 {
-	int x_repeat, y_repeat;
+	size_t x_repeat, y_repeat;
 
 	if (x >= 0) {
-		x_repeat = x % _width;
+		x_repeat = static_cast<size_t>(x % _width);
 	} else {
-		x_repeat = _width - (int(std::abs(double(x) + 1.0)) % _width);
+		x_repeat = static_cast<size_t>(_width - (int(std::abs(double(x) + 1.0)) % _width));
 	}
 	if (y >= 0) {
-		y_repeat = y % _height;
+		y_repeat = static_cast<size_t>(y % _height);
 	} else {
-		y_repeat = _height - (int(std::abs(double(y) + 1.0)) % _height);
+		y_repeat = static_cast<size_t>(_height - (int(std::abs(double(y) + 1.0)) % _height));
 	}
-	return _data[_width * y_repeat + x_repeat];
+	return _data[size_t(_width) * y_repeat + x_repeat];
 }
 
 template <class T>
@@ -536,7 +533,7 @@ ImgVector<T>::get_mirror(const int x, const int y) const
 	}
 	x_mirror = int(round(_width - 0.5 - std::fabs(_width - 0.5 - (x_mirror % (2 * _width)))));
 	y_mirror = int(round(_height - 0.5 - std::fabs(_height - 0.5 - (y_mirror % (2 * _height)))));
-	return _data[_width * y_mirror + x_mirror];
+	return _data[size_t(_width) * size_t(y_mirror) + size_t(x_mirror)];
 }
 
 
@@ -557,8 +554,8 @@ ImgVector<T>::get_zeropad_cubic(const double& x, const double& y, const double& 
 	}
 	for (int m = 0; m < 4; m++) {
 		for (int n = 0; n < 4; n++) {
-			value = value
-			    + this->get_zeropad(int(floor(x)), int(floor(y))) * bicubic_x[n] * bicubic_y[m];
+			value += this->get_zeropad(int(floor(x)) + n - 1, int(floor(y)) + m - 1)
+			    * bicubic_x[n] * bicubic_y[m];
 		}
 	}
 	return value;
@@ -578,8 +575,8 @@ ImgVector<T>::get_repeat_cubic(const double& x, const double& y, const double& B
 	}
 	for (int m = 0; m < 4; m++) {
 		for (int n = 0; n < 4; n++) {
-			value = value
-			    + this->get_repeat(int(floor(x)), int(floor(y))) * bicubic_x[n] * bicubic_y[m];
+			value += this->get_repeat(int(floor(x)) + n - 1, int(floor(y)) + m - 1)
+			    * bicubic_x[n] * bicubic_y[m];
 		}
 	}
 	return value;
@@ -599,8 +596,8 @@ ImgVector<T>::get_mirror_cubic(const double& x, const double& y, const double& B
 	}
 	for (int m = 0; m < 4; m++) {
 		for (int n = 0; n < 4; n++) {
-			value = value
-			    + this->get_mirror(int(floor(x)), int(floor(y))) * bicubic_x[n] * bicubic_y[m];
+			value += this->get_mirror(int(floor(x)) + n - 1, int(floor(y)) + m - 1)
+			    * bicubic_x[n] * bicubic_y[m];
 		}
 	}
 	return value;
@@ -617,7 +614,7 @@ ImgVector<T>::min(void) const
 		throw std::logic_error("T ImgVector<T>::min(void) : vector is empty");
 	}
 	T min = _data[0];
-	for (int i = 1; i < _width * _height; i++) {
+	for (size_t i = 1; i < size_t(_width) * size_t(_height); i++) {
 		if (_data[i] < min) {
 			min = _data[i];
 		}
@@ -633,7 +630,7 @@ ImgVector<T>::max(void) const
 		throw std::logic_error("T ImgVector<T>::max(void) : vector is empty");
 	}
 	T max = _data[0];
-	for (int i = 1; i < _width * _height; i++) {
+	for (size_t i = 1; i < size_t(_width) * size_t(_height); i++) {
 		if (_data[i] > max) {
 			max = _data[i];
 		}
@@ -653,13 +650,13 @@ ImgVector<T>::min(const int top_left_x, const int top_left_y, const int crop_wid
 	} else if (crop_height <= 0) {
 		throw std::invalid_argument("T ImgVector<T>::min(int, int, int, int) : crop_height<= 0");
 	}
-	T min = _data[_width * top_left_y + top_left_x];
+	T min = _data[size_t(_width) * size_t(top_left_y) + size_t(top_left_x)];
 	for (int y = 0; y < crop_height; y++) {
 		for (int x = 0; x < crop_width; x++) {
 			if (0 <= x + top_left_x && x + top_left_x < _width
 			    && 0 <= y + top_left_y && y + top_left_y < _height
-			    && _data[_width * (y + top_left_y) + x + top_left_x] < min) {
-				min = _data[_width * (y + top_left_y) + x + top_left_x];
+			    && _data[size_t(_width) * size_t(y + top_left_y) + size_t(x + top_left_x)] < min) {
+				min = _data[size_t(_width) * size_t(y + top_left_y) + size_t(x + top_left_x)];
 			}
 		}
 	}
@@ -677,13 +674,13 @@ ImgVector<T>::max(const int top_left_x, const int top_left_y, const int crop_wid
 	} else if (crop_height <= 0) {
 		throw std::invalid_argument("T ImgVector<T>::max(int, int, int, int) : crop_height <= 0");
 	}
-	T max = _data[_width * top_left_y + top_left_x];
+	T max = _data[size_t(_width) * size_t(top_left_y) + size_t(top_left_x)];
 	for (int y = 0; y < crop_height; y++) {
 		for (int x = 0; x < crop_width; x++) {
 			if (0 <= x + top_left_x && x + top_left_x < _width
 			    && 0 <= y + top_left_y && y + top_left_y < _height
-			    && _data[_width * (y + top_left_y) + x + top_left_x] > max) {
-				max = _data[_width * (y + top_left_y) + x + top_left_x];
+			    && _data[size_t(_width) * size_t(y + top_left_y) + size_t(x + top_left_x)] > max) {
+				max = _data[size_t(_width) * size_t(y + top_left_y) + size_t(x + top_left_x)];
 			}
 		}
 	}
@@ -698,14 +695,14 @@ template <class T>
 const T
 ImgVector<T>::variance(void) const
 {
-	double N = double(_width * _height);
+	double N = double(_width) * double(_height);
 	T sum_squared = .0;
 	T sum = .0;
 
-	for (int y = 0; y < _height; y++) {
-		for (int x = 0; x < _width; x++) {
-			sum += _data[_width * y + x];
-			sum_squared += _data[_width * y + x] * _data[_width * y + x];
+	for (size_t y = 0; y < size_t(_height); y++) {
+		for (size_t x = 0; x < size_t(_width); x++) {
+			sum += _data[size_t(_width) * y + x];
+			sum_squared += _data[size_t(_width) * y + x] * _data[size_t(_width) * y + x];
 		}
 	}
 	return sum_squared / N - sum * sum / (N * N);
@@ -724,8 +721,9 @@ ImgVector<T>::variance(const int top_left_x, const int top_left_y, const int cro
 			if (0 <= x && x < _width
 			    && 0 <= y && y < _height) {
 				N += 1.0;
-				sum += _data[_width * y + x];
-				sum_squared += _data[_width * y + x] * _data[_width * y + x];
+				sum += _data[size_t(_width) * size_t(y) + size_t(x)];
+				sum_squared += _data[size_t(_width) * size_t(y) + size_t(x)]
+				    * _data[size_t(_width) * size_t(y) + size_t(x)];
 			}
 		}
 	}
@@ -750,7 +748,7 @@ ImgVector<T>::crop(const int top_left_x, const int top_left_y, const int crop_wi
 	try {
 		tmp = new ImgVector<T>;
 	}
-	catch (const std::bad_alloc &bad) {
+	catch (const std::bad_alloc& bad) {
 		std::cerr << bad.what() << std::endl
 		    << "ImgVector<T>* ImgVector<T>::crop(int, int, int, int) : Cannot allocate memory" << std::endl;
 		throw;
@@ -762,7 +760,7 @@ ImgVector<T>::crop(const int top_left_x, const int top_left_y, const int crop_wi
 		for (int x = 0; x < crop_height; x++) {
 			if (0 <= top_left_y + y && top_left_y + y < _height
 			    && 0 <= top_left_x + x && top_left_x + x < _width) {
-				tmp->at(x, y) = _data[_width * (y + top_left_y) + x + top_left_x];
+				tmp->at(x, y) = _data[size_t(_width) * size_t(y + top_left_y) + size_t(x + top_left_x)];
 			} else {
 				tmp->at(x, y) = 0;
 			}
@@ -785,7 +783,7 @@ ImgVector<T>::contrast_stretching(const T& Min, const T& Max)
 	T min_tmp = _data[0];
 	T max_tmp = _data[0];
 
-	for (int i = 1; i < _width * _height; i++) {
+	for (size_t i = 1; i < size_t(_width) * size_t(_height); i++) {
 		if (_data[i] < min_tmp) {
 			min_tmp = _data[i];
 		} else if (_data[i] > max_tmp) {
@@ -793,7 +791,7 @@ ImgVector<T>::contrast_stretching(const T& Min, const T& Max)
 		}
 	}
 	// Stretching
-	for (int i = 0; i < _width * _height; i++) {
+	for (size_t i = 0; i < size_t(_width) * size_t(_height); i++) {
 		_data[i] = Min + (_data[i] - min_tmp) * Max / (max_tmp - min_tmp);
 	}
 }
@@ -803,7 +801,7 @@ ImgVector<T>::contrast_stretching(const T& Min, const T& Max)
 
 template <class T>
 void
-ImgVector<T>::resize_zerohold(const int Width, const int Height)
+ImgVector<T>::resample_zerohold(const int Width, const int Height)
 {
 	T *resized = nullptr;
 	T additive_identity = T();
@@ -811,36 +809,34 @@ ImgVector<T>::resize_zerohold(const int Width, const int Height)
 	double scale_y = .0;
 	int area_x;
 	int area_y;
-	int m, n;
-	int x, y;
 	T sum;
 
 	if (Width <= 0) {
-		throw std::out_of_range("ImgVector<T>::resize_zerohold(int, int) : int Width");
+		throw std::out_of_range("ImgVector<T>::resample_zerohold(const int, const int) : int Width");
 	}else if (Height <= 0) {
-		throw std::out_of_range("ImgVector<T>::resize_zerohold(int, int) : int Height");
+		throw std::out_of_range("ImgVector<T>::resample_zerohold(const int, const int) : int Height");
 	}
 	scale_x = double(Width) / _width;
 	scale_y = double(Height) / _height;
 	try {
-		resized = new T[Width * Height];
+		resized = new T[size_t(Width) * size_t(Height)];
 	}
 	catch (const std::bad_alloc &bad) {
 		std::cerr << bad.what() << std::endl
-		    << "ImgVector<T>::resize_zerohold(int, int) : Cannot allocate memory" << std::endl;
+		    << "ImgVector<T>::resample_zerohold(const int, const int) : Cannot allocate memory" << std::endl;
 		throw;
 	}
 	area_x = ceil(double(_width) / Width);
 	area_y = ceil(double(_height) / Height);
-	for (y = 0; y < Height; y++) {
-		for (x = 0; x < Width; x++) {
+	for (size_t y = 0; y < size_t(Height); y++) {
+		for (size_t x = 0; x < size_t(Width); x++) {
 			sum = additive_identity;
-			for (m = 0; m < area_y; m++) {
-				for (n = 0; n < area_x; n++) {
+			for (int m = 0; m < area_y; m++) {
+				for (int n = 0; n < area_x; n++) {
 					sum += this->get(int(floor(x / scale_x)) + n, int(floor(y / scale_y)) + m);
 				}
 			}
-			resized[Width * y + x] = sum / (area_x * area_y);
+			resized[size_t(Width) * y + x] = sum / (area_x * area_y);
 		}
 	}
 	delete[] _data;
@@ -860,7 +856,7 @@ ImgVector<T>::resize_zerohold(const int Width, const int Height)
 */
 template <class T>
 void
-ImgVector<T>::resize_bicubic(const int Width, const int Height, const bool saturate, const double min, const double max, T (*Nearest_Integer_Method)(double &d), const double B, const double C)
+ImgVector<T>::resample_bicubic(const int Width, const int Height, const bool saturate, const double min, const double max, T (*Nearest_Integer_Method)(double &d), const double B, const double C)
 {
 	T *resized = nullptr;
 	double *conv = nullptr;
@@ -869,14 +865,12 @@ ImgVector<T>::resize_bicubic(const int Width, const int Height, const bool satur
 	double scale_conv;
 	int L, L_center;
 	double dx, dy;
-	int x, y;
-	int m, n;
 	double sum;
 
 	if (Width <= 0) {
-		throw std::out_of_range("ImgVector<T>::resize_bicubic(int, int, double, double, T (*)(double &d), double, double) :int Width");
+		throw std::out_of_range("ImgVector<T>::resample_bicubic(const int, const int, const double, const double, T (*)(double &d), const double, const double) :int Width");
 	} else if (Height <= 0) {
-		throw std::out_of_range("ImgVector<T>::resize_bicubic(int, int, double, double, T (*)(double &d), double, double) :int Height");
+		throw std::out_of_range("ImgVector<T>::resample_bicubic(const int, const int, const double, const double, T (*)(double &d), const double, const double) :int Height");
 	}
 	scale_x = double(Width) / _width;
 	scale_y = double(Height) / _height;
@@ -887,12 +881,12 @@ ImgVector<T>::resize_bicubic(const int Width, const int Height, const bool satur
 		scale_conv = ceil(1.0 / (scale_x < scale_y ? scale_x : scale_y));
 	}
 	try {
-		resized = new T[Width * Height];
+		resized = new T[size_t(Width) * size_t(Height)];
 		conv = new double[int(scale_conv * 4)];
 	}
-	catch (const std::bad_alloc &bad) {
+	catch (const std::bad_alloc& bad) {
 		std::cerr << bad.what() << std::endl
-		    << "ImgVector<double>::resize_bicubic(int, int) error : Cannot allocate memory" << std::endl;
+		    << "ImgVector<double>::resample_bicubic(const int, const int, const double, const double, T (*)(double &d), const double, const double) error : Cannot allocate memory" << std::endl;
 		delete[] resized;
 		delete[] conv;
 		throw;
@@ -907,21 +901,21 @@ ImgVector<T>::resize_bicubic(const int Width, const int Height, const bool satur
 		L = 4 * int(ceil(scale_conv));
 		L_center = int(floor((L - 1.0) / 2.0));
 	}
-	for (x = 0; x < Width; x++) {
+	for (int x = 0; x < Width; x++) {
 		if (scale_x >= 1.0) {
 			dx = (x - (scale_x - 1.0) / 2.0) / scale_x;
-			for (n = 0; n < L; n++) {
+			for (int n = 0; n < L; n++) {
 				conv[n] = ImgVector<T>::cubic(double(n - L_center) - (dx - floor(dx)), B, C);
 			}
 		} else {
 			dx = x / scale_x + (1.0 / scale_x - 1.0) / 2.0;
-			for (n = 0; n < L; n++) {
+			for (int n = 0; n < L; n++) {
 				conv[n] = ImgVector<T>::cubic((double(n - L_center) - (dx - floor(dx))) * scale_x, B, C) / scale_conv;
 			}
 		}
-		for (y = 0; y < _height; y++) {
+		for (int y = 0; y < _height; y++) {
 			sum = 0.0;
-			for (n = 0; n < L; n++) {
+			for (int n = 0; n < L; n++) {
 				sum += conv[n] * this->get_mirror(int(floor(dx)) + n - L_center, y);
 			}
 			Tmp.at(x, y) = sum;
@@ -937,30 +931,30 @@ ImgVector<T>::resize_bicubic(const int Width, const int Height, const bool satur
 		L = 4 * int(ceil(scale_conv));
 		L_center = int(floor((L - 1.0) / 2.0));
 	}
-	for (y = 0; y < Height; y++) {
+	for (int y = 0; y < Height; y++) {
 		if (scale_y >= 1.0) {
 			dy = (y - (scale_y - 1.0) / 2.0) / scale_y;
-			for (m = 0; m < L; m++) {
+			for (int m = 0; m < L; m++) {
 				conv[m] = ImgVector<T>::cubic(double(m - L_center) - (dy - floor(dy)), B, C);
 			}
 		} else {
 			dy = y / scale_y + (1.0 / scale_y - 1.0) / 2.0;
-			for (m = 0; m < L; m++) {
+			for (int m = 0; m < L; m++) {
 				conv[m] = ImgVector<T>::cubic((double(m - L_center) - (dy - floor(dy))) / scale_conv, B, C) / scale_conv;
 			}
 		}
-		for (x = 0; x < Width; x++) {
+		for (int x = 0; x < Width; x++) {
 			sum = 0.0;
-			for (m = 0; m < L; m++) {
+			for (int m = 0; m < L; m++) {
 				sum += conv[m] * Tmp.get_mirror(x, int(floor(dy)) + m - L_center);
 			}
 			if (saturate) {
 				sum = sum >= min ? sum <= max ? sum : max : min;
 			}
 			if (Nearest_Integer_Method != nullptr) {
-				resized[Width * y + x] = Nearest_Integer_Method(sum);
+				resized[size_t(Width) * size_t(y) + size_t(x)] = Nearest_Integer_Method(sum);
 			} else {
-				resized[Width * y + x] = sum;
+				resized[size_t(Width) * size_t(y) + size_t(x)] = sum;
 			}
 		}
 	}
@@ -993,7 +987,7 @@ void
 ImgVector<T>::map(T (*func)(T &value))
 {
 	if (func != nullptr) {
-		for (int i = 0 ; i < _width * _height; i++) {
+		for (size_t i = 0 ; i < size_t(_width) * size_t(_height); i++) {
 			_data[i] = func(_data[i]);
 		}
 	}
@@ -1008,7 +1002,7 @@ template <class RT>
 ImgVector<T> &
 ImgVector<T>::operator+=(const RT& val)
 {
-	for (int i = 0; i < _width * _height; i++) {
+	for (size_t i = 0; i < size_t(_width) * size_t(_height); i++) {
 		_data[i] += val;
 	}
 	return *this;
@@ -1019,7 +1013,7 @@ template <class RT>
 ImgVector<T> &
 ImgVector<T>::operator-=(const RT& val)
 {
-	for (int i = 0; i < _width * _height; i++) {
+	for (size_t i = 0; i < size_t(_width) * size_t(_height); i++) {
 		_data[i] -= val;
 	}
 	return *this;
@@ -1030,7 +1024,7 @@ template <class RT>
 ImgVector<T> &
 ImgVector<T>::operator*=(const RT& val)
 {
-	for (int i = 0; i < _width * _height; i++) {
+	for (size_t i = 0; i < size_t(_width) * size_t(_height); i++) {
 		_data[i] *= val;
 	}
 	return *this;
@@ -1041,7 +1035,7 @@ template <class RT>
 ImgVector<T> &
 ImgVector<T>::operator/=(const RT& val)
 {
-	for (int i = 0; i < _width * _height; i++) {
+	for (size_t i = 0; i < size_t(_width) * size_t(_height); i++) {
 		_data[i] /= val;
 	}
 	return *this;
@@ -1060,7 +1054,7 @@ ImgVector<T>::operator+=(const ImgVector<RT>& rvector)
 		std::cerr << "ImgVector<T>& ImgVector<T>::operator+=(const ImgVector<T>&) : Size of const ImgVector<T>& rvalue is not match" << std::endl;
 		throw std::invalid_argument("Size of const ImgVector<T>& rvalue is not match");
 	}
-	for (int i = 0; i < _width * _height; i++) {
+	for (size_t i = 0; i < size_t(_width) * size_t(_height); i++) {
 		_data[i] += rvector._data[i];
 	}
 	return *this;
@@ -1076,7 +1070,7 @@ ImgVector<T>::operator-=(const ImgVector<RT>& rvector)
 		std::cerr << "ImgVector<T>& ImgVector<T>::operator-=(const ImgVector<T>&) : Size of const ImgVector<T>& rvalue is not match" << std::endl;
 		throw std::invalid_argument("Size of const ImgVector<T>& rvalue is not match");
 	}
-	for (int i = 0; i < _width * _height; i++) {
+	for (size_t i = 0; i < size_t(_width) * size_t(_height); i++) {
 		_data[i] -= rvector._data[i];
 	}
 	return *this;
@@ -1092,7 +1086,7 @@ ImgVector<T>::operator*=(const ImgVector<RT>& rvector)
 		std::cerr << "ImgVector<T>& ImgVector<T>::operator*=(const ImgVector<T>&) : Size of const ImgVector<T>& rvalue is not match" << std::endl;
 		throw std::invalid_argument("Size of const ImgVector<T>& rvalue is not match");
 	}
-	for (int i = 0; i < _width * _height; i++) {
+	for (size_t i = 0; i < size_t(_width) * size_t(_height); i++) {
 		_data[i] *= rvector._data[i];
 	}
 	return *this;
@@ -1108,7 +1102,7 @@ ImgVector<T>::operator/=(const ImgVector<RT>& rvector)
 		std::cerr << "ImgVector<T>& ImgVector<T>::operator/=(const ImgVector<T>&) : Size of const ImgVector<T>& rvalue is not match" << std::endl;
 		throw std::invalid_argument("Size of const ImgVector<T>& rvalue is not match");
 	}
-	for (int i = 0; i < _width * _height; i++) {
+	for (size_t i = 0; i < size_t(_width) * size_t(_height); i++) {
 		_data[i] /= rvector._data[i];
 	}
 	return *this;

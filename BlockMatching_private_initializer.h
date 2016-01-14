@@ -98,7 +98,7 @@ BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<
 }
 
 template <class T>
-BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<int>& region_map_prev, const ImgVector<T>& image_current, const ImgVector<int>& region_map_current)
+BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<size_t>& region_map_prev, const ImgVector<T>& image_current, const ImgVector<size_t>& region_map_current)
 {
 	_width = 0;
 	_height = 0;
@@ -157,7 +157,7 @@ BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<
 }
 
 template <class T>
-BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<int>& region_map_prev, const ImgVector<T>& image_current, const ImgVector<int>& region_map_current, const ImgVector<T>& image_next, const ImgVector<int>& region_map_next)
+BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<size_t>& region_map_prev, const ImgVector<T>& image_current, const ImgVector<size_t>& region_map_current, const ImgVector<T>& image_next, const ImgVector<size_t>& region_map_next)
 {
 	_width = 0;
 	_height = 0;
@@ -352,7 +352,7 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& imag
 
 template <class T>
 void
-BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<int>& region_map_prev, const ImgVector<T>& image_current, const ImgVector<int>& region_map_current)
+BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<size_t>& region_map_prev, const ImgVector<T>& image_current, const ImgVector<size_t>& region_map_current)
 {
 	_width = 0;
 	_height = 0;
@@ -404,7 +404,7 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<int>& re
 
 template <class T>
 void
-BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<int>& region_map_prev, const ImgVector<T>& image_current, const ImgVector<int>& region_map_current, const ImgVector<T>& image_next, const ImgVector<int>& region_map_next)
+BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<size_t>& region_map_prev, const ImgVector<T>& image_current, const ImgVector<size_t>& region_map_current, const ImgVector<T>& image_next, const ImgVector<size_t>& region_map_next)
 {
 	_width = 0;
 	_height = 0;
@@ -464,7 +464,7 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<int>& re
  */
 template <class T>
 void
-BlockMatching<T>::get_connected_region_list(std::vector<std::list<VECTOR_2D<int> > >* connected_regions, const ImgVector<int>& region_map)
+BlockMatching<T>::get_connected_region_list(std::vector<std::list<VECTOR_2D<int> > >* connected_regions, const ImgVector<size_t>& region_map)
 {
 	const VECTOR_2D<int> adjacent[8] = {
 	    VECTOR_2D<int>(-1, -1), VECTOR_2D<int>(0, -1), VECTOR_2D<int>(1, -1),
@@ -478,7 +478,7 @@ BlockMatching<T>::get_connected_region_list(std::vector<std::list<VECTOR_2D<int>
 	for (int y = 0; y < _height; y++) {
 		for (int x = 0; x < _width; x++) {
 			if (collected.get(x, y) == false) {
-				int num = region_map.get(x, y);
+				size_t num = region_map.get(x, y);
 				collected.at(x, y) = true;
 				tmp_list.push_back(std::list<VECTOR_2D<int> >(0)); // Add new region pixel list
 				VECTOR_2D<int> r(x, y);

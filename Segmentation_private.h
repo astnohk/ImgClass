@@ -17,6 +17,7 @@
 template <class T>
 Segmentation<T>::Segmentation(void)
 {
+	_size = 0;
 	_width = 0;
 	_height = 0;
 	_kernel_spatial = 10.0;
@@ -27,6 +28,7 @@ template <class T>
 Segmentation<T>::Segmentation(const ImgVector<T>& image, const double kernel_spatial_radius, const double kernel_intensity_radius)
 {
 	_image.copy(image);
+	_size = _image.size();
 	_width = _image.width();
 	_height = _image.height();
 	_kernel_spatial = kernel_spatial_radius;
@@ -49,6 +51,7 @@ Segmentation<T>::Segmentation(const ImgVector<T>& image, const double kernel_spa
 template <class T>
 Segmentation<T>::Segmentation(const Segmentation<T>& segmentation) // Copy constructor
 {
+	_size = segmentation._size;
 	_width = segmentation._width;
 	_height = segmentation._height;
 	_kernel_spatial = segmentation._kernel_spatial;
@@ -67,6 +70,7 @@ Segmentation<T> &
 Segmentation<T>::reset(const ImgVector<T>& image, const double kernel_spatial_radius, const double kernel_intensity_radius)
 {
 	_image.copy(image);
+	_size = _image.size();
 	_width = _image.width();
 	_height = _image.height();
 	_kernel_spatial = kernel_spatial_radius;
@@ -93,6 +97,7 @@ template <class T>
 Segmentation<T> &
 Segmentation<T>::copy(const Segmentation<T>& segmentation)
 {
+	_size = segmentation._size;
 	_width = segmentation._width;
 	_height = segmentation._height;
 	_kernel_spatial = segmentation._kernel_spatial;
@@ -130,6 +135,7 @@ template <class T>
 Segmentation<T> &
 Segmentation<T>::operator=(const Segmentation<T>& rvalue)
 {
+	_size = rvalue._size;
 	_width = rvalue._width;
 	_height = rvalue._height;
 	_kernel_spatial = rvalue._kernel_spatial;
@@ -155,14 +161,14 @@ Segmentation<T>::ref_color_quantized_image(void) const
 }
 
 template <class T>
-const ImgVector<int> &
+const ImgVector<size_t> &
 Segmentation<T>::ref_vector_converge_map(void) const
 {
 	return _vector_converge_map;
 }
 
 template <class T>
-const ImgVector<int> &
+const ImgVector<size_t> &
 Segmentation<T>::ref_segmentation_map(void) const
 {
 	return _segmentation_map;
@@ -198,38 +204,45 @@ Segmentation<T>::height(void) const
 	return _height;
 }
 
+template <class T>
+size_t
+Segmentation<T>::size(void) const
+{
+	return _size;
+}
+
 
 template <class T>
-int & 
-Segmentation<T>::operator[](int n)
+size_t & 
+Segmentation<T>::operator[](size_t n)
 {
 	return _segmentation_map[n];
 }
 
 template <class T>
-int & 
-Segmentation<T>::at(int n)
+size_t & 
+Segmentation<T>::at(size_t n)
 {
-	assert(0 <= n && n < _width * _height);
+	assert(0 <= n && n < _size);
 	return _segmentation_map[n];
 }
 
 template <class T>
-int & 
+size_t & 
 Segmentation<T>::at(int x, int y)
 {
 	return _segmentation_map.at(x, y);
 }
 
 template <class T>
-int & 
+size_t & 
 Segmentation<T>::at_repeat(int x, int y)
 {
 	return _segmentation_map.at_repeat(x, y);
 }
 
 template <class T>
-int & 
+size_t & 
 Segmentation<T>::at_mirror(int x, int y)
 {
 	return _segmentation_map.at_mirror(x, y);
@@ -237,35 +250,35 @@ Segmentation<T>::at_mirror(int x, int y)
 
 
 template <class T>
-int
-Segmentation<T>::get(int n) const
+size_t
+Segmentation<T>::get(size_t n) const
 {
 	return _segmentation_map.get(n);
 }
 
 template <class T>
-int
+size_t
 Segmentation<T>::get(int x, int y) const
 {
 	return _segmentation_map.get(x, y);
 }
 
 template <class T>
-int
+size_t
 Segmentation<T>::get_zeropad(int x, int y) const
 {
 	return _segmentation_map.get_zeropad(x, y);
 }
 
 template <class T>
-int
+size_t
 Segmentation<T>::get_repeat(int x, int y) const
 {
 	return _segmentation_map.get_repeat(x, y);
 }
 
 template <class T>
-int
+size_t
 Segmentation<T>::get_mirror(int x, int y) const
 {
 	return _segmentation_map.get_mirror(x, y);
@@ -303,7 +316,8 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 		}
 	}
 	// Initialize vector converge map
-	_vector_converge_map.reset(_width, _height, 0);
+	ImgVector<bool> vector_converge_mask(_width, _height, false);
+	_vector_converge_map.reset(_width, _height);
 	// Compute Mean Shift vector
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_SEGMENTATION)
 	unsigned int finished = 0;
@@ -335,7 +349,7 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 				r.y = _height - 1;
 			}
 			// Check converge point
-			_vector_converge_map.at(r.x, r.y) = -1;
+			vector_converge_mask.at(r.x, r.y) = true;
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_SEGMENTATION)
 #ifdef _OPENMP
 #pragma omp critical
@@ -355,10 +369,10 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 #endif
 	// Collect converged points
 	{
-		int num = 1;
+		size_t num = 1;
 		for (int y = 0; y < _height; y++) {
 			for (int x = 0; x < _width; x++) {
-				if (_vector_converge_map.get(x, y) < 0) {
+				if (vector_converge_mask.get(x, y)) {
 					VECTOR_2D<int> r(x, y);
 					regions_list.push_back(std::list<VECTOR_2D<int> >(1, r));
 					for (std::list<VECTOR_2D<int> >::iterator ite = regions_list.back().begin();
@@ -367,8 +381,8 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 						for (int k = 0; k < 8; k++) { // Search 8-adjacent
 							r.x = ite->x + adjacent[k].x;
 							r.y = ite->y + adjacent[k].y;
-							if (_vector_converge_map.get_zeropad(r.x, r.y) < 0) {
-								_vector_converge_map.at(r.x, r.y) = 0; // eliminate collected point from map
+							if (vector_converge_mask.get_zeropad(r.x, r.y)) {
+								vector_converge_mask.at(r.x, r.y) = false; // eliminate collected point from map
 								regions_list.back().push_back(r);
 							}
 						}
@@ -376,7 +390,7 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 					for (std::list<VECTOR_2D<int> >::iterator ite = regions_list.back().begin();
 					    ite != regions_list.back().end();
 					    ++ite) {
-						_vector_converge_map.at(ite->x, ite->y) = static_cast<int>(num);
+						_vector_converge_map.at(ite->x, ite->y) = num;
 					}
 					num++;
 				}
@@ -388,7 +402,7 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 	for (int y = 0; y < _shift_vector.height(); y++) {
 		for (int x = 0; x < _shift_vector.width(); x++) {
 			VECTOR_2D<int> r(int(round(_shift_vector.get(x, y).x)), int(round(_shift_vector.get(x, y).y)));
-			unsigned int n_region = static_cast<unsigned int>(_vector_converge_map.get_zeropad(r.x, r.y));
+			size_t n_region = _vector_converge_map.get_zeropad(r.x, r.y);
 			_segmentation_map.at(x, y) = n_region;
 		}
 	}
@@ -399,7 +413,7 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 		for (std::list<VECTOR_2D<int> >::iterator ite = regions_vector[n].begin();
 		    ite != regions_vector[n].end();
 		    ++ite) {
-			_segmentation_map.at(ite->x, ite->y) = static_cast<int>(n);
+			_segmentation_map.at(ite->x, ite->y) = n;
 		}
 	}
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_SEGMENTATION)
@@ -425,7 +439,7 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 	// Reset _segmentation_map by _regions No.
 	for (unsigned int n = 0; n < _regions.size(); n++) {
 		for (unsigned int i = 0; i < _regions[n].size(); i++) {
-			_segmentation_map.at(_regions[n][i].x, _regions[n][i].y) = static_cast<int>(n);
+			_segmentation_map.at(_regions[n][i].x, _regions[n][i].y) = n;
 		}
 	}
 	// Make color-quantized image
@@ -460,7 +474,7 @@ Segmentation<T>::collect_regions_in_segmentation_map(std::vector<std::list<VECTO
 			}
 			VECTOR_2D<int> r(x, y);
 			collected.at(x, y) = true;
-			int N = _segmentation_map.get(r.x, r.y);
+			size_t N = _segmentation_map.get(r.x, r.y);
 			list.push_back(std::list<VECTOR_2D<int> >(1, r));
 			num_region++;
 			// Search connected regions with 8-adjacent
@@ -508,14 +522,14 @@ Segmentation<T>::small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >
 		}
 	}
 	// Concatenate small regions
-	for (unsigned int n = 0; n < regions_vector->size(); n++) {
+	for (size_t n = 0; n < regions_vector->size(); n++) {
 		if (small_regions[n] == false) {
 			continue;
 		}
 		num_small_region++; // Count the number of small regions here because some regions may become larger on this routine
 		// Search nearest neighbor of the small region
 		T center_color = _image.get(regions_vector->at(n).begin()->x, regions_vector->at(n).begin()->y);
-		unsigned int concatenate_target = n;
+		size_t concatenate_target = n;
 		double min = DBL_MAX;
 		bool check = false;
 		for (std::list<VECTOR_2D<int> >::iterator ite = regions_vector->at(n).begin();
@@ -525,13 +539,13 @@ Segmentation<T>::small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >
 				for (int x = -search_range; x <= search_range; x++) {
 					VECTOR_2D<int> r(ite->x + x, ite->y + y);
 					if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height
-					    && static_cast<unsigned int>(_segmentation_map.get(r.x, r.y)) != n) {
+					    && _segmentation_map.get(r.x, r.y) != n) {
 						double diff = this->distance(center_color, _image.get(r.x, r.y));
 						double dist = norm_squared(_shift_vector.get(r.x, r.y) - _shift_vector.get(ite->x, ite->y));
 						if (diff + dist < min) {
 							check = true;
 							min = diff + dist;
-							concatenate_target = static_cast<unsigned int>(_segmentation_map.get(r.x, r.y));
+							concatenate_target = _segmentation_map.get(r.x, r.y);
 						}
 					}
 				}
@@ -543,7 +557,7 @@ Segmentation<T>::small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >
 			for (std::list<VECTOR_2D<int> >::iterator ite = regions_vector->at(n).begin();
 			    ite != regions_vector->at(n).end();
 			    ++ite) {
-				_segmentation_map.at(ite->x, ite->y) = static_cast<int>(concatenate_target);
+				_segmentation_map.at(ite->x, ite->y) = concatenate_target;
 				_color_quantized_image.at(ite->x, ite->y) = _color_quantized_image.get(r.x, r.y);
 			}
 			// splice the list

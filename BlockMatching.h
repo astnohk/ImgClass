@@ -29,9 +29,9 @@ class BlockMatching
 		ImgVector<T> _image_prev;
 		ImgVector<T> _image_current; // Base image for motion estimation
 		ImgVector<T> _image_next;
-		ImgVector<int> _region_map_prev;
-		ImgVector<int> _region_map_current;
-		ImgVector<int> _region_map_next;
+		ImgVector<size_t> _region_map_prev;
+		ImgVector<size_t> _region_map_current;
+		ImgVector<size_t> _region_map_next;
 		ImgVector<T> _color_quantized_prev;
 		ImgVector<T> _color_quantized_current;
 		ImgVector<T> _color_quantized_next;
@@ -49,16 +49,16 @@ class BlockMatching
 		explicit BlockMatching(const BlockMatching& copy);
 		BlockMatching(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const int BlockSize);
 		BlockMatching(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const ImgVector<T>& image_next, const int BlockSize);
-		BlockMatching(const ImgVector<T>& image_prev, const ImgVector<int>& region_prev, const ImgVector<T>& image_current, const ImgVector<int>& region_current);
-		BlockMatching(const ImgVector<T>& image_prev, const ImgVector<int>& region_prev, const ImgVector<T>& image_current, const ImgVector<int>& region_current, const ImgVector<T>& image_next, const ImgVector<int>& region_next);
+		BlockMatching(const ImgVector<T>& image_prev, const ImgVector<size_t>& region_prev, const ImgVector<T>& image_current, const ImgVector<size_t>& region_current);
+		BlockMatching(const ImgVector<T>& image_prev, const ImgVector<size_t>& region_prev, const ImgVector<T>& image_current, const ImgVector<size_t>& region_current, const ImgVector<T>& image_next, const ImgVector<size_t>& region_next);
 		// Destructor
 		virtual ~BlockMatching(void);
 
 		// Resetter
 		void reset(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const int BlockSize);
 		void reset(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const ImgVector<T>& image_next, const int BlockSize);
-		void reset(const ImgVector<T>& image_prev, const ImgVector<int>& region_prev, const ImgVector<T>& image_current, const ImgVector<int>& region_current);
-		void reset(const ImgVector<T>& image_prev, const ImgVector<int>& region_prev, const ImgVector<T>& image_current, const ImgVector<int>& region_current, const ImgVector<T>& image_next, const ImgVector<int>& region_next);
+		void reset(const ImgVector<T>& image_prev, const ImgVector<size_t>& region_prev, const ImgVector<T>& image_current, const ImgVector<size_t>& region_current);
+		void reset(const ImgVector<T>& image_prev, const ImgVector<size_t>& region_prev, const ImgVector<T>& image_current, const ImgVector<size_t>& region_current, const ImgVector<T>& image_next, const ImgVector<size_t>& region_next);
 
 		// Get state
 		int width(void) const;
@@ -96,7 +96,7 @@ class BlockMatching
 	protected:
 		void image_normalizer(void);
 		// Extract connected region from region_map
-		void get_connected_region_list(std::vector<std::list<VECTOR_2D<int> > >* connected_regions, const ImgVector<int>& region_map);
+		void get_connected_region_list(std::vector<std::list<VECTOR_2D<int> > >* connected_regions, const ImgVector<size_t>& region_map);
 		void get_color_quantized_image(ImgVector<T>* decreased_color_image, const ImgVector<T>& image, const std::vector<std::list<VECTOR_2D<int> > >& connected_regions);
 
 		// Main method of block_matching

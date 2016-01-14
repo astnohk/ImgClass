@@ -58,7 +58,7 @@ BlockMatching<T>::block_matching_lattice(const int search_range, const double co
 	ImgVector<VECTOR_2D<double> >* grad_prev = this->grad_image(_image_prev, 0, 0, _image_prev.width(), _image_prev.height());
 	ImgVector<double> grad_prev_x(grad_prev->width(), grad_prev->height());
 	ImgVector<double> grad_prev_y(grad_prev->width(), grad_prev->height());
-	for (int i = 0; i < grad_prev->size(); i++) {
+	for (size_t i = 0; i < grad_prev->size(); i++) {
 		grad_prev_x[i] = grad_prev->get(i).x;
 		grad_prev_y[i] = grad_prev->get(i).y;
 	}
@@ -78,7 +78,7 @@ BlockMatching<T>::block_matching_lattice(const int search_range, const double co
 			ImgVector<VECTOR_2D<double> >* grad_prev_local = this->grad_image(_image_prev, x_b, y_b, _block_size, _block_size);
 			ImgVector<double> grad_prev_local_x(_block_size, _block_size);
 			ImgVector<double> grad_prev_local_y(_block_size, _block_size);
-			for (int i = 0; i < grad_prev_local->size(); i++) {
+			for (size_t i = 0; i < grad_prev_local->size(); i++) {
 				grad_prev_local_x[i] = grad_prev_local->get(i).x;
 				grad_prev_local_y[i] = grad_prev_local->get(i).y;
 			}
@@ -148,7 +148,7 @@ BlockMatching<T>::block_matching_lattice(const int search_range, const double co
 	}
 	// Interpolate Motion Vector on skipped blocks
 	vector_interpolation(flat_blocks, &estimated);
-	for (int n = 0; n < _motion_vector_prev.size(); n++) {
+	for (size_t n = 0; n < _motion_vector_prev.size(); n++) {
 		_motion_vector_time[n].x = _motion_vector_prev[n].x;
 		_motion_vector_time[n].y = _motion_vector_prev[n].y;
 		_motion_vector_time[n].t = -1;
@@ -257,7 +257,7 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range, const 
 		}
 #endif
 	}
-	for (int n = 0; n < _motion_vector_prev.size(); n++) {
+	for (size_t n = 0; n < _motion_vector_prev.size(); n++) {
 		_motion_vector_time[n].x = _motion_vector_prev[n].x;
 		_motion_vector_time[n].y = _motion_vector_prev[n].y;
 		_motion_vector_time[n].t = -1;

@@ -233,12 +233,13 @@ ImgVector<T>::resize(const int Width, const int Height, const T& value)
 			_data = new_data;
 			_reserved_size = new_size;
 		} else if (Width > _width) { // New size is less than or equal to previous but new_width > previous_width
-			for (size_t y = size_t(Height) - 1; y >= 0; y--) {
-				for (size_t x = size_t(Width) - 1; x >= 0; x--) {
-					if (y < size_t(_height) && x < size_t(_width)) {
-						_data[size_t(Width) * y + x] = _data[size_t(_width) * y + x];
+			for (int y = Height - 1; y >= 0; y--) {
+				for (int x = Width - 1; x >= 0; x--) {
+					if (y < _height && x < _width) {
+						_data[size_t(Width) * size_t(y) + size_t(x)] =
+						    _data[size_t(_width) * size_t(y) + size_t(x)];
 					} else {
-						_data[size_t(Width) * y + x] = value;
+						_data[size_t(Width) * size_t(y) + size_t(x)] = value;
 					}
 				}
 			}

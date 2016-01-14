@@ -10,7 +10,7 @@ BlockMatching<ImgClass::RGB>::image_normalizer(void)
 {
 	// Previous
 	double max_int = .0;
-	for (int i = 0; i < _width * _height; i++) {
+	for (size_t i = 0; i < _image_prev.size(); i++) {
 		if (norm(_image_prev[i]) > max_int) {
 			max_int = norm(_image_prev[i]);
 		}
@@ -20,7 +20,7 @@ BlockMatching<ImgClass::RGB>::image_normalizer(void)
 	}
 	// Current
 	max_int = .0;
-	for (int i = 0; i < _width * _height; i++) {
+	for (size_t i = 0; i < _image_current.size(); i++) {
 		if (norm(_image_current[i]) > max_int) {
 			max_int = norm(_image_current[i]);
 		}
@@ -30,7 +30,7 @@ BlockMatching<ImgClass::RGB>::image_normalizer(void)
 	}
 	// Next
 	max_int = .0;
-	for (int i = 0; i < _image_next.size(); i++) {
+	for (size_t i = 0; i < _image_next.size(); i++) {
 		if (norm(_image_next[i]) > max_int) {
 			max_int = norm(_image_next[i]);
 		}
@@ -46,7 +46,7 @@ BlockMatching<ImgClass::Lab>::image_normalizer(void)
 {
 	// Previous
 	double max_int = .0;
-	for (int i = 0; i < _width * _height; i++) {
+	for (size_t i = 0; i < _image_prev.size(); i++) {
 		if (norm(_image_prev[i]) > max_int) {
 			max_int = norm(_image_prev[i]);
 		}
@@ -56,7 +56,7 @@ BlockMatching<ImgClass::Lab>::image_normalizer(void)
 	}
 	// Current
 	max_int = .0;
-	for (int i = 0; i < _width * _height; i++) {
+	for (size_t i = 0; i < _image_current.size(); i++) {
 		if (norm(_image_current[i]) > max_int) {
 			max_int = norm(_image_current[i]);
 		}
@@ -66,7 +66,7 @@ BlockMatching<ImgClass::Lab>::image_normalizer(void)
 	}
 	// Next
 	max_int = .0;
-	for (int i = 0; i < _image_next.size(); i++) {
+	for (size_t i = 0; i < _image_next.size(); i++) {
 		if (norm(_image_next[i]) > max_int) {
 			max_int = norm(_image_next[i]);
 		}

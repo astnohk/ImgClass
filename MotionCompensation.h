@@ -15,7 +15,6 @@ class MotionCompensation
 		ImgVector<T> _image_next;
 		ImgVector<VECTOR_2D<double> > _vector_prev;
 		ImgVector<VECTOR_2D<double> > _vector_next;
-
 		ImgVector<T> _image_compensated;
 
 	public:
@@ -61,7 +60,6 @@ class MotionCompensation
 
 		// Motion compensation methods
 		void create_image_compensated(const ImgVector<bool>* mask = nullptr);
-		void create_image_compensated_forward(const ImgVector<bool>* mask = nullptr);
 		void create_image_estimated(const double estimate_time, const ImgVector<bool>* mask = nullptr);
 };
 

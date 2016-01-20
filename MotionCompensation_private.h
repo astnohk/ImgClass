@@ -389,41 +389,6 @@ MotionCompensation<T>::create_image_compensated(const ImgVector<bool>* mask)
 	}
 }
 
-/*
-  void MotionCompensation<T>::create_image_masked_compensated(ImgVector<bool> *mask)
-
-  Make compensated image.
-  Forwarding means the Vector dispalying motion of the pixels so the compensated image could have UNDEFINED pixels.
-  If the mask is specified then it will only compensate the pixel of masked.
-  ImgVector<bool> *mask should mean mask of compensated image.
-  If mask(x, y) == true then the pixel would be compensated
-  and if mask(x, y) == false then the pixel hold the original (image_current) intensity.
-*/
-template <class T>
-void
-MotionCompensation<T>::create_image_compensated_forward(const ImgVector<bool>* mask)
-{
-	if (mask == nullptr) {
-		_image_compensated.reset(_width, _height);
-		for (int y = 0; y < _height; y++) {
-			for (int x = 0; x < _width; x++) {
-				VECTOR_2D<double> v = _vector_prev.get(x, y);
-				_image_compensated.at(x, y) = _image_prev.get_zeropad(x + v.x, y + v.y);
-			}
-		}
-	} else {
-		_image_compensated.copy(_image_current); // Initialize with Original image (image_current)
-		for (int y = 0; y < _height; y++) {
-			for (int x = 0; x < _width; x++) {
-				if (mask->get(x, y) == false) {
-					continue;
-				}
-				VECTOR_2D<double> v = _vector_prev.get(x, y);
-				_image_compensated.at(x, y) = _image_prev.get_zeropad(x + v.x, y + v.y);
-			}
-		}
-	}
-}
 
 /*
   void MotionCompensation<T>::create_image_masked_compensated(ImgVector<bool> *mask)

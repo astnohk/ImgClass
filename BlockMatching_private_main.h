@@ -148,10 +148,42 @@ BlockMatching<T>::block_matching_lattice(const int search_range, const double co
 	}
 	// Interpolate Motion Vector on skipped blocks
 	vector_interpolation(flat_blocks, &estimated);
-	for (size_t n = 0; n < _motion_vector_prev.size(); n++) {
-		_motion_vector_time[n].x = _motion_vector_prev[n].x;
-		_motion_vector_time[n].y = _motion_vector_prev[n].y;
-		_motion_vector_time[n].t = -1;
+	if (_image_next.isNULL() == false) { // Use bi-directional motion estimation
+		for (int Y_b = 0; Y_b < _cells_height; Y_b++) {
+			for (int X_b = 0; X_b < _cells_width; X_b++) {
+				for (int dy = 0; dy < _block_size; dy++) {
+					int y = Y_b * _block_size + dy;
+					if (y >= _height) {
+						continue;
+					}
+					for (int dx = 0; dx < _block_size; dx++) {
+						int x = X_b * _block_size + dx;
+						if (x >= _width) {
+							continue;
+						}
+						VECTOR_2D<double> mv_p = _motion_vector_prev.get(x, y);
+						VECTOR_2D<double> mv_n = _motion_vector_next.get(x, y);
+						double diff_prev = norm(_image_prev.get_zeropad_cubic(mv_p.x, mv_p.y) - _image_current.get(x, y));
+						double diff_next = norm(_image_next.get_zeropad_cubic(mv_n.x, mv_n.y) - _image_current.get(x, y));
+						if (diff_prev <= diff_next) {
+							_motion_vector_time.at(x, y).x = _motion_vector_prev.at(x, y).x;
+							_motion_vector_time.at(x, y).y = _motion_vector_prev.at(x, y).y;
+							_motion_vector_time.at(x, y).t = -1;
+						} else {
+							_motion_vector_time.at(x, y).x = _motion_vector_next.at(x, y).x;
+							_motion_vector_time.at(x, y).y = _motion_vector_next.at(x, y).y;
+							_motion_vector_time.at(x, y).t = 1;
+						}
+					}
+				}
+			}
+		}
+	} else { // Use forward motion estimation
+		for (size_t n = 0; n < _motion_vector_prev.size(); n++) {
+			_motion_vector_time[n].x = _motion_vector_prev[n].x;
+			_motion_vector_time[n].y = _motion_vector_prev[n].y;
+			_motion_vector_time[n].t = -1;
+		}
 	}
 }
 
@@ -160,11 +192,6 @@ template <class T>
 void
 BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range, const double coeff_MAD, const double coeff_ZNCC)
 {
-	const int x_start = -search_range / 2;
-	const int x_end = search_range / 2;
-	const int y_start = -search_range / 2;
-	const int y_end = search_range / 2;
-
 	double (BlockMatching<T>::*MAD_func)(const ImgVector<T>&, const ImgVector<T>&, const int, const int, const std::list<VECTOR_2D<int> >&) = &BlockMatching<T>::MAD_region;
 	double (BlockMatching<T>::*NCC_func)(const ImgVector<T>&, const ImgVector<T>&, const int, const int, const std::list<VECTOR_2D<int> >&) = &BlockMatching<T>::ZNCC_region;
 	//double (BlockMatching<T>::*MAD_func)(const ImgVector<T>&, const ImgVector<T>&, const int, const int, const std::list<VECTOR_2D<int> >&) = &BlockMatching<T>::MAD_region_nearest_intensity;
@@ -186,9 +213,6 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range, const 
 	printf(" Block Matching :   0.0%%\x1b[1A\n");
 #endif
 	// Compute Motion Vectors
-#ifdef _OPENMP
-#pragma omp parallel for schedule(dynamic)
-#endif
 	for (unsigned int n = 0; n < _connected_regions_current.size(); n++) {
 		VECTOR_2D<double> MV(.0, .0);
 		std::vector<ImgVector<T> *> reference_images;
@@ -205,18 +229,22 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range, const 
 			// Compute initial value
 			double MAD = (this->*MAD_func)(
 			    *(reference_images[ref]), _image_current,
-			    x_start, y_start,
+			    -search_range / 2, search_range / 2,
 			    _connected_regions_current[n]);
 			double ZNCC = (this->*NCC_func)(
 			    *(reference_images[ref]), _image_current,
-			    x_start, y_start,
+			    -search_range / 2, search_range / 2,
 			    _connected_regions_current[n]);
 			double E_min = coeff_MAD * MAD + coeff_ZNCC * (1.0 - ZNCC);
 			// Search minimum value
-			for (int y_diff = y_start; y_diff <= y_end; y_diff++) {
-				for (int x_diff = x_start; x_diff <= x_end; x_diff++) {
-					std::vector<VECTOR_2D<int> > region;
-
+			{
+				int x;
+#ifdef _OPENMP
+#pragma omp parallel for private(MAD, ZNCC)
+#endif
+				for (x = 0; x < search_range * search_range; x++) {
+					int y_diff = x / search_range - search_range / 2;
+					int x_diff = x % search_range - search_range / 2;
 					VECTOR_2D<double> v_tmp(x_diff, y_diff);
 					MAD = (this->*MAD_func)(
 					    *(reference_images[ref]), _image_current,
@@ -227,13 +255,18 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range, const 
 					    x_diff, y_diff,
 					    _connected_regions_current[n]);
 					double E_tmp = coeff_MAD * MAD + coeff_ZNCC * (1.0 - ZNCC);
-					if (E_tmp < E_min) {
-						E_min = E_tmp;
-						MV = v_tmp;
-					} else if (fabs(E_tmp - E_min) < 1E-6) {
-						if (norm(MV) >= norm(v_tmp)) {
+#ifdef _OPENMP
+#pragma omp critical
+#endif
+					{
+						if (E_tmp < E_min) {
 							E_min = E_tmp;
 							MV = v_tmp;
+						} else if (fabs(E_tmp - E_min) < DBL_EPSILON) {
+							if (norm(v_tmp) < norm(MV)) {
+								E_min = E_tmp;
+								MV = v_tmp;
+							}
 						}
 					}
 				}
@@ -245,22 +278,37 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range, const 
 			}
 		}
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_BLOCKMATCHING)
-#ifdef _OPENMP
-#pragma omp critical
-#endif
-		{
-			double ratio = double(++finished_regions) / _connected_regions_current.size();
-			if (round(ratio * 1000.0) > progress) {
-				progress = static_cast<unsigned int>(round(ratio * 1000.0)); // Take account of Over-Run
-				printf("\r Block Matching : %5.1f%%\x1b[1A\n", progress * 0.1);
-			}
+		double ratio = double(++finished_regions) / _connected_regions_current.size();
+		if (round(ratio * 1000.0) > progress) {
+			progress = static_cast<unsigned int>(round(ratio * 1000.0)); // Take account of Over-Run
+			printf("\r Block Matching : %5.1f%%\x1b[1A\n", progress * 0.1);
 		}
 #endif
 	}
-	for (size_t n = 0; n < _motion_vector_prev.size(); n++) {
-		_motion_vector_time[n].x = _motion_vector_prev[n].x;
-		_motion_vector_time[n].y = _motion_vector_prev[n].y;
-		_motion_vector_time[n].t = -1;
+	for (unsigned int n = 0; n < _connected_regions_current.size(); n++) {
+		for (std::list<VECTOR_2D<int> >::const_iterator ite = _connected_regions_current[n].begin();
+		    ite != _connected_regions_current[n].end();
+		    ++ite) {
+			if (_image_next.isNULL()) { // Use forward motion estimation
+				_motion_vector_time.at(ite->x, ite->y).x = _motion_vector_prev.get(ite->x, ite->y).x;
+				_motion_vector_time.at(ite->x, ite->y).y = _motion_vector_prev.get(ite->x, ite->y).y;
+				_motion_vector_time.at(ite->x, ite->y).t = -1;
+			} else { // Use bi-directional motion estimation
+				VECTOR_2D<double> mv_p = _motion_vector_prev.get(ite->x, ite->y);
+				VECTOR_2D<double> mv_n = _motion_vector_next.get(ite->x, ite->y);
+				double diff_prev = norm(_image_next.get_zeropad_cubic(mv_n.x, mv_n.y) - _image_current.get(ite->x, ite->y));
+				double diff_next = norm(_image_prev.get_zeropad_cubic(mv_p.x, mv_p.y) - _image_current.get(ite->x, ite->y));
+				if (diff_prev <= diff_next) { // Use forward motion vector
+					_motion_vector_time.at(ite->x, ite->y).x = _motion_vector_prev.get(ite->x, ite->y).x;
+					_motion_vector_time.at(ite->x, ite->y).y = _motion_vector_prev.get(ite->x, ite->y).y;
+					_motion_vector_time.at(ite->x, ite->y).t = -1;
+				} else {
+					_motion_vector_time.at(ite->x, ite->y).x = _motion_vector_next.get(ite->x, ite->y).x;
+					_motion_vector_time.at(ite->x, ite->y).y = _motion_vector_next.get(ite->x, ite->y).y;
+					_motion_vector_time.at(ite->x, ite->y).t = 1;
+				}
+			}
+		}
 	}
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_BLOCKMATCHING)
 	printf("\n Block Matching : Finished\n");

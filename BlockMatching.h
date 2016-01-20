@@ -7,7 +7,6 @@
 #endif
 */
 
-
 #include <list>
 #include <vector>
 

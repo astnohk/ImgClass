@@ -1,6 +1,7 @@
 #ifndef LIB_ImgClass
 #define LIB_ImgClass
 
+#include <cfloat>
 #include <cstddef>
 /* Macro for compatibility where the C++11 not supported
 #ifndef nullptr

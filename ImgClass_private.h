@@ -549,14 +549,19 @@ ImgVector<T>::get_zeropad_cubic(const double& x, const double& y, const double& 
 	double bicubic_y[4];
 	T value = T();
 
-	for (int n = 0; n < 4; n++) {
-		bicubic_x[n] = this->cubic(n - 1.0 - (x - floor(x)), B, C);
-		bicubic_y[n] = this->cubic(n - 1.0 - (y - floor(y)), B, C);
-	}
-	for (int m = 0; m < 4; m++) {
+	if (fabs(x - floor(x)) < DBL_EPSILON
+	    && fabs(y - floor(y)) < DBL_EPSILON) {
+		value = this->get_zeropad(int(x), int(y));
+	} else {
 		for (int n = 0; n < 4; n++) {
-			value += this->get_zeropad(int(floor(x)) + n - 1, int(floor(y)) + m - 1)
-			    * bicubic_x[n] * bicubic_y[m];
+			bicubic_x[n] = this->cubic(n - 1.0 - (x - floor(x)), B, C);
+			bicubic_y[n] = this->cubic(n - 1.0 - (y - floor(y)), B, C);
+		}
+		for (int m = 0; m < 4; m++) {
+			for (int n = 0; n < 4; n++) {
+				value += this->get_zeropad(int(floor(x)) + n - 1, int(floor(y)) + m - 1)
+				    * bicubic_x[n] * bicubic_y[m];
+			}
 		}
 	}
 	return value;
@@ -570,14 +575,19 @@ ImgVector<T>::get_repeat_cubic(const double& x, const double& y, const double& B
 	double bicubic_y[4];
 	T value = T();
 
-	for (int n = 0; n < 4; n++) {
-		bicubic_x[n] = this->cubic(n - 1.0 - (x - floor(x)), B, C);
-		bicubic_y[n] = this->cubic(n - 1.0 - (y - floor(y)), B, C);
-	}
-	for (int m = 0; m < 4; m++) {
+	if (fabs(x - floor(x)) < DBL_EPSILON
+	    && fabs(y - floor(y)) < DBL_EPSILON) {
+		value = this->get_zeropad(int(x), int(y));
+	} else {
 		for (int n = 0; n < 4; n++) {
-			value += this->get_repeat(int(floor(x)) + n - 1, int(floor(y)) + m - 1)
-			    * bicubic_x[n] * bicubic_y[m];
+			bicubic_x[n] = this->cubic(n - 1.0 - (x - floor(x)), B, C);
+			bicubic_y[n] = this->cubic(n - 1.0 - (y - floor(y)), B, C);
+		}
+		for (int m = 0; m < 4; m++) {
+			for (int n = 0; n < 4; n++) {
+				value += this->get_repeat(int(floor(x)) + n - 1, int(floor(y)) + m - 1)
+				    * bicubic_x[n] * bicubic_y[m];
+			}
 		}
 	}
 	return value;
@@ -591,14 +601,19 @@ ImgVector<T>::get_mirror_cubic(const double& x, const double& y, const double& B
 	double bicubic_y[4];
 	T value = T();
 
-	for (int n = 0; n < 4; n++) {
-		bicubic_x[n] = this->cubic(n - 1.0 - (x - floor(x)), B, C);
-		bicubic_y[n] = this->cubic(n - 1.0 - (y - floor(y)), B, C);
-	}
-	for (int m = 0; m < 4; m++) {
+	if (fabs(x - floor(x)) < DBL_EPSILON
+	    && fabs(y - floor(y)) < DBL_EPSILON) {
+		value = this->get_zeropad(int(x), int(y));
+	} else {
 		for (int n = 0; n < 4; n++) {
-			value += this->get_mirror(int(floor(x)) + n - 1, int(floor(y)) + m - 1)
-			    * bicubic_x[n] * bicubic_y[m];
+			bicubic_x[n] = this->cubic(n - 1.0 - (x - floor(x)), B, C);
+			bicubic_y[n] = this->cubic(n - 1.0 - (y - floor(y)), B, C);
+		}
+		for (int m = 0; m < 4; m++) {
+			for (int n = 0; n < 4; n++) {
+				value += this->get_mirror(int(floor(x)) + n - 1, int(floor(y)) + m - 1)
+				    * bicubic_x[n] * bicubic_y[m];
+			}
 		}
 	}
 	return value;
@@ -697,8 +712,8 @@ const T
 ImgVector<T>::variance(void) const
 {
 	double N = double(_width) * double(_height);
-	T sum_squared = .0;
-	T sum = .0;
+	T sum_squared = T();
+	T sum = T();
 
 	for (size_t y = 0; y < size_t(_height); y++) {
 		for (size_t x = 0; x < size_t(_width); x++) {
@@ -714,8 +729,8 @@ const T
 ImgVector<T>::variance(const int top_left_x, const int top_left_y, const int crop_width, const int crop_height) const
 {
 	double N = .0;
-	T sum_squared = .0;
-	T sum = .0;
+	T sum_squared = T();
+	T sum = T();
 
 	for (int y = top_left_y; y < top_left_y + crop_height; y++) {
 		for (int x = top_left_x; x < top_left_x + crop_width; x++) {
@@ -861,7 +876,7 @@ ImgVector<T>::resample_bicubic(const int Width, const int Height, const bool sat
 {
 	T *resized = nullptr;
 	double *conv = nullptr;
-	ImgVector<double> Tmp;
+	ImgVector<T> Tmp;
 	double scale_x, scale_y;
 	double scale_conv;
 	int L, L_center;

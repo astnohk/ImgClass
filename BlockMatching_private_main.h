@@ -33,8 +33,8 @@ template <class T>
 void
 BlockMatching<T>::block_matching_lattice(const int search_range, const double coeff_MAD, const double coeff_ZNCC)
 {
-	double (BlockMatching<T>::*MAD_func)(const int, const int, const int, const int, const int, const int) = &BlockMatching<T>::MAD;
-	double (BlockMatching<T>::*NCC_func)(const int, const int, const int, const int, const int, const int) = &BlockMatching<T>::ZNCC;
+	double (BlockMatching<T>::*MAD_func)(const ImgVector<T>&, const ImgVector<T>&, const int, const int, const int, const int) = &BlockMatching<T>::MAD;
+	double (BlockMatching<T>::*NCC_func)(const ImgVector<T>&, const ImgVector<T>&, const int, const int, const int, const int) = &BlockMatching<T>::ZNCC;
 
 	ImgVector<bool> estimated(_cells_width, _cells_height, false);
 	std::list<VECTOR_2D<int> > flat_blocks;
@@ -55,95 +55,102 @@ BlockMatching<T>::block_matching_lattice(const int search_range, const double co
 		_motion_vector_next.reset(_cells_width, _cells_height);
 	}
 	// Compute global gradients of the image
-	ImgVector<VECTOR_2D<double> >* grad_prev = this->grad_image(_image_prev, 0, 0, _image_prev.width(), _image_prev.height());
-	ImgVector<double> grad_prev_x(grad_prev->width(), grad_prev->height());
-	ImgVector<double> grad_prev_y(grad_prev->width(), grad_prev->height());
-	for (size_t i = 0; i < grad_prev->size(); i++) {
-		grad_prev_x[i] = grad_prev->get(i).x;
-		grad_prev_y[i] = grad_prev->get(i).y;
+	double grad_max_min_x;
+	double grad_max_min_y;
+	{
+		ImgVector<VECTOR_2D<double> >* grad = this->grad_image(_image_current, 0, 0, _image_current.width(), _image_current.height());
+		ImgVector<double> grad_x(grad->width(), grad->height());
+		ImgVector<double> grad_y(grad->width(), grad->height());
+		for (size_t i = 0; i < grad->size(); i++) {
+			grad_x[i] = grad->get(i).x;
+			grad_y[i] = grad->get(i).y;
+		}
+		delete grad;
+		grad = nullptr;
+		grad_max_min_x = grad_x.max() - grad_x.min();
+		grad_max_min_y = grad_y.max() - grad_y.min();
 	}
-	delete grad_prev;
-	grad_prev = nullptr;
-	double grad_prev_max_min_x = grad_prev_x.max() - grad_prev_x.min();
-	double grad_prev_max_min_y = grad_prev_y.max() - grad_prev_y.min();
-	// Compute Motion Vectors
+	// Set reference_images
+	std::vector<ImgVector<T> *> reference_images;
+	std::vector<ImgVector<VECTOR_2D<double> > *> motion_vectors;
+	reference_images.push_back(&_image_prev);
+	motion_vectors.push_back(&_motion_vector_prev);
+	if (_image_next.isNULL() == false) {
+		reference_images.push_back(&_image_next);
+		motion_vectors.push_back(&_motion_vector_next);
+	}
+	// Compute Motion Vectors for previous and next frame
+	for (size_t ref = 0; ref < reference_images.size(); ref++) {
 #ifdef _OPENMP
 #pragma omp parallel for
 #endif
-	for (int Y_b = 0; Y_b < _cells_height; Y_b++) {
-		int y_b = Y_b * _block_size;
-		for (int X_b = 0; X_b < _cells_width; X_b++) {
-			int x_b = X_b * _block_size;
-			// Check the block can be estimated
-			ImgVector<VECTOR_2D<double> >* grad_prev_local = this->grad_image(_image_prev, x_b, y_b, _block_size, _block_size);
-			ImgVector<double> grad_prev_local_x(_block_size, _block_size);
-			ImgVector<double> grad_prev_local_y(_block_size, _block_size);
-			for (size_t i = 0; i < grad_prev_local->size(); i++) {
-				grad_prev_local_x[i] = grad_prev_local->get(i).x;
-				grad_prev_local_y[i] = grad_prev_local->get(i).y;
-			}
-			delete grad_prev_local;
-			grad_prev_local = nullptr;
-			if ((grad_prev_local_x.max() - grad_prev_local_x.min()) / grad_prev_max_min_x < 0.1
-			    || (grad_prev_local_y.max() - grad_prev_local_y.min()) / grad_prev_max_min_y < 0.1) {
-				if (estimated.get_zeropad(X_b - 1, Y_b) || estimated.get_zeropad(X_b, Y_b - 1)) {
-					flat_blocks.push_front(VECTOR_2D<int>(X_b, Y_b));
-				} else {
-					flat_blocks.push_back(VECTOR_2D<int>(X_b, Y_b));
+		for (int Y_b = 0; Y_b < _cells_height; Y_b++) {
+			int y_b = Y_b * _block_size;
+			for (int X_b = 0; X_b < _cells_width; X_b++) {
+				int x_b = X_b * _block_size;
+				// Check the block can be estimated
+				ImgVector<VECTOR_2D<double> >* grad_local = this->grad_image(_image_current, x_b, y_b, _block_size, _block_size);
+				ImgVector<double> grad_local_x(_block_size, _block_size);
+				ImgVector<double> grad_local_y(_block_size, _block_size);
+				for (size_t i = 0; i < grad_local->size(); i++) {
+					grad_local_x[i] = grad_local->get(i).x;
+					grad_local_y[i] = grad_local->get(i).y;
 				}
-				_motion_vector_prev.at(X_b, Y_b) = 0;
-				continue;
-			}
-			estimated.at(X_b, Y_b) = true;
+				delete grad_local;
+				grad_local = nullptr;
+				if ((grad_local_x.max() - grad_local_x.min()) / grad_max_min_x < 0.1
+				    || (grad_local_y.max() - grad_local_y.min()) / grad_max_min_y < 0.1) {
+					if (estimated.get_zeropad(X_b - 1, Y_b) || estimated.get_zeropad(X_b, Y_b - 1)) {
+						flat_blocks.push_front(VECTOR_2D<int>(X_b, Y_b));
+					} else {
+						flat_blocks.push_back(VECTOR_2D<int>(X_b, Y_b));
+					}
+					motion_vectors[ref]->at(X_b, Y_b) = 0;
+					continue;
+				}
+				estimated.at(X_b, Y_b) = true;
 
-			VECTOR_2D<double> MV(.0, .0);
-			int x_start, x_end;
-			int y_start, y_end;
-			// Compute start and end coordinates
-			if (search_range < 0) {
-				x_start = 1 - _block_size;
-				x_end = _width - 1;
-				y_start = 1 - _block_size;
-				y_end = _height - 1;
-			} else {
-				x_start = std::max(x_b - (search_range / 2), 1 - _block_size);
-				x_end = std::min(x_b + search_range / 2, _width - 1);
-				y_start = std::max(y_b - (search_range / 2), 1 - _block_size);
-				y_end = std::min(y_b + search_range / 2, _height - 1);
-			}
-			double MAD = (this->*MAD_func)(
-			    x_start, y_start,
-			    x_b, y_b,
-			    _block_size, _block_size);
-			double ZNCC = (this->*NCC_func)(
-			    x_start, y_start,
-			    x_b, y_b,
-			    _block_size, _block_size);
-			double E_min = coeff_MAD * MAD + coeff_ZNCC * (1.0 - ZNCC);
-			for (int y = y_start; y <= y_end; y++) {
-				for (int x = x_start; x <= x_end; x++) {
-					VECTOR_2D<double> v_tmp(double(x - x_b), double(y - y_b));
-					MAD = (this->*MAD_func)(
-					    x, y,
-					    x_b, y_b,
-					    _block_size, _block_size);
-					ZNCC = (this->*NCC_func)(
-					    x, y,
-					    x_b, y_b,
-					    _block_size, _block_size);
-					double E_tmp = coeff_MAD * MAD + coeff_ZNCC * (1.0 - ZNCC);
-					if (E_tmp < E_min) {
-						E_min = E_tmp;
-						MV = v_tmp;
-					} else if (fabs(E_tmp - E_min) < 1E-6) {
-						if (norm(MV) >= norm(v_tmp)) {
+				int x_start, x_end;
+				int y_start, y_end;
+				// Compute start and end coordinates
+				if (search_range < 0) {
+					x_start = 1 - _block_size;
+					x_end = _width - 1;
+					y_start = 1 - _block_size;
+					y_end = _height - 1;
+				} else {
+					x_start = std::max(x_b - (search_range / 2), 1 - _block_size);
+					x_end = std::min(x_b + search_range / 2, _width - 1);
+					y_start = std::max(y_b - (search_range / 2), 1 - _block_size);
+					y_end = std::min(y_b + search_range / 2, _height - 1);
+				}
+				double E_min = DBL_MAX;
+				VECTOR_2D<double> MV(.0, .0);
+				for (int y = y_start; y <= y_end; y++) {
+					for (int x = x_start; x <= x_end; x++) {
+						VECTOR_2D<double> v_tmp(double(x - x_b), double(y - y_b));
+						double MAD = (this->*MAD_func)(
+						    *(reference_images[ref]), _image_current,
+						    x, y,
+						    x_b, y_b);
+						double ZNCC = (this->*NCC_func)(
+						    *(reference_images[ref]), _image_current,
+						    x, y,
+						    x_b, y_b);
+						double E_tmp = coeff_MAD * MAD + coeff_ZNCC * (1.0 - ZNCC);
+						if (E_tmp < E_min) {
 							E_min = E_tmp;
 							MV = v_tmp;
+						} else if (fabs(E_tmp - E_min) < 1E-6) {
+							if (norm(MV) >= norm(v_tmp)) {
+								E_min = E_tmp;
+								MV = v_tmp;
+							}
 						}
 					}
 				}
+				motion_vectors[ref]->at(X_b, Y_b) = MV;
 			}
-			_motion_vector_prev.at(X_b, Y_b) = MV;
 		}
 	}
 	// Interpolate Motion Vector on skipped blocks
@@ -151,30 +158,26 @@ BlockMatching<T>::block_matching_lattice(const int search_range, const double co
 	if (_image_next.isNULL() == false) { // Use bi-directional motion estimation
 		for (int Y_b = 0; Y_b < _cells_height; Y_b++) {
 			for (int X_b = 0; X_b < _cells_width; X_b++) {
+				VECTOR_2D<double> mv_p = _motion_vector_prev.get(X_b, Y_b);
+				VECTOR_2D<double> mv_n = _motion_vector_next.get(X_b, Y_b);
+				double diff_prev = 0.0;
+				double diff_next = 0.0;
 				for (int dy = 0; dy < _block_size; dy++) {
-					int y = Y_b * _block_size + dy;
-					if (y >= _height) {
-						continue;
-					}
+					int y = _block_size * Y_b + dy;
 					for (int dx = 0; dx < _block_size; dx++) {
-						int x = X_b * _block_size + dx;
-						if (x >= _width) {
-							continue;
-						}
-						VECTOR_2D<double> mv_p = _motion_vector_prev.get(x, y);
-						VECTOR_2D<double> mv_n = _motion_vector_next.get(x, y);
-						double diff_prev = norm(_image_prev.get_zeropad_cubic(mv_p.x, mv_p.y) - _image_current.get(x, y));
-						double diff_next = norm(_image_next.get_zeropad_cubic(mv_n.x, mv_n.y) - _image_current.get(x, y));
-						if (diff_prev <= diff_next) {
-							_motion_vector_time.at(x, y).x = _motion_vector_prev.at(x, y).x;
-							_motion_vector_time.at(x, y).y = _motion_vector_prev.at(x, y).y;
-							_motion_vector_time.at(x, y).t = -1;
-						} else {
-							_motion_vector_time.at(x, y).x = _motion_vector_next.at(x, y).x;
-							_motion_vector_time.at(x, y).y = _motion_vector_next.at(x, y).y;
-							_motion_vector_time.at(x, y).t = 1;
-						}
+						int x = _block_size * X_b + dx;
+						diff_prev += norm(_image_prev.get_zeropad_cubic(x + mv_p.x, y + mv_p.y) - _image_current.get(x, y));
+						diff_next += norm(_image_next.get_zeropad_cubic(x + mv_n.x, y + mv_n.y) - _image_current.get(x, y));
 					}
+				}
+				if (diff_prev <= diff_next) {
+					_motion_vector_time.at(X_b, Y_b).x = _motion_vector_prev.at(X_b, Y_b).x;
+					_motion_vector_time.at(X_b, Y_b).y = _motion_vector_prev.at(X_b, Y_b).y;
+					_motion_vector_time.at(X_b, Y_b).t = -1;
+				} else {
+					_motion_vector_time.at(X_b, Y_b).x = _motion_vector_next.at(X_b, Y_b).x;
+					_motion_vector_time.at(X_b, Y_b).y = _motion_vector_next.at(X_b, Y_b).y;
+					_motion_vector_time.at(X_b, Y_b).t = 1;
 				}
 			}
 		}
@@ -225,32 +228,23 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range, const 
 			reference_images.push_back(&_image_next);
 			motion_vectors.push_back(&_motion_vector_next);
 		}
-		for (unsigned int ref = 0; ref < reference_images.size(); ref++) {
-			// Compute initial value
-			double MAD = (this->*MAD_func)(
-			    *(reference_images[ref]), _image_current,
-			    -search_range / 2, search_range / 2,
-			    _connected_regions_current[n]);
-			double ZNCC = (this->*NCC_func)(
-			    *(reference_images[ref]), _image_current,
-			    -search_range / 2, search_range / 2,
-			    _connected_regions_current[n]);
-			double E_min = coeff_MAD * MAD + coeff_ZNCC * (1.0 - ZNCC);
+		for (size_t ref = 0; ref < reference_images.size(); ref++) {
+			double E_min = DBL_MAX;
 			// Search minimum value
 			{
 				int x;
 #ifdef _OPENMP
-#pragma omp parallel for private(MAD, ZNCC)
+#pragma omp parallel for
 #endif
 				for (x = 0; x < search_range * search_range; x++) {
 					int y_diff = x / search_range - search_range / 2;
 					int x_diff = x % search_range - search_range / 2;
 					VECTOR_2D<double> v_tmp(x_diff, y_diff);
-					MAD = (this->*MAD_func)(
+					double MAD = (this->*MAD_func)(
 					    *(reference_images[ref]), _image_current,
 					    x_diff, y_diff,
 					    _connected_regions_current[n]);
-					ZNCC = (this->*NCC_func)(
+					double ZNCC = (this->*NCC_func)(
 					    *(reference_images[ref]), _image_current,
 					    x_diff, y_diff,
 					    _connected_regions_current[n]);
@@ -296,8 +290,8 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range, const 
 			} else { // Use bi-directional motion estimation
 				VECTOR_2D<double> mv_p = _motion_vector_prev.get(ite->x, ite->y);
 				VECTOR_2D<double> mv_n = _motion_vector_next.get(ite->x, ite->y);
-				double diff_prev = norm(_image_next.get_zeropad_cubic(mv_n.x, mv_n.y) - _image_current.get(ite->x, ite->y));
-				double diff_next = norm(_image_prev.get_zeropad_cubic(mv_p.x, mv_p.y) - _image_current.get(ite->x, ite->y));
+				double diff_prev = norm(_image_prev.get_zeropad_cubic(ite->x + mv_p.x, ite->y + mv_p.y) - _image_current.get(ite->x, ite->y));
+				double diff_next = norm(_image_next.get_zeropad_cubic(ite->x + mv_n.x, ite->y + mv_n.y) - _image_current.get(ite->x, ite->y));
 				if (diff_prev <= diff_next) { // Use forward motion vector
 					_motion_vector_time.at(ite->x, ite->y).x = _motion_vector_prev.get(ite->x, ite->y).x;
 					_motion_vector_time.at(ite->x, ite->y).y = _motion_vector_prev.get(ite->x, ite->y).y;
@@ -335,22 +329,22 @@ BlockMatching<T>::vector_interpolation(const std::list<VECTOR_2D<int> >& flat_bl
 
 		// Compare 4 adjacent
 		if (estimated->get_mirror(X_b, Y_b - 1)
-		    && (MAD_tmp = this->MAD(x_b, y_b, x_b, y_b - _block_size, _block_size, _block_size, _image_prev, _image_prev)) < MAD_min) {
+		    && (MAD_tmp = this->MAD(_image_prev, _image_prev, x_b, y_b, x_b, y_b - _block_size)) < MAD_min) {
 			_motion_vector_prev.at(X_b, Y_b) = _motion_vector_prev.get_mirror(X_b, Y_b - 1);
 			MAD_min = MAD_tmp;
 		}
 		if (estimated->get_mirror(X_b - 1, Y_b)
-		    && (MAD_tmp = this->MAD(x_b, y_b, x_b - _block_size, y_b, _block_size, _block_size, _image_prev, _image_prev)) < MAD_min) {
+		    && (MAD_tmp = this->MAD(_image_prev, _image_prev, x_b, y_b, x_b - _block_size, y_b)) < MAD_min) {
 			_motion_vector_prev.at(X_b, Y_b) = _motion_vector_prev.get_mirror(X_b - 1, Y_b);
 			MAD_min = MAD_tmp;
 		}
 		if (estimated->get_mirror(X_b, Y_b + 1)
-		    && (MAD_tmp = this->MAD(x_b, y_b, x_b, y_b + _block_size, _block_size, _block_size, _image_prev, _image_prev)) < MAD_min) {
+		    && (MAD_tmp = this->MAD(_image_prev, _image_prev, x_b, y_b, x_b, y_b + _block_size)) < MAD_min) {
 			_motion_vector_prev.at(X_b, Y_b) = _motion_vector_prev.get_mirror(X_b, Y_b + 1);
 			MAD_min = MAD_tmp;
 		}
 		if (estimated->get_mirror(X_b + 1, Y_b)
-		    && (MAD_tmp = this->MAD(x_b, y_b, x_b + _block_size, y_b, _block_size, _block_size, _image_prev, _image_prev)) < MAD_min) {
+		    && (MAD_tmp = this->MAD(_image_prev, _image_prev, x_b, y_b, x_b + _block_size, y_b)) < MAD_min) {
 			_motion_vector_prev.at(X_b, Y_b) = _motion_vector_prev.get_mirror(X_b + 1, Y_b);
 			MAD_min = MAD_tmp;
 		}
@@ -391,87 +385,54 @@ BlockMatching<ImgClass::Lab>::grad_image(const ImgVector<ImgClass::Lab>& image, 
 // ----- Correlation -----
 template <class T>
 double
-BlockMatching<T>::MAD(const int x_l, const int y_l, const int x_r, const int y_r, const int block_width, const int block_height, const ImgVector<T>& limage, const ImgVector<T>& rimage)
+BlockMatching<T>::MAD(const ImgVector<T>& reference, const ImgVector<T>& interest, const int x_ref, const int y_ref, const int x_int, const int y_int)
 {
 	double sad = 0;
 
-	for (int y = 0; y < block_height; y++) {
-		for (int x = 0; x < block_width; x++) {
-			sad = sad + fabs(double(limage.get_zeropad(x_l+ x, y_l+ y) - rimage.get_zeropad(x_r + x, y_r + y)));
+	for (int y = 0; y < _block_size; y++) {
+		for (int x = 0; x < _block_size; x++) {
+			sad = sad + norm(reference.get_zeropad(x_ref + x, y_ref + y) - interest.get_zeropad(x_int + x, y_int + y));
 		}
 	}
-	return sad / double(block_width * block_height);
+	return sad / double(_block_size * _block_size);
 }
-
-template <>
-double
-BlockMatching<ImgClass::RGB>::MAD(const int x_l, const int y_l, const int x_r, const int y_r, const int block_width, const int block_height, const ImgVector<ImgClass::RGB>& limage, const ImgVector<ImgClass::RGB>& rimage);
-
-template <>
-double
-BlockMatching<ImgClass::Lab>::MAD(const int x_l, const int y_l, const int x_r, const int y_r, const int block_width, const int block_height, const ImgVector<ImgClass::Lab>& limage, const ImgVector<ImgClass::Lab>& rimage);
 
 
 
 
 template <class T>
 double
-BlockMatching<T>::MAD(const int x_prev, const int y_prev, const int x_current, const int y_current, const int block_width, const int block_height)
+BlockMatching<T>::ZNCC(const ImgVector<T>& reference, const ImgVector<T>& interest, const int x_ref, const int y_ref, const int x_int, const int y_int)
 {
-	double sad = 0;
+	double N = _block_size * _block_size;
+	double sum_reference = 0;
+	double sum_interest = 0;
+	double sum_sq_reference = 0;
+	double sum_sq_interest = 0;
+	double sum_sq_reference_interest = 0;
 
-	for (int y = 0; y < block_height; y++) {
-		for (int x = 0; x < block_width; x++) {
-			sad = sad + fabs(double(_image_current.get_zeropad(x_current + x, y_current + y) - _image_prev.get_zeropad(x_prev + x, y_prev + y)));
+	for (int y = 0; y < _block_size; y++) {
+		for (int x = 0; x < _block_size; x++) {
+			sum_reference += reference.get_zeropad(x_ref + x, y_ref + y);
+			sum_interest += interest.get_zeropad(x_int + x, y_int + y);
+			sum_sq_reference += reference.get_zeropad(x_ref + x, y_ref + y) * reference.get_zeropad(x_ref + x, y_ref + y);
+			sum_sq_interest += interest.get_zeropad(x_int + x, y_int + y) * interest.get_zeropad(x_int + x, y_int + y);
+			sum_sq_reference_interest += reference.get_zeropad(x_ref + x, y_ref + y) * interest.get_zeropad(x_int + x, y_int + y);
 		}
 	}
-	return sad / double(block_width * block_height);
+	return (N * sum_sq_reference_interest - sum_reference * sum_interest)
+	    / (sqrt((N * sum_sq_reference - sum_reference * sum_reference)
+	    * (N * sum_sq_interest - sum_interest * sum_interest))
+	    + DBL_MIN);
 }
 
 template <>
 double
-BlockMatching<ImgClass::RGB>::MAD(const int x_prev, const int y_prev, const int x_current, const int y_current, const int block_width, const int block_height);
+BlockMatching<ImgClass::RGB>::ZNCC(const ImgVector<ImgClass::RGB>& reference, const ImgVector<ImgClass::RGB>& interest, const int x_ref, const int y_ref, const int x_int, const int y_int);
 
 template <>
 double
-BlockMatching<ImgClass::Lab>::MAD(const int x_prev, const int y_prev, const int x_current, const int y_current, const int block_width, const int block_height);
-
-
-
-
-template <class T>
-double
-BlockMatching<T>::ZNCC(const int x_prev, const int y_prev, const int x_current, const int y_current, const int block_width, const int block_height)
-{
-	double N = block_width * block_height;
-	double sum_prev = 0;
-	double sum_current = 0;
-	double sum_sq_prev = 0;
-	double sum_sq_current = 0;
-	double sum_sq_prev_current = 0;
-
-	for (int y = 0; y < block_height; y++) {
-		for (int x = 0; x < block_width; x++) {
-			sum_prev += _image_prev.get_zeropad(x_prev + x, y_prev + y);
-			sum_current += _image_current.get_zeropad(x_current + x, y_current + y);
-			sum_sq_prev += _image_prev.get_zeropad(x_prev + x, y_prev + y) * _image_prev.get_zeropad(x_prev + x, y_prev + y);
-			sum_sq_current += _image_current.get_zeropad(x_current + x, y_current + y) * _image_current.get_zeropad(x_current + x, y_current + y);
-			sum_sq_prev_current += _image_prev.get_zeropad(x_prev + x, y_prev + y) * _image_current.get_zeropad(x_current + x, y_current + y);
-		}
-	}
-	return (N * sum_sq_prev_current - sum_prev * sum_current) /
-	    (sqrt((N * sum_sq_prev - sum_prev * sum_prev)
-	    * (N * sum_sq_current - sum_current * sum_current))
-	    + 1.0E-10);
-}
-
-template <>
-double
-BlockMatching<ImgClass::RGB>::ZNCC(const int x_prev, const int y_prev, const int x_current, const int y_current, const int block_width, const int block_height);
-
-template <>
-double
-BlockMatching<ImgClass::Lab>::ZNCC(const int x_prev, const int y_prev, const int x_current, const int y_current, const int block_width, const int block_height);
+BlockMatching<ImgClass::Lab>::ZNCC(const ImgVector<ImgClass::Lab>& reference, const ImgVector<ImgClass::Lab>& interest, const int x_ref, const int y_ref, const int x_int, const int y_int);
 
 
 
@@ -507,17 +468,17 @@ BlockMatching<ImgClass::Lab>::MAD_region(const ImgVector<ImgClass::Lab>& referen
 
 template <class T>
 double
-BlockMatching<T>::ZNCC_region(const ImgVector<T>& reference, const ImgVector<T>& current, const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_current)
+BlockMatching<T>::ZNCC_region(const ImgVector<T>& reference, const ImgVector<T>& interest, const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_interest)
 {
 	double N = 0;
 	T sum_reference = 0;
-	T sum_current = 0;
+	T sum_interest = 0;
 	T sum_sq_reference = 0;
-	T sum_sq_current = 0;
-	T sum_sq_reference_current = 0;
+	T sum_sq_interest = 0;
+	T sum_sq_reference_interest = 0;
 
-	for (std::list<VECTOR_2D<int> >::const_iterator ite = region_current.begin();
-	    ite != region_current.end();
+	for (std::list<VECTOR_2D<int> >::const_iterator ite = region_interest.begin();
+	    ite != region_interest.end();
 	    ++ite) {
 		VECTOR_2D<int> r(ite->x + x_diff, ite->y + y_diff);
 
@@ -527,27 +488,27 @@ BlockMatching<T>::ZNCC_region(const ImgVector<T>& reference, const ImgVector<T>&
 		sum_sq_reference += reference.get_zeropad(r.x, r.y)
 		    * reference.get_zeropad(r.x, r.y);
 		// Next frame
-		sum_current += current.get_zeropad(ite->x, ite->y);
-		sum_sq_current += current.get_zeropad(ite->x, ite->y)
-		    * current.get_zeropad(ite->x, ite->y);
+		sum_interest += interest.get_zeropad(ite->x, ite->y);
+		sum_sq_interest += interest.get_zeropad(ite->x, ite->y)
+		    * interest.get_zeropad(ite->x, ite->y);
 		// Co-frame
-		sum_sq_reference_current += reference.get_zeropad(r.x, r.y)
-		    * current.get_zeropad(ite->x, ite->y);
+		sum_sq_reference_interest += reference.get_zeropad(r.x, r.y)
+		    * interest.get_zeropad(ite->x, ite->y);
 	}
 	// Calculate Covariance
-	return (N * sum_sq_reference_current - sum_reference * sum_current) /
+	return (N * sum_sq_reference_interest - sum_reference * sum_interest) /
 	    (sqrt((N * sum_sq_reference - sum_reference * sum_reference)
-	    * (N * sum_sq_current - sum_current * sum_current))
-	    + 1.0E-10);
+	    * (N * sum_sq_interest - sum_interest * sum_interest))
+	    + DBL_MIN);
 }
 
 template <>
 double
-BlockMatching<ImgClass::RGB>::ZNCC_region(const ImgVector<ImgClass::RGB>& reference, const ImgVector<ImgClass::RGB>& current, const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_current);
+BlockMatching<ImgClass::RGB>::ZNCC_region(const ImgVector<ImgClass::RGB>& reference, const ImgVector<ImgClass::RGB>& interest, const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_interest);
 
 template <>
 double
-BlockMatching<ImgClass::Lab>::ZNCC_region(const ImgVector<ImgClass::Lab>& reference, const ImgVector<ImgClass::Lab>& current, const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_current);
+BlockMatching<ImgClass::Lab>::ZNCC_region(const ImgVector<ImgClass::Lab>& reference, const ImgVector<ImgClass::Lab>& interest, const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_interest);
 
 
 

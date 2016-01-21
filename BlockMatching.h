@@ -108,13 +108,11 @@ class BlockMatching
 		ImgVector<VECTOR_2D<double> >* grad_image(const ImgVector<T>& image, const int top_left_x, const int top_left_y, const int crop_width, const int crop_height);
 
 		// Correlation function
-		double MAD(const int x_l, const int y_l, const int x_r, const int y_r, const int block_width, const int block_height, const ImgVector<T>& limage, const ImgVector<T>& rimage);
-
-		double MAD(const int x_prev, const int y_prev, const int x_current, const int y_current, const int block_width, const int block_height);
-		double ZNCC(const int x_prev, const int y_prev, const int x_current, const int y_current, const int block_width, const int block_height);
+		double MAD(const ImgVector<T>& reference, const ImgVector<T>& interest, const int x_ref, const int y_ref, const int x_int, const int y_int);
+		double ZNCC(const ImgVector<T>& reference, const ImgVector<T>& interest, const int x_ref, const int y_ref, const int x_int, const int y_int);
 		// Arbitrary shaped correlation function
-		double MAD_region(const ImgVector<T>& reference, const ImgVector<T>& current, const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_current);
-		double ZNCC_region(const ImgVector<T>& reference, const ImgVector<T>& current, const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_current);
+		double MAD_region(const ImgVector<T>& reference, const ImgVector<T>& interest, const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_interest);
+		double ZNCC_region(const ImgVector<T>& reference, const ImgVector<T>& interest, const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_interest);
 		// Arbitrary shaped correlation function with nearest intensity restricted
 		double MAD_region_nearest_intensity(const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_current);
 		double ZNCC_region_nearest_intensity(const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_current);

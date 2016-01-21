@@ -418,6 +418,14 @@ ImgVector<T>::operator[](const size_t n)
 }
 
 template <class T>
+const T &
+ImgVector<T>::operator[](const size_t n) const
+{
+	return _data[n];
+}
+
+
+template <class T>
 T &
 ImgVector<T>::at(const size_t n)
 {
@@ -426,12 +434,30 @@ ImgVector<T>::at(const size_t n)
 }
 
 template <class T>
+const T &
+ImgVector<T>::at(const size_t n) const
+{
+	assert(0 <= n && n < size_t(_width) * size_t(_height));
+	return _data[n];
+}
+
+
+template <class T>
 T &
 ImgVector<T>::at(const int x, const int y)
 {
 	assert(0 <= x && x < _width && 0 <= y && y < _height);
 	return _data[size_t(_width) * size_t(y) + size_t(x)];
 }
+
+template <class T>
+const T &
+ImgVector<T>::at(const int x, const int y) const
+{
+	assert(0 <= x && x < _width && 0 <= y && y < _height);
+	return _data[size_t(_width) * size_t(y) + size_t(x)];
+}
+
 
 template <class T>
 T &
@@ -453,8 +479,46 @@ ImgVector<T>::at_repeat(const int x, const int y)
 }
 
 template <class T>
+const T &
+ImgVector<T>::at_repeat(const int x, const int y) const
+{
+	size_t x_repeat, y_repeat;
+
+	if (x >= 0) {
+		x_repeat = static_cast<size_t>(x % _width);
+	} else {
+		x_repeat = static_cast<size_t>(_width - (int(std::abs(double(x) + 1.0)) % _width));
+	}
+	if (y >= 0) {
+		y_repeat = static_cast<size_t>(y % _height);
+	} else {
+		y_repeat = static_cast<size_t>(_height - (int(std::abs(double(y) + 1.0)) % _height));
+	}
+	return _data[size_t(_width) * y_repeat + x_repeat];
+}
+
+
+template <class T>
 T &
 ImgVector<T>::at_mirror(const int x, const int y)
+{
+	int x_mirror = x;
+	int y_mirror = y;
+
+	if (x_mirror < 0) {
+		x_mirror = -x_mirror - 1; // should be set the offset when Mirroring over negative
+	}
+	if (y_mirror < 0) {
+		y_mirror = -y_mirror - 1;
+	}
+	x_mirror = int(round(_width - 0.5 - std::fabs(_width - 0.5 - (x_mirror % (2 * _width)))));
+	y_mirror = int(round(_height - 0.5 - std::fabs(_height - 0.5 - (y_mirror % (2 * _height)))));
+	return _data[size_t(_width) * size_t(y_mirror) + size_t(x_mirror)];
+}
+
+template <class T>
+const T &
+ImgVector<T>::at_mirror(const int x, const int y) const
 {
 	int x_mirror = x;
 	int y_mirror = y;
@@ -1122,5 +1186,24 @@ ImgVector<T>::operator/=(const ImgVector<RT>& rvector)
 		_data[i] /= rvector._data[i];
 	}
 	return *this;
+}
+
+
+
+// Stream
+template <class Type>
+std::ostream &
+operator<<(std::ostream& os, const ImgVector<Type>& rvalue)
+{
+#ifdef _CXXABI_H
+	char *name = abi::__cxa_demangle(typeid(Type).name(), 0, 0, 0);
+	os << "[ size: " << rvalue.width() << "x" << rvalue.height()
+	    << ", type: " << name << " ]" << std::endl;
+	std::free(name);
+#else
+	os << "[ size: " << rvalue.width() << "x" << rvalue.height()
+	    << ", type: " << typeid(Type).name() << " ]" << std::endl;
+#endif
+	return os;
 }
 

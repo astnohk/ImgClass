@@ -3,6 +3,10 @@
 
 #include <cfloat>
 #include <cstddef>
+#include <typeinfo>
+
+#include <cxxabi.h>
+
 /* Macro for compatibility where the C++11 not supported
 #ifndef nullptr
 #define nullptr 0
@@ -51,6 +55,13 @@ class ImgVector
 		T& at(const int x, const int y);
 		T& at_repeat(const int x, const int y);
 		T& at_mirror(const int x, const int y);
+		// const Reference to the pixel
+		const T& operator[](const size_t n) const;
+		const T& at(const size_t n) const;
+		const T& at(const int x, const int y) const;
+		const T& at_repeat(const int x, const int y) const;
+		const T& at_mirror(const int x, const int y) const;
+
 		// Get image intencity
 		const T get(const size_t n) const; // return const to avoid to mistake get() for at()
 		const T get(const int x, const int y) const;

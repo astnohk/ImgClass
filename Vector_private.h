@@ -72,6 +72,15 @@ VECTOR_2D<T>::operator=(const Tval& value)
 	return *this;
 }
 
+template <class T>
+VECTOR_2D<T> &
+VECTOR_2D<T>::operator=(const Vector_ST<T>& vector_st)
+{
+	x = vector_st.x;
+	y = vector_st.y;
+	return *this;
+}
+
 
 template <class T>
 VECTOR_2D<T> &

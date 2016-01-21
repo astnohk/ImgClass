@@ -2,9 +2,10 @@
 #define LIB_ImgClass_Vector
 
 #include <ostream>
+template <class T> class Vector_ST;
 
 template <class T>
-struct VECTOR_2D
+class VECTOR_2D
 {
 	public:
 		T x;
@@ -22,6 +23,7 @@ struct VECTOR_2D
 
 		VECTOR_2D<T>& operator=(const VECTOR_2D<T>& vector);
 		template<class Tval> VECTOR_2D<T>& operator=(const Tval& value);
+		VECTOR_2D<T>& operator=(const Vector_ST<T>& vector_st);
 
 		VECTOR_2D<T>& operator+=(const VECTOR_2D<T>& vector);
 
@@ -83,7 +85,7 @@ template<class Type> std::ostream& operator<<(std::ostream& os, const VECTOR_2D<
 
 
 template <class T>
-struct Vector_ST
+class Vector_ST
 {
 	public:
 		T x;
@@ -100,6 +102,7 @@ struct Vector_ST
 
 		// Operators
 		Vector_ST<T>& operator=(const Vector_ST<T>& vector);
+		Vector_ST<T>& operator=(const VECTOR_2D<T>& vector_2d);
 
 		Vector_ST<T>& operator+=(const Vector_ST<T>& vector);
 

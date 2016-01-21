@@ -57,6 +57,16 @@ Vector_ST<T>::operator=(const Vector_ST<T>& vector)
 	return *this;
 }
 
+template <class T>
+Vector_ST<T> &
+Vector_ST<T>::operator=(const VECTOR_2D<T>& vector_2d)
+{
+	x = vector_2d.x;
+	y = vector_2d.y;
+	t = 0;
+	return *this;
+}
+
 
 template <class T>
 Vector_ST<T> &

@@ -1,9 +1,27 @@
 #include "BlockMatching.h"
+#include "Lab.h"
+#include "RGB.h"
 
 
 
 
-// ----- Miscellaneous -----
+// ----- Global function -----
+double
+norm_squared(const double& value)
+{
+	return value * value;
+}
+
+double
+norm(const double& value)
+{
+	return fabs(value);
+}
+
+
+
+
+// ----- Specialize -----
 template <>
 void
 BlockMatching<ImgClass::RGB>::image_normalizer(void)
@@ -78,7 +96,6 @@ BlockMatching<ImgClass::Lab>::image_normalizer(void)
 
 
 
-
 template <>
 ImgVector<VECTOR_2D<double> > *
 BlockMatching<ImgClass::Lab>::grad_image(const ImgVector<ImgClass::Lab>& image, const int top_left_x, const int top_left_y, const int crop_width, const int crop_height)
@@ -125,7 +142,7 @@ BlockMatching<ImgClass::RGB>::ZNCC(const ImgVector<ImgClass::RGB>& reference, co
 	return (N * sum_sq_reference_interest - inner_prod(sum_reference, sum_interest))
 	    / (sqrt(N * sum_sq_reference - inner_prod(sum_reference, sum_reference))
 	    * sqrt(N * sum_sq_interest - inner_prod(sum_interest, sum_interest))
-	    + DBL_MIN);
+	    + DBL_EPSILON);
 }
 
 template <>
@@ -151,7 +168,7 @@ BlockMatching<ImgClass::Lab>::ZNCC(const ImgVector<ImgClass::Lab>& reference, co
 	return (N * sum_sq_reference_interest - inner_prod(sum_reference, sum_interest))
 	    / (sqrt(N * sum_sq_reference - inner_prod(sum_reference, sum_reference))
 	    * sqrt(N * sum_sq_interest - inner_prod(sum_interest, sum_interest))
-	    + DBL_MIN);
+	    + DBL_EPSILON);
 }
 
 
@@ -231,7 +248,7 @@ BlockMatching<ImgClass::RGB>::ZNCC_region(const ImgVector<ImgClass::RGB>& refere
 	return (N * sum_sq_reference_interest - inner_prod(sum_reference, sum_interest)) /
 	    (sqrt((N * sum_sq_reference - inner_prod(sum_reference, sum_reference))
 	    * (N * sum_sq_interest - inner_prod(sum_interest, sum_interest)))
-	    + DBL_MIN);
+	    + DBL_EPSILON);
 }
 
 template <>
@@ -270,7 +287,7 @@ BlockMatching<ImgClass::Lab>::ZNCC_region(const ImgVector<ImgClass::Lab>& refere
 	return (N * sum_sq_reference_interest - inner_prod(sum_reference, sum_interest)) /
 	    (sqrt((N * sum_sq_reference - inner_prod(sum_reference, sum_reference))
 	    * (N * sum_sq_interest - inner_prod(sum_interest, sum_interest)))
-	    + DBL_MIN);
+	    + DBL_EPSILON);
 }
 
 
@@ -355,7 +372,7 @@ BlockMatching<ImgClass::RGB>::ZNCC_region_nearest_intensity(const int x_diff_pre
 	return (N * sum_sq_prev_current - inner_prod(sum_prev, sum_current)) /
 	    (sqrt((N * sum_sq_prev - inner_prod(sum_prev, sum_prev))
 	    * (N * sum_sq_current - inner_prod(sum_current, sum_current)))
-	    + 1.0E-10);
+	    + DBL_EPSILON);
 }
 
 template <>
@@ -392,22 +409,6 @@ BlockMatching<ImgClass::Lab>::ZNCC_region_nearest_intensity(const int x_diff_pre
 	return (N * sum_sq_prev_current - inner_prod(sum_prev, sum_current)) /
 	    (sqrt((N * sum_sq_prev - inner_prod(sum_prev, sum_prev))
 	    * (N * sum_sq_current - inner_prod(sum_current, sum_current)))
-	    + 1.0E-10);
-}
-
-
-
-
-// ----- Global function -----
-double
-norm_squared(const double& value)
-{
-	return value * value;
-}
-
-double
-norm(const double& value)
-{
-	return fabs(value);
+	    + DBL_EPSILON);
 }
 

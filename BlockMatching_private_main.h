@@ -423,7 +423,7 @@ BlockMatching<T>::ZNCC(const ImgVector<T>& reference, const ImgVector<T>& intere
 	return (N * sum_sq_reference_interest - sum_reference * sum_interest)
 	    / (sqrt((N * sum_sq_reference - sum_reference * sum_reference)
 	    * (N * sum_sq_interest - sum_interest * sum_interest))
-	    + DBL_MIN);
+	    + DBL_EPSILON);
 }
 
 template <>
@@ -499,7 +499,7 @@ BlockMatching<T>::ZNCC_region(const ImgVector<T>& reference, const ImgVector<T>&
 	return (N * sum_sq_reference_interest - sum_reference * sum_interest) /
 	    (sqrt((N * sum_sq_reference - sum_reference * sum_reference)
 	    * (N * sum_sq_interest - sum_interest * sum_interest))
-	    + DBL_MIN);
+	    + DBL_EPSILON);
 }
 
 template <>

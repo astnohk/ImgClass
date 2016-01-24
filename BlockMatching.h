@@ -10,11 +10,13 @@
 #include <list>
 #include <vector>
 
-#include "ImgClass.h"
-#include "Lab.h"
-#include "RGB.h"
 #include "Vector.h"
+#include "ImgClass.h"
 
+namespace ImgClass {
+	class RGB;
+	class Lab;
+}
 
 template <class T>
 class BlockMatching

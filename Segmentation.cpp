@@ -1,4 +1,6 @@
 #include "Segmentation.h"
+#include "Lab.h"
+#include "RGB.h"
 
 
 

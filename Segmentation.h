@@ -1,15 +1,20 @@
 #ifndef LIB_ImgClass_Segmentation
 #define LIB_ImgClass_Segmentation
 
-#include "ImgClass.h"
-#include "Lab.h"
-#include "RGB.h"
+#include <list>
+#include <vector>
+
 #include "Vector.h"
+#include "ImgClass.h"
 
 #if defined(_OPENMP)
 #include <omp.h>
 #endif
 
+namespace ImgClass {
+	class RGB;
+	class Lab;
+}
 
 template <class T>
 class Segmentation

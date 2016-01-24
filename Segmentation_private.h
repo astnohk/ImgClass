@@ -422,7 +422,7 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 	// Eliminate small connected regions
 	unsigned int num_small_region = small_region_eliminate(&regions_vector, Min_Number_of_Pixels, Search_Range);
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_SEGMENTATION)
-	printf(" Mean-Shift method : the number of regions %u -> %u\n", num_region, num_region - num_small_region);
+	printf(" Mean-Shift method : The number of regions %u -> %u\n", num_region, num_region - num_small_region);
 #endif
 	// Copy connected regions list
 	num_region -= num_small_region;

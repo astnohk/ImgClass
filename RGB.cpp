@@ -151,48 +151,6 @@ namespace ImgClass {
 		B /= rvalue;
 		return *this;
 	}
-
-
-	const RGB
-	RGB::operator+(const RGB& rcolor) const
-	{
-		RGB color;
-		color.R += rcolor.R;
-		color.G += rcolor.G;
-		color.B += rcolor.B;
-		return color;
-	}
-
-	const RGB
-	RGB::operator+(const double& rvalue) const
-	{
-		RGB color;
-		color.R += rvalue;
-		color.G += rvalue;
-		color.B += rvalue;
-		return color;
-	}
-
-
-	const RGB
-	RGB::operator-(const RGB& rcolor) const
-	{
-		RGB color;
-		color.R -= rcolor.R;
-		color.G -= rcolor.G;
-		color.B -= rcolor.B;
-		return color;
-	}
-
-	const RGB
-	RGB::operator-(const double& rvalue) const
-	{
-		RGB color;
-		color.R -= rvalue;
-		color.G -= rvalue;
-		color.B -= rvalue;
-		return color;
-	}
 }
 
 
@@ -215,6 +173,27 @@ operator-(ImgClass::RGB rcolor)
 	rcolor.G = -rcolor.G;
 	rcolor.B = -rcolor.B;
 	return rcolor;
+}
+
+
+const ImgClass::RGB
+operator+(const ImgClass::RGB& lcolor, const ImgClass::RGB& rcolor)
+{
+	ImgClass::RGB color;
+	color.R = lcolor.R + rcolor.R;
+	color.G = lcolor.G + rcolor.G;
+	color.B = lcolor.B + rcolor.B;
+	return color;
+}
+
+const ImgClass::RGB
+operator-(const ImgClass::RGB& lcolor, const ImgClass::RGB& rcolor)
+{
+	ImgClass::RGB color;
+	color.R = lcolor.R - rcolor.R;
+	color.G = lcolor.G - rcolor.G;
+	color.B = lcolor.B - rcolor.B;
+	return color;
 }
 
 
@@ -265,16 +244,6 @@ operator/(const ImgClass::RGB& lcolor, const double& rvalue)
 	color.R = lcolor.R / rvalue;
 	color.G = lcolor.G / rvalue;
 	color.B = lcolor.B / rvalue;
-	return color;
-}
-
-const ImgClass::RGB
-operator/(const double& lvalue, const ImgClass::RGB& rcolor)
-{
-	ImgClass::RGB color;
-	color.R = lvalue / rcolor.R;
-	color.G = lvalue / rcolor.G;
-	color.B = lvalue / rcolor.B;
 	return color;
 }
 

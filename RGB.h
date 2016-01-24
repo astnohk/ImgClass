@@ -36,13 +36,6 @@ namespace ImgClass {
 
 			RGB& operator/=(const RGB& rcolor);
 			RGB& operator/=(const double& rvalue);
-
-			// Non substituting
-			const RGB operator+(const RGB& rcolor) const;
-			const RGB operator+(const double& rvalue) const;
-
-			const RGB operator-(const RGB& rcolor) const;
-			const RGB operator-(const double& rvalue) const;
 	};
 }
 
@@ -50,13 +43,15 @@ namespace ImgClass {
 const ImgClass::RGB operator+(ImgClass::RGB rcolor);
 const ImgClass::RGB operator-(ImgClass::RGB rcolor);
 
+const ImgClass::RGB operator+(const ImgClass::RGB& lcolor, const ImgClass::RGB& rcolor);
+const ImgClass::RGB operator-(const ImgClass::RGB& lcolor, const ImgClass::RGB& rcolor);
+
 const ImgClass::RGB operator*(const ImgClass::RGB& lcolor, const ImgClass::RGB& rcolor);
 const ImgClass::RGB operator*(const ImgClass::RGB& lcolor, const double& rvalue);
 const ImgClass::RGB operator*(const double& lvalue, const ImgClass::RGB& rcolor);
 
 const ImgClass::RGB operator/(const ImgClass::RGB& lcolor, const ImgClass::RGB& rcolor);
 const ImgClass::RGB operator/(const ImgClass::RGB& lcolor, const double& rvalue);
-const ImgClass::RGB operator/(const double& lvalue, const ImgClass::RGB& rcolor);
 
 // Comparator
 bool operator==(const ImgClass::RGB& lcolor, const ImgClass::RGB& rcolor);

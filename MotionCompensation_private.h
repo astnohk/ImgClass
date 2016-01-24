@@ -570,34 +570,34 @@ template <class T>
 void
 MotionCompensation<T>::create_image_compensated(void)
 {
-	VECTOR_2D<int> r;
-	VECTOR_2D<int> r_next;
+	VECTOR_2D<double> r;
+	VECTOR_2D<double> r_next;
 	_image_compensated.reset(_width, _height);
 	for (int y = 0; y < _height; y++) {
 		for (int x = 0; x < _width; x++) {
 			if (_vector_time.isNULL()) {
 				if (_vector_next.isNULL()) { // Forward motion compensation
-					r.x = int(round(x + _vector_prev.get(x, y).x));
-					r.y = int(round(y + _vector_prev.get(x, y).y));
-					_image_compensated.at(x, y) = _image_prev.get_zeropad(r.x, r.y);
+					r.x = x + _vector_prev.get(x, y).x;
+					r.y = y + _vector_prev.get(x, y).y;
+					_image_compensated.at(x, y) = _image_prev.get_zeropad_cubic(r.x, r.y);
 				} else { // Mean bi-directional motion compensation
-					r.x = int(round(x + _vector_prev.get(x, y).x));
-					r.y = int(round(y + _vector_prev.get(x, y).y));
-					r_next.x = int(round(x + _vector_next.get(x, y).x));
-					r_next.y = int(round(y + _vector_next.get(x, y).y));
+					r.x = x + _vector_prev.get(x, y).x;
+					r.y = y + _vector_prev.get(x, y).y;
+					r_next.x = x + _vector_next.get(x, y).x;
+					r_next.y = y + _vector_next.get(x, y).y;
 					_image_compensated.at(x, y) =
-					    (_image_prev.get_zeropad(r.x, r.y) + _image_prev.get_zeropad(r.x, r.y)) * 0.5;
+					    (_image_prev.get_zeropad_cubic(r.x, r.y) + _image_prev.get_zeropad_cubic(r.x, r.y)) * 0.5;
 				}
 			} else {
-				r.x = int(round(x + _vector_time.get(x, y).x));
-				r.y = int(round(y + _vector_time.get(x, y).y));
+				r.x = x + _vector_time.get(x, y).x;
+				r.y = y + _vector_time.get(x, y).y;
 				if (_vector_time.get(x, y).t < 0) {
-					_image_compensated.at(x, y) = _image_prev.get_zeropad(r.x, r.y);
+					_image_compensated.at(x, y) = _image_prev.get_zeropad_cubic(r.x, r.y);
 				} else {
 #ifdef IMG_CLASS_BLOCKMATCHING_OCCLUSION_ZEROPAD
 					_image_compensated.at(x, y) = 0;
 #else
-					_image_compensated.at(x, y) = _image_next.get_zeropad(r.x, r.y);
+					_image_compensated.at(x, y) = _image_next.get_zeropad_cubic(r.x, r.y);
 #endif
 				}
 			}

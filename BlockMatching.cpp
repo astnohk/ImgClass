@@ -18,6 +18,12 @@ norm(const double& value)
 	return fabs(value);
 }
 
+double
+inner_prod(const double& lvalue, const double& rvalue)
+{
+	return lvalue * rvalue;
+}
+
 
 
 
@@ -96,203 +102,9 @@ BlockMatching<ImgClass::Lab>::image_normalizer(void)
 
 
 
-template <>
-ImgVector<VECTOR_2D<double> > *
-BlockMatching<ImgClass::Lab>::grad_image(const ImgVector<ImgClass::Lab>& image, const int top_left_x, const int top_left_y, const int crop_width, const int crop_height)
-{
-	ImgVector<VECTOR_2D<double> >* gradients = new ImgVector<VECTOR_2D<double> >(crop_width, crop_height);
 
-	for (int y = 0; y < crop_height; y++) {
-		for (int x = 0; x < crop_width; x++) {
-			gradients->at(x, y).x =
-			    image.get_mirror(top_left_x + x + 1, top_left_y + y).L
-			    - image.get_mirror(top_left_x + x, top_left_y + y).L;
-			gradients->at(x, y).y =
-			    image.get_mirror(top_left_x + x, top_left_y + y + 1).L
-			    - image.get_mirror(top_left_x + x, top_left_y + y).L;
-		}
-	}
-	return gradients;
-}
-
-
-
-
-// ----- Correlation functions -----
-template <>
-double
-BlockMatching<ImgClass::RGB>::ZNCC(const ImgVector<ImgClass::RGB>& reference, const ImgVector<ImgClass::RGB>& interest, const int x_ref, const int y_ref, const int x_int, const int y_int)
-{
-	double N = _block_size * _block_size;
-	ImgClass::RGB sum_reference(.0, .0, .0);
-	ImgClass::RGB sum_interest(.0, .0, .0);
-	double sum_sq_reference = 0;
-	double sum_sq_interest = 0;
-	double sum_sq_reference_interest = 0;
-
-	for (int y = 0; y < _block_size; y++) {
-		for (int x = 0; x < _block_size; x++) {
-			sum_reference += reference.get_zeropad(x_ref + x, y_ref + y);
-			sum_interest += interest.get_zeropad(x_int + x, y_int + y);
-			sum_sq_reference += inner_prod(reference.get_zeropad(x_ref + x, y_ref + y), reference.get_zeropad(x_ref + x, y_ref + y));
-			sum_sq_interest += inner_prod(interest.get_zeropad(x_int + x, y_int + y), interest.get_zeropad(x_int + x, y_int + y));
-			sum_sq_reference_interest += inner_prod(reference.get_zeropad(x_ref + x, y_ref + y), interest.get_zeropad(x_int + x, y_int + y));
-		}
-	}
-	return (N * sum_sq_reference_interest - inner_prod(sum_reference, sum_interest))
-	    / (sqrt(N * sum_sq_reference - inner_prod(sum_reference, sum_reference))
-	    * sqrt(N * sum_sq_interest - inner_prod(sum_interest, sum_interest))
-	    + DBL_EPSILON);
-}
-
-template <>
-double
-BlockMatching<ImgClass::Lab>::ZNCC(const ImgVector<ImgClass::Lab>& reference, const ImgVector<ImgClass::Lab>& interest, const int x_ref, const int y_ref, const int x_int, const int y_int)
-{
-	double N = _block_size * _block_size;
-	ImgClass::Lab sum_reference(.0, .0, .0);
-	ImgClass::Lab sum_interest(.0, .0, .0);
-	double sum_sq_reference = 0;
-	double sum_sq_interest = 0;
-	double sum_sq_reference_interest = 0;
-
-	for (int y = 0; y < _block_size; y++) {
-		for (int x = 0; x < _block_size; x++) {
-			sum_reference += reference.get_zeropad(x_ref + x, y_ref + y);
-			sum_interest += interest.get_zeropad(x_int + x, y_int + y);
-			sum_sq_reference += inner_prod(reference.get_zeropad(x_ref + x, y_ref + y), reference.get_zeropad(x_ref + x, y_ref + y));
-			sum_sq_interest += inner_prod(interest.get_zeropad(x_int + x, y_int + y), interest.get_zeropad(x_int + x, y_int + y));
-			sum_sq_reference_interest += inner_prod(reference.get_zeropad(x_ref + x, y_ref + y), interest.get_zeropad(x_int + x, y_int + y));
-		}
-	}
-	return (N * sum_sq_reference_interest - inner_prod(sum_reference, sum_interest))
-	    / (sqrt(N * sum_sq_reference - inner_prod(sum_reference, sum_reference))
-	    * sqrt(N * sum_sq_interest - inner_prod(sum_interest, sum_interest))
-	    + DBL_EPSILON);
-}
-
-
-
-
-// ----- region -----
-template <>
-double
-BlockMatching<ImgClass::RGB>::MAD_region(const ImgVector<ImgClass::RGB>& reference, const ImgVector<ImgClass::RGB>& interest, const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_interest)
-{
-	double N = .0;
-	double sad = .0;
-
-	for (std::list<VECTOR_2D<int> >::const_iterator ite = region_interest.begin();
-	    ite != region_interest.end();
-	    ++ite) {
-		N += 1.0;
-		ImgClass::RGB color_reference(reference.get_zeropad(ite->x + x_diff, ite->y + y_diff));
-		ImgClass::RGB color_interest(interest.get_zeropad(ite->x, ite->y));
-		sad += norm(color_interest - color_reference);
-	}
-	return sad / N;
-}
-
-template <>
-double
-BlockMatching<ImgClass::Lab>::MAD_region(const ImgVector<ImgClass::Lab>& reference, const ImgVector<ImgClass::Lab>& interest, const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_interest)
-{
-	double N = .0;
-	double sad = .0;
-
-	for (std::list<VECTOR_2D<int> >::const_iterator ite = region_interest.begin();
-	    ite != region_interest.end();
-	    ++ite) {
-		N += 1.0;
-		ImgClass::Lab color_reference(reference.get_zeropad(ite->x + x_diff, ite->y + y_diff));
-		ImgClass::Lab color_interest(interest.get_zeropad(ite->x, ite->y));
-		sad += norm(color_interest - color_reference);
-	}
-	return sad / N;
-}
-
-
-template <>
-double
-BlockMatching<ImgClass::RGB>::ZNCC_region(const ImgVector<ImgClass::RGB>& reference, const ImgVector<ImgClass::RGB>& interest, const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_interest)
-{
-	double N = .0;
-	ImgClass::RGB sum_reference(.0, .0, .0);
-	ImgClass::RGB sum_interest(.0, .0, .0);
-	double sum_sq_reference = .0;
-	double sum_sq_interest = .0;
-	double sum_sq_reference_interest = .0;
-
-	for (std::list<VECTOR_2D<int> >::const_iterator ite = region_interest.begin();
-	    ite != region_interest.end();
-	    ++ite) {
-		VECTOR_2D<int> r(ite->x + x_diff, ite->y + y_diff);
-
-		N += 1.0;
-		// Previous frame
-		sum_reference += reference.get_zeropad(r.x, r.y);
-		sum_sq_reference += inner_prod(
-		    reference.get_zeropad(r.x, r.y)
-		    , reference.get_zeropad(r.x, r.y));
-		// Next frame
-		sum_interest += interest.get_zeropad(ite->x, ite->y);
-		sum_sq_interest += inner_prod(
-		    interest.get_zeropad(ite->x, ite->y)
-		    , interest.get_zeropad(ite->x, ite->y));
-		// Co-frame
-		sum_sq_reference_interest += inner_prod(
-		    reference.get_zeropad(r.x, r.y)
-		    , interest.get_zeropad(ite->x, ite->y));
-	}
-	// Calculate Covariance
-	return (N * sum_sq_reference_interest - inner_prod(sum_reference, sum_interest)) /
-	    (sqrt((N * sum_sq_reference - inner_prod(sum_reference, sum_reference))
-	    * (N * sum_sq_interest - inner_prod(sum_interest, sum_interest)))
-	    + DBL_EPSILON);
-}
-
-template <>
-double
-BlockMatching<ImgClass::Lab>::ZNCC_region(const ImgVector<ImgClass::Lab>& reference, const ImgVector<ImgClass::Lab>& interest, const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_interest)
-{
-	double N = .0;
-	ImgClass::Lab sum_reference(.0, .0, .0);
-	ImgClass::Lab sum_interest(.0, .0, .0);
-	double sum_sq_reference = .0;
-	double sum_sq_interest = .0;
-	double sum_sq_reference_interest = .0;
-
-	for (std::list<VECTOR_2D<int> >::const_iterator ite = region_interest.begin();
-	    ite != region_interest.end();
-	    ++ite) {
-		VECTOR_2D<int> r(ite->x + x_diff, ite->y + y_diff);
-
-		N += 1.0;
-		// Previous frame
-		sum_reference += reference.get_zeropad(r.x, r.y);
-		sum_sq_reference += inner_prod(
-		    reference.get_zeropad(r.x, r.y)
-		    , reference.get_zeropad(r.x, r.y));
-		// Next frame
-		sum_interest += interest.get_zeropad(ite->x, ite->y);
-		sum_sq_interest += inner_prod(
-		    interest.get_zeropad(ite->x, ite->y)
-		    , interest.get_zeropad(ite->x, ite->y));
-		// Co-frame
-		sum_sq_reference_interest += inner_prod(
-		    reference.get_zeropad(r.x, r.y)
-		    , interest.get_zeropad(ite->x, ite->y));
-	}
-	// Calculate Covariance
-	return (N * sum_sq_reference_interest - inner_prod(sum_reference, sum_interest)) /
-	    (sqrt((N * sum_sq_reference - inner_prod(sum_reference, sum_reference))
-	    * (N * sum_sq_interest - inner_prod(sum_interest, sum_interest)))
-	    + DBL_EPSILON);
-}
-
-
-
-
+// ---------- Correlation functions ----------
+// ----- region nearest intensity -----
 template <>
 double
 BlockMatching<ImgClass::RGB>::MAD_region_nearest_intensity(const int x_diff_prev, const int y_diff_prev, const std::list<VECTOR_2D<int> >& region)

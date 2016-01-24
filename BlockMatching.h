@@ -27,6 +27,7 @@ class BlockMatching
 		int _block_size;
 		int _cells_width;
 		int _cells_height;
+		int _subpixel_scale; // Full-pel : 1, Half-pel : 2, Quarter-pel : 4
 		ImgVector<T> _image_prev;
 		ImgVector<T> _image_current; // Base image for motion estimation
 		ImgVector<T> _image_next;
@@ -47,19 +48,20 @@ class BlockMatching
 	public:
 		// Constructors
 		BlockMatching(void);
+		BlockMatching(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const int BlockSize, const int Subpixel_Scale = 1);
+		BlockMatching(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const ImgVector<T>& image_next, const int BlockSize, const int Subpixel_Scale = 1);
+		BlockMatching(const ImgVector<T>& image_prev, const ImgVector<size_t>& region_prev, const ImgVector<T>& image_current, const ImgVector<size_t>& region_current, const int Subpixel_Scale = 1);
+		BlockMatching(const ImgVector<T>& image_prev, const ImgVector<size_t>& region_prev, const ImgVector<T>& image_current, const ImgVector<size_t>& region_current, const ImgVector<T>& image_next, const ImgVector<size_t>& region_next, const int Subpixel_Scale = 1);
+		// Copy constructor
 		explicit BlockMatching(const BlockMatching& copy);
-		BlockMatching(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const int BlockSize);
-		BlockMatching(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const ImgVector<T>& image_next, const int BlockSize);
-		BlockMatching(const ImgVector<T>& image_prev, const ImgVector<size_t>& region_prev, const ImgVector<T>& image_current, const ImgVector<size_t>& region_current);
-		BlockMatching(const ImgVector<T>& image_prev, const ImgVector<size_t>& region_prev, const ImgVector<T>& image_current, const ImgVector<size_t>& region_current, const ImgVector<T>& image_next, const ImgVector<size_t>& region_next);
 		// Destructor
 		virtual ~BlockMatching(void);
 
 		// Resetter
-		void reset(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const int BlockSize);
-		void reset(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const ImgVector<T>& image_next, const int BlockSize);
-		void reset(const ImgVector<T>& image_prev, const ImgVector<size_t>& region_prev, const ImgVector<T>& image_current, const ImgVector<size_t>& region_current);
-		void reset(const ImgVector<T>& image_prev, const ImgVector<size_t>& region_prev, const ImgVector<T>& image_current, const ImgVector<size_t>& region_current, const ImgVector<T>& image_next, const ImgVector<size_t>& region_next);
+		void reset(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const int BlockSize, const int Subpixel_Scale = 1);
+		void reset(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const ImgVector<T>& image_next, const int BlockSize, const int Subpixel_Scale = 1);
+		void reset(const ImgVector<T>& image_prev, const ImgVector<size_t>& region_prev, const ImgVector<T>& image_current, const ImgVector<size_t>& region_current, const int Subpixel_Scale = 1);
+		void reset(const ImgVector<T>& image_prev, const ImgVector<size_t>& region_prev, const ImgVector<T>& image_current, const ImgVector<size_t>& region_current, const ImgVector<T>& image_next, const ImgVector<size_t>& region_next, const int Subpixel_Scale = 1);
 
 		// Get state
 		int width(void) const;
@@ -106,14 +108,13 @@ class BlockMatching
 		// Interpolate skipped Motion Vectors
 		void vector_interpolation(const std::list<VECTOR_2D<int> >& flat_blocks, ImgVector<bool>* estimated);
 
-		// Get gradients
-		ImgVector<VECTOR_2D<double> >* grad_image(const ImgVector<T>& image, const int top_left_x, const int top_left_y, const int crop_width, const int crop_height);
-
 		// Correlation function
 		double MAD(const ImgVector<T>& reference, const ImgVector<T>& interest, const int x_ref, const int y_ref, const int x_int, const int y_int);
+		double MAD_cubic(const ImgVector<T>& reference, const ImgVector<T>& interest, const double x_ref, const double y_ref, const double x_int, const double y_int);
 		double ZNCC(const ImgVector<T>& reference, const ImgVector<T>& interest, const int x_ref, const int y_ref, const int x_int, const int y_int);
 		// Arbitrary shaped correlation function
 		double MAD_region(const ImgVector<T>& reference, const ImgVector<T>& interest, const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_interest);
+		double MAD_region_cubic(const ImgVector<T>& reference, const ImgVector<T>& interest, const double x_diff, const double y_diff, const std::list<VECTOR_2D<int> >& region_interest);
 		double ZNCC_region(const ImgVector<T>& reference, const ImgVector<T>& interest, const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_interest);
 		// Arbitrary shaped correlation function with nearest intensity restricted
 		double MAD_region_nearest_intensity(const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_current);
@@ -122,6 +123,7 @@ class BlockMatching
 
 double norm_squared(const double& value);
 double norm(const double& value);
+double inner_prod(const double& lvalue, const double& rvalue);
 
 #include "BlockMatching_private_initializer.h"
 #include "BlockMatching_private_accessor.h"

@@ -15,19 +15,21 @@ BlockMatching<T>::BlockMatching(void)
 	_block_size = 0;
 	_cells_width = 0;
 	_cells_height = 0;
+	_subpixel_scale = 1;
 }
 
 
 
 
 template <class T>
-BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const int BlockSize)
+BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const int BlockSize, const int Subpixel_Scale)
 {
 	_width = 0;
 	_height = 0;
 	_block_size = 0;
 	_cells_width = 0;
 	_cells_height = 0;
+	_subpixel_scale = 1;
 	if (image_prev.isNULL()) {
 		std::cerr << "BlockMatching<T>::BlockMatching(const ImgVector<T>&, const ImgVector<T>&, const int) : ImgVector<T>& image_prev" << std::endl;
 		throw std::invalid_argument("BlockMatching<T>::BlockMatching(const ImgVector<T>&, const ImgVector<T>&, const int) : ImgVector<T>& image_prev");
@@ -50,6 +52,7 @@ BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<
 	_block_size = BlockSize;
 	_cells_width = int(ceil(double(_width) / double(_block_size)));
 	_cells_height = int(ceil(double(_height) / double(_block_size)));
+	_subpixel_scale = Subpixel_Scale;
 
 	_image_prev.copy(image_prev);
 	_image_current.copy(image_current);
@@ -59,13 +62,14 @@ BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<
 }
 
 template <class T>
-BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const ImgVector<T>& image_next, const int BlockSize)
+BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const ImgVector<T>& image_next, const int BlockSize, const int Subpixel_Scale)
 {
 	_width = 0;
 	_height = 0;
 	_block_size = 0;
 	_cells_width = 0;
 	_cells_height = 0;
+	_subpixel_scale = 1;
 	if (image_prev.isNULL()) {
 		std::cerr << "BlockMatching<T>::BlockMatching(const ImgVector<T>&, const ImgVector<T>&, const int) : ImgVector<T>& image_prev" << std::endl;
 		throw std::invalid_argument("BlockMatching<T>::BlockMatching(const ImgVector<T>&, const ImgVector<T>&, const int) : ImgVector<T>& image_prev");
@@ -88,6 +92,7 @@ BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<
 	_block_size = BlockSize;
 	_cells_width = int(ceil(double(_width) / double(_block_size)));
 	_cells_height = int(ceil(double(_height) / double(_block_size)));
+	_subpixel_scale = Subpixel_Scale;
 
 	_image_prev.copy(image_prev);
 	_image_current.copy(image_current);
@@ -98,13 +103,14 @@ BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<
 }
 
 template <class T>
-BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<size_t>& region_map_prev, const ImgVector<T>& image_current, const ImgVector<size_t>& region_map_current)
+BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<size_t>& region_map_prev, const ImgVector<T>& image_current, const ImgVector<size_t>& region_map_current, const int Subpixel_Scale)
 {
 	_width = 0;
 	_height = 0;
 	_block_size = 0;
 	_cells_width = 0;
 	_cells_height = 0;
+	_subpixel_scale = 1;
 	if (image_prev.isNULL()) {
 		std::cerr << "BlockMatching<T>::BlockMatching(const ImgVector<T>&, const ImgVector<T>&, const int) : const ImgVector<T>& image_prev" << std::endl;
 		throw std::invalid_argument("const ImgVector<T>& image_prev");
@@ -133,6 +139,8 @@ BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<
 	_block_size = 1;
 	_cells_width = _width;
 	_cells_height = _height;
+	_subpixel_scale = Subpixel_Scale;
+
 	_image_prev.copy(image_prev);
 	_image_current.copy(image_current);
 	_region_map_prev.copy(region_map_prev);
@@ -157,13 +165,14 @@ BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<
 }
 
 template <class T>
-BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<size_t>& region_map_prev, const ImgVector<T>& image_current, const ImgVector<size_t>& region_map_current, const ImgVector<T>& image_next, const ImgVector<size_t>& region_map_next)
+BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<size_t>& region_map_prev, const ImgVector<T>& image_current, const ImgVector<size_t>& region_map_current, const ImgVector<T>& image_next, const ImgVector<size_t>& region_map_next, const int Subpixel_Scale)
 {
 	_width = 0;
 	_height = 0;
 	_block_size = 0;
 	_cells_width = 0;
 	_cells_height = 0;
+	_subpixel_scale = 1;
 	if (image_prev.isNULL()) {
 		std::cerr << "BlockMatching<T>::BlockMatching(const ImgVector<T>&, const ImgVector<T>&, const int) : const ImgVector<T>& image_prev" << std::endl;
 		throw std::invalid_argument("const ImgVector<T>& image_prev");
@@ -192,6 +201,7 @@ BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<
 	_block_size = 1;
 	_cells_width = _width;
 	_cells_height = _height;
+	_subpixel_scale = Subpixel_Scale;
 
 	_image_prev.copy(image_prev);
 	_image_current.copy(image_current);
@@ -232,6 +242,7 @@ BlockMatching<T>::BlockMatching(const BlockMatching& copy)
 	_block_size = copy._block_size;
 	_cells_width = copy._cells_width;
 	_cells_height = copy._cells_height;
+	_subpixel_scale = copy._subpixel_scale;
 
 	_image_prev.copy(copy._image_prev);
 	_image_current.copy(copy._image_current);
@@ -262,13 +273,14 @@ BlockMatching<T>::~BlockMatching(void)
 
 template <class T>
 void
-BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const int BlockSize)
+BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const int BlockSize, const int Subpixel_Scale)
 {
 	_width = 0;
 	_height = 0;
 	_block_size = 0;
 	_cells_width = 0;
 	_cells_height = 0;
+	_subpixel_scale = 1;
 	if (image_prev.isNULL()) {
 		std::cerr << "void BlockMatching<T>::reset(const ImgVector<T>&, const ImgVector<T>&, const int) : const ImgVector<T>& image_prev" << std::endl;
 		throw std::invalid_argument("const ImgVector<T>& image_prev");
@@ -285,6 +297,7 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& imag
 	_block_size = BlockSize;
 	_cells_width = int(ceil(double(_width) / double(_block_size)));
 	_cells_height = int(ceil(double(_height) / double(_block_size)));
+	_subpixel_scale = Subpixel_Scale;
 
 	_image_prev.copy(image_prev);
 	_image_current.copy(image_current);
@@ -307,13 +320,14 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& imag
 
 template <class T>
 void
-BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const ImgVector<T>& image_next, const int BlockSize)
+BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const ImgVector<T>& image_next, const int BlockSize, const int Subpixel_Scale)
 {
 	_width = 0;
 	_height = 0;
 	_block_size = 0;
 	_cells_width = 0;
 	_cells_height = 0;
+	_subpixel_scale = 1;
 	if (image_prev.isNULL()) {
 		std::cerr << "void BlockMatching<T>::reset(const ImgVector<T>&, const ImgVector<T>&, const int) : const ImgVector<T>& image_prev" << std::endl;
 		throw std::invalid_argument("const ImgVector<T>& image_prev");
@@ -330,6 +344,7 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& imag
 	_block_size = BlockSize;
 	_cells_width = int(ceil(double(_width) / double(_block_size)));
 	_cells_height = int(ceil(double(_height) / double(_block_size)));
+	_subpixel_scale = Subpixel_Scale;
 
 	_image_prev.copy(image_prev);
 	_image_current.copy(image_current);
@@ -352,13 +367,14 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<T>& imag
 
 template <class T>
 void
-BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<size_t>& region_map_prev, const ImgVector<T>& image_current, const ImgVector<size_t>& region_map_current)
+BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<size_t>& region_map_prev, const ImgVector<T>& image_current, const ImgVector<size_t>& region_map_current, const int Subpixel_Scale)
 {
 	_width = 0;
 	_height = 0;
 	_block_size = 0;
 	_cells_width = 0;
 	_cells_height = 0;
+	_subpixel_scale = 1;
 	if (image_prev.isNULL()) {
 		std::cerr << "void BlockMatching<T>::reset(const ImgVector<T>&, const ImgVector<T>&, const ImgVector<int>&) : const ImgVector<T>& image_prev" << std::endl;
 		throw std::invalid_argument("const ImgVector<T>& image_prev");
@@ -378,6 +394,7 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<size_t>&
 	_block_size = 1;
 	_cells_width = _width;
 	_cells_height = _height;
+	_subpixel_scale = Subpixel_Scale;
 
 	_image_prev.copy(image_prev);
 	_image_current.copy(image_current);
@@ -413,13 +430,14 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<size_t>&
 
 template <class T>
 void
-BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<size_t>& region_map_prev, const ImgVector<T>& image_current, const ImgVector<size_t>& region_map_current, const ImgVector<T>& image_next, const ImgVector<size_t>& region_map_next)
+BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<size_t>& region_map_prev, const ImgVector<T>& image_current, const ImgVector<size_t>& region_map_current, const ImgVector<T>& image_next, const ImgVector<size_t>& region_map_next, const int Subpixel_Scale)
 {
 	_width = 0;
 	_height = 0;
 	_block_size = 0;
 	_cells_width = 0;
 	_cells_height = 0;
+	_subpixel_scale = 1;
 	if (image_prev.isNULL()) {
 		std::cerr << "void BlockMatching<T>::reset(const ImgVector<T>&, const ImgVector<T>&, const ImgVector<int>&) : const ImgVector<T>& image_prev" << std::endl;
 		throw std::invalid_argument("const ImgVector<T>& image_prev");
@@ -439,6 +457,7 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<size_t>&
 	_block_size = 1;
 	_cells_width = _width;
 	_cells_height = _height;
+	_subpixel_scale = Subpixel_Scale;
 
 	_image_prev.copy(image_prev);
 	_image_current.copy(image_current);

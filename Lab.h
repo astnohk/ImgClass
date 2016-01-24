@@ -63,12 +63,8 @@ bool operator>(const double& lvalue, const ImgClass::Lab& rcolor);
 
 // Arithmetic non-substituting operator
 ImgClass::Lab operator+(const ImgClass::Lab& lcolor, const ImgClass::Lab& rcolor);
-ImgClass::Lab operator+(const ImgClass::Lab& lcolor, const double& rvalue);
-ImgClass::Lab operator+(const double& lvalue, const ImgClass::Lab& rcolor);
 
 ImgClass::Lab operator-(const ImgClass::Lab& lcolor, const ImgClass::Lab& rcolor);
-ImgClass::Lab operator-(const ImgClass::Lab& lcolor, const double& rvalue);
-ImgClass::Lab operator-(const double& lvalue, const ImgClass::Lab& rcolor);
 
 ImgClass::Lab operator*(const ImgClass::Lab& lcolor, const ImgClass::Lab& rcolor);
 ImgClass::Lab operator*(const ImgClass::Lab& lcolor, const double& rvalue);

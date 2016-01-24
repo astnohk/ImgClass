@@ -535,52 +535,42 @@ double
 BlockMatching<T>::MAD_region_nearest_intensity(const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_current)
 {
 	double N = .0;
-	double sad = 0;
+	double sad = .0;
 
 	for (std::list<VECTOR_2D<int> >::const_iterator ite = region_current.begin();
 	    ite != region_current.end();
 	    ++ite) {
 		VECTOR_2D<int> r(ite->x + x_diff, ite->y + y_diff);
 
-		double coeff = fabs(
+		double coeff = norm(
 		    _color_quantized_current.get(ite->x, ite->y)
 		    - _color_quantized_prev.get_zeropad(r.x, r.y));
 		N += coeff;
-		sad += coeff * fabs(
-		    double(_image_current.get(ite->x, ite->y)
+		sad += coeff * norm(
+		    _image_current.get(ite->x, ite->y
 		    - _image_prev.get_zeropad(r.x, r.y)));
 	}
 	return sad / N;
 }
-
-template <>
-double
-BlockMatching<ImgClass::RGB>::MAD_region_nearest_intensity(const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_current);
-
-template <>
-double
-BlockMatching<ImgClass::Lab>::MAD_region_nearest_intensity(const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_current);
-
-
 
 
 template <class T>
 double
 BlockMatching<T>::ZNCC_region_nearest_intensity(const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_current)
 {
-	double N = 0;
-	double sum_prev = 0;
-	double sum_current = 0;
-	double sum_sq_prev = 0;
-	double sum_sq_current = 0;
-	double sum_sq_prev_current = 0;
+	double N = .0;
+	T sum_prev = T();
+	T sum_current = T();
+	double sum_sq_prev = .0;
+	double sum_sq_current = .0;
+	double sum_sq_prev_current = .0;
 
 	for (std::list<VECTOR_2D<int> >::const_iterator ite = region_current.begin();
 	    ite != region_current.end();
 	    ++ite) {
 		VECTOR_2D<int> r(ite->x + x_diff, ite->y + y_diff);
 
-		double coeff = 1.0 - fabs(
+		double coeff = 1.0 - norm(
 		    _color_quantized_current.get(ite->x, ite->y)
 		    - _color_quantized_prev.get_zeropad(r.x, r.y));
 		N += coeff;
@@ -603,14 +593,6 @@ BlockMatching<T>::ZNCC_region_nearest_intensity(const int x_diff, const int y_di
 	return (N * sum_sq_prev_current - sum_prev * sum_current) /
 	    (sqrt((N * sum_sq_prev - sum_prev * sum_prev)
 	    * (N * sum_sq_current - sum_current * sum_current))
-	    + 1.0E-10);
+	    + DBL_EPSILON);
 }
-
-template <>
-double
-BlockMatching<ImgClass::RGB>::ZNCC_region_nearest_intensity(const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_current);
-
-template <>
-double
-BlockMatching<ImgClass::Lab>::ZNCC_region_nearest_intensity(const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_current);
 

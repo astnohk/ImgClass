@@ -3,8 +3,8 @@
 
 #include <vector>
 
-#include "ImgClass.h"
 #include "Vector.h"
+#include "ImgClass.h"
 
 template <class T>
 class MotionCompensation

@@ -383,18 +383,18 @@ ImgClass::Lab
 saturate(const ImgClass::Lab& value, const double& min, const double& max)
 {
 	ImgClass::Lab ret(value);
-	auto lambda = [](const double& value, const double& min, const double& max) -> double {
-		if (value < min) {
+	auto lambda = [&min, &max](const double& val) -> double {
+		if (val < min) {
 			return min;
-		} else if (value > max) {
+		} else if (val > max) {
 			return max;
 		} else {
-			return value;
+			return val;
 		}
 	};
-	ret.L = lambda(ret.L, min, max);
-	ret.a = lambda(ret.a, min, max);
-	ret.b = lambda(ret.b, min, max);
+	ret.L = lambda(ret.L);
+	ret.a = lambda(ret.a);
+	ret.b = lambda(ret.b);
 	return ret;
 }
 

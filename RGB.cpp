@@ -307,18 +307,18 @@ ImgClass::RGB
 saturate(const ImgClass::RGB& value, const double& min, const double& max)
 {
 	ImgClass::RGB ret(value);
-	auto lambda = [](const double& value, const double& min, const double& max) -> double {
-		if (value < min) {
+	auto lambda = [&min, &max](const double& val) -> double {
+		if (val < min) {
 			return min;
-		} else if (value > max) {
+		} else if (val > max) {
 			return max;
 		} else {
-			return value;
+			return val;
 		}
 	};
-	ret.R = lambda(ret.R, min, max);
-	ret.G = lambda(ret.G, min, max);
-	ret.B = lambda(ret.B, min, max);
+	ret.R = lambda(ret.R);
+	ret.G = lambda(ret.G);
+	ret.B = lambda(ret.B);
 	return ret;
 }
 

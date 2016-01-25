@@ -70,7 +70,6 @@ class MotionCompensation
 
 		// Motion compensation methods
 		void create_image_compensated(void);
-		void create_image_estimated(const double estimate_time);
 };
 
 #include "MotionCompensation_private.h"

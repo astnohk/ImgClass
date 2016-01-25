@@ -605,33 +605,3 @@ MotionCompensation<T>::create_image_compensated(void)
 	}
 }
 
-
-/*
- * void MotionCompensation<T>::create_image_masked_compensated(const double estimate_time)
- * Make estimated (compensated) image.
- * if estimate_frame = 2 then it estimate the image of next of next frame.
-*/
-template <class T>
-void
-MotionCompensation<T>::create_image_estimated(const double estimate_time)
-{
-	if (_vector_time.isNULL() == false) {
-		std::cerr << "Estimate by motion compensation is only for forward motion compensation" << std::endl;
-		throw std::invalid_argument("_vector_prev is NULL");
-	}
-	VECTOR_2D<int> r;
-	VECTOR_2D<int> r_est;
-	_image_compensated.reset(_width, _height);
-	for (int y = 0; y < _height; y++) {
-		for (int x = 0; x < _width; x++) {
-			r.x = int(round(x + _vector_prev.get(x, y).x));
-			r.y = int(round(y + _vector_prev.get(x, y).y));
-			r_est = r * (1.0 - estimate_time);
-			if (0 <= r_est.x && r_est.x < _width
-			    && 0 <= r_est.y && r_est.y < _height) {
-				_image_compensated.at(r_est.x, r_est.y) = _image_prev.get_zeropad(r.x, r.y);
-			}
-		}
-	}
-}
-

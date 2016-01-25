@@ -64,6 +64,9 @@ double inner_prod(const ImgClass::RGB& lcolor, const ImgClass::RGB& rcolor);
 double norm_squared(const ImgClass::RGB& color);
 double norm(const ImgClass::RGB& color);
 
+// Saturation
+ImgClass::RGB saturate(const ImgClass::RGB& value, const double& min, const double& max);
+
 // Stream
 std::ostream& operator<<(std::ostream& os, const ImgClass::RGB& rcolor);
 

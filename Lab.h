@@ -81,6 +81,9 @@ const ImgClass::Lab abs(const ImgClass::Lab& color);
 double norm_squared(const ImgClass::Lab& color);
 double norm(const ImgClass::Lab& color);
 
+// Saturation
+ImgClass::Lab saturate(const ImgClass::Lab& value, const double& min, const double& max);
+
 // Stream
 std::ostream& operator<<(std::ostream& os, const ImgClass::Lab& rcolor);
 

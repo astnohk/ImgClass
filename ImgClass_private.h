@@ -1063,6 +1063,19 @@ ImgVector<T>::cubic(const double x, const double B, const double C) const
 
 
 template <class T>
+template <class RT>
+void
+ImgVector<T>::saturate(T (*func)(const T& value, const RT& min, const RT& max), const RT& min, const RT& max)
+{
+	if (func != nullptr) {
+		for (size_t i = 0 ; i < this->size(); i++) {
+			_data[i] = func(_data[i], min, max);
+		}
+	}
+}
+
+
+template <class T>
 void
 ImgVector<T>::map(T (*func)(T &value))
 {
@@ -1186,6 +1199,21 @@ ImgVector<T>::operator/=(const ImgVector<RT>& rvector)
 		_data[i] /= rvector._data[i];
 	}
 	return *this;
+}
+
+
+
+template <class T>
+T
+saturate(const T& value, const T& min, const T& max)
+{
+	if (value < min) {
+		return min;
+	} else if (value > max) {
+		return max;
+	} else {
+		return value;
+	}
 }
 
 

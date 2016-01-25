@@ -87,6 +87,7 @@ class ImgVector
 
 		// Simple image processing (Change the data of *this)
 		void contrast_stretching(const T& Min, const T& Max);
+		template<class RT> void saturate(T (*)(const T&, const RT&, const RT&), const RT& min, const RT& max);
 		void map(T (*func)(T &value));
 
 		// Resampling (Change the data of *this)
@@ -107,6 +108,8 @@ class ImgVector
 	protected:
 		double cubic(const double x, const double B, const double C) const;
 };
+
+template<class T> T saturate(const T& value, const T& min, const T& max);
 
 #include "ImgClass_private.h"
 

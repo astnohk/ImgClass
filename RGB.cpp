@@ -302,6 +302,27 @@ norm(const ImgClass::RGB& color)
 }
 
 
+// Saturation
+ImgClass::RGB
+saturate(const ImgClass::RGB& value, const double& min, const double& max)
+{
+	ImgClass::RGB ret(value);
+	auto lambda = [](const double& value, const double& min, const double& max) -> double {
+		if (value < min) {
+			return min;
+		} else if (value > max) {
+			return max;
+		} else {
+			return value;
+		}
+	};
+	ret.R = lambda(ret.R, min, max);
+	ret.G = lambda(ret.G, min, max);
+	ret.B = lambda(ret.B, min, max);
+	return ret;
+}
+
+
 // Stream
 std::ostream &
 operator<<(std::ostream& os, const ImgClass::RGB& rcolor)

@@ -102,7 +102,7 @@ BlockMatching<T>::block_matching_lattice(const int search_range, const double co
 						if (E_tmp < E_min) {
 							E_min = E_tmp;
 							MV = v_tmp;
-						} else if (fabs(E_tmp - E_min) < 1E-6
+						} else if (fabs(E_tmp - E_min) < 1.0E-6
 						    && norm_squared(MV) >= norm_squared(v_tmp)) {
 							E_min = E_tmp;
 							MV = v_tmp;
@@ -119,19 +119,18 @@ BlockMatching<T>::block_matching_lattice(const int search_range, const double co
 							    *(reference_images[ref]), _image_current,
 							    double(x_b) + MV.x + v_tmp.x,
 							    double(y_b) + MV.y + v_tmp.y,
-							    double(x_b) + MV.x,
-							    double(y_b) + MV.y);
+							    double(x_b),
+							    double(y_b));
 							if (MAD < MAD_min) {
 								MAD_min = MAD;
 								MV_subpel = v_tmp;
-							} else if (fabs(MAD - MAD_min) < 1E-6
+							} else if (fabs(MAD - MAD_min) < 1.0E-6
 							    && norm_squared(MV_subpel) >= norm_squared(v_tmp)) {
 								MAD_min = MAD;
 								MV_subpel = v_tmp;
 							}
 						}
 					}
-					std::cout << MV_subpel << std::endl;
 					MV += MV_subpel;
 				}
 				motion_vectors[ref]->at(X_b, Y_b) = MV;
@@ -249,7 +248,7 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range, const 
 						if (E_tmp < E_min) {
 							E_min = E_tmp;
 							MV = v_tmp;
-						} else if (fabs(E_tmp - E_min) < DBL_EPSILON) {
+						} else if (fabs(E_tmp - E_min) < 1.0E-6) {
 							if (norm_squared(v_tmp) < norm_squared(MV)) {
 								E_min = E_tmp;
 								MV = v_tmp;
@@ -273,7 +272,7 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range, const 
 						if (MAD < MAD_min) {
 							MAD_min = MAD;
 							MV_subpel = v_tmp;
-						} else if (fabs(MAD - MAD_min) < 1E-6
+						} else if (fabs(MAD - MAD_min) < 1.0E-6
 						    && norm_squared(MV_subpel) >= norm_squared(v_tmp)) {
 							MAD_min = MAD;
 							MV_subpel = v_tmp;

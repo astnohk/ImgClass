@@ -124,6 +124,27 @@ VECTOR_2D<T>::operator/=(const T& value) // Scalar multiplication
 
 
 template <class T>
+template <class RT>
+VECTOR_2D<T> &
+VECTOR_2D<T>::operator<<=(const RT& value)
+{
+	this->x <<= value;
+	this->y <<= value;
+	return *this;
+}
+
+template <class T>
+template <class RT>
+VECTOR_2D<T> &
+VECTOR_2D<T>::operator>>=(const RT& value)
+{
+	this->x >>= value;
+	this->y >>= value;
+	return *this;
+}
+
+
+template <class T>
 bool
 VECTOR_2D<T>::operator==(const VECTOR_2D<T>& vector)
 {
@@ -226,6 +247,23 @@ operator/(VECTOR_2D<Type> lvector, const Tval& rvalue)
 {
 	lvector.x = lvector.x / rvalue;
 	lvector.y = lvector.y / rvalue;
+	return lvector;
+}
+
+
+template<class Type, class RType>
+VECTOR_2D<Type> operator<<(VECTOR_2D<Type> lvector, const RType& rvalue)
+{
+	lvector.x <<= rvalue;
+	lvector.y <<= rvalue;
+	return lvector;
+}
+
+template<class Type, class RType>
+VECTOR_2D<Type> operator>>(VECTOR_2D<Type> lvector, const RType& rvalue)
+{
+	lvector.x >>= rvalue;
+	lvector.y >>= rvalue;
 	return lvector;
 }
 

@@ -34,27 +34,11 @@ class VECTOR_2D
 
 		VECTOR_2D<T>& operator/=(const T& value);
 
+		template<class RT> VECTOR_2D<T>& operator<<=(const RT& value);
+		template<class RT> VECTOR_2D<T>& operator>>=(const RT& value);
+
 		bool operator==(const VECTOR_2D<T>& vector);
 		bool operator!=(const VECTOR_2D<T>& vector);
-
-		// Friend operators
-		template<class Type> friend VECTOR_2D<Type> operator+(VECTOR_2D<Type> vector);
-		template<class Type> friend VECTOR_2D<Type> operator-(VECTOR_2D<Type> vector);
-                                            
-		template<class Type> friend VECTOR_2D<Type> operator+(VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
-		template<class Type> friend VECTOR_2D<Type> operator-(VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
-                                            
-		template<class Type> friend Type operator*(const VECTOR_2D<Type>& lvector, const VECTOR_2D<Type>& rvector);
-		template<class Type, class Tval> friend VECTOR_2D<Type> operator*(VECTOR_2D<Type> lvector, const Tval& rvalue);
-		template<class Type, class Tval> friend VECTOR_2D<Type> operator*(const Tval& lvalue, VECTOR_2D<Type> rvector);
-
-		template<class Type, class Tval> friend VECTOR_2D<Type> operator/(VECTOR_2D<Type> lvector, const Tval& rvalue);
-
-		template<class Type> friend double norm(const VECTOR_2D<Type> &vector);
-		template<class Type> friend double arg(const VECTOR_2D<Type> &vector);
-		template<class Type> friend VECTOR_2D<Type> floor(const VECTOR_2D<Type> &vector);
-		template<class Type> friend VECTOR_2D<Type> round(const VECTOR_2D<Type> &vector);
-		template<class Type> friend VECTOR_2D<Type> ceil(const VECTOR_2D<Type> &vector);
 };
 
 // Global operator overloading
@@ -69,6 +53,9 @@ template<class Type, class Tval> VECTOR_2D<Type> operator*(VECTOR_2D<Type> lvect
 template<class Type, class Tval> VECTOR_2D<Type> operator*(const Tval& lvalue, VECTOR_2D<Type> rvector);
 
 template<class Type, class Tval> VECTOR_2D<Type> operator/(VECTOR_2D<Type> lvector, const Tval& rvalue);
+
+template<class Type, class RType> VECTOR_2D<Type> operator<<(VECTOR_2D<Type> lvector, const RType& rvalue);
+template<class Type, class RType> VECTOR_2D<Type> operator>>(VECTOR_2D<Type> lvector, const RType& rvalue);
 
 // Arithmetic
 template<class Type> double norm_squared(const VECTOR_2D<Type>& vector);

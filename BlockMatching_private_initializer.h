@@ -154,8 +154,8 @@ BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_BLOCKMATCHING)
 	std::cout << " Block Matching : Collect connected region from region map" << std::endl;
 #endif
-	get_connected_region_list(&_connected_regions_prev, region_map_prev);
-	get_connected_region_list(&_connected_regions_current, region_map_current);
+	get_connected_regions(&_connected_regions_prev, region_map_prev);
+	get_connected_regions(&_connected_regions_current, region_map_current);
 	// Get color quantized image
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_BLOCKMATCHING)
 	std::cout << " Block Matching : Get color quantized image" << std::endl;
@@ -219,9 +219,9 @@ BlockMatching<T>::BlockMatching(const ImgVector<T>& image_prev, const ImgVector<
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_BLOCKMATCHING)
 	std::cout << " Block Matching : Collect connected region from region map" << std::endl;
 #endif
-	get_connected_region_list(&_connected_regions_prev, region_map_prev);
-	get_connected_region_list(&_connected_regions_current, region_map_current);
-	get_connected_region_list(&_connected_regions_next, region_map_next);
+	get_connected_regions(&_connected_regions_prev, region_map_prev);
+	get_connected_regions(&_connected_regions_current, region_map_current);
+	get_connected_regions(&_connected_regions_next, region_map_next);
 	// Get color quantized image
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_BLOCKMATCHING)
 	std::cout << " Block Matching : Get color quantized image" << std::endl;
@@ -416,8 +416,8 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<size_t>&
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_BLOCKMATCHING)
 	std::cout << " Block Matching : Collect connected region from region map" << std::endl;
 #endif
-	get_connected_region_list(&_connected_regions_prev, region_map_prev);
-	get_connected_region_list(&_connected_regions_current, region_map_current);
+	get_connected_regions(&_connected_regions_prev, region_map_prev);
+	get_connected_regions(&_connected_regions_current, region_map_current);
 	_connected_regions_next.clear();
 	// Get color quantized image
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_BLOCKMATCHING)
@@ -479,9 +479,9 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<size_t>&
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_BLOCKMATCHING)
 	std::cout << " Block Matching : Collect connected region from region map" << std::endl;
 #endif
-	get_connected_region_list(&_connected_regions_prev, region_map_prev);
-	get_connected_region_list(&_connected_regions_current, region_map_current);
-	get_connected_region_list(&_connected_regions_next, region_map_next);
+	get_connected_regions(&_connected_regions_prev, region_map_prev);
+	get_connected_regions(&_connected_regions_current, region_map_current);
+	get_connected_regions(&_connected_regions_next, region_map_next);
 	// Get color quantized image
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_BLOCKMATCHING)
 	std::cout << " Block Matching : Get color quantized image" << std::endl;
@@ -501,7 +501,7 @@ BlockMatching<T>::reset(const ImgVector<T>& image_prev, const ImgVector<size_t>&
  */
 template <class T>
 void
-BlockMatching<T>::get_connected_region_list(std::vector<std::list<VECTOR_2D<int> > >* connected_regions, const ImgVector<size_t>& region_map)
+BlockMatching<T>::get_connected_regions(std::vector<std::vector<VECTOR_2D<int> > >* connected_regions, const ImgVector<size_t>& region_map)
 {
 	const VECTOR_2D<int> adjacent[8] = {
 	    VECTOR_2D<int>(-1, -1), VECTOR_2D<int>(0, -1), VECTOR_2D<int>(1, -1),
@@ -540,7 +540,7 @@ BlockMatching<T>::get_connected_region_list(std::vector<std::list<VECTOR_2D<int>
 	connected_regions->resize(tmp_list.size());
 	// Copy extracted connected region to std::vector _connected_regions
 	std::list<std::list<VECTOR_2D<int> > >::iterator ite = tmp_list.begin();
-	for (unsigned int n = 0; n < connected_regions->size(); ++ite, n++) {
+	for (size_t n = 0; n < connected_regions->size(); ++ite, n++) {
 		connected_regions->at(n).assign(ite->begin(), ite->end());
 	}
 }
@@ -578,7 +578,7 @@ BlockMatching<ImgClass::Lab>::image_normalizer(void);
 // ----- Decrease Color -----
 template <class T>
 void
-BlockMatching<T>::get_color_quantized_image(ImgVector<T>* decreased_color_image, const ImgVector<T>& image, const std::vector<std::list<VECTOR_2D<int> > >& connected_regions)
+BlockMatching<T>::get_color_quantized_image(ImgVector<T>* decreased_color_image, const ImgVector<T>& image, const std::vector<std::vector<VECTOR_2D<int> > >& connected_regions)
 {
 	decreased_color_image->reset(_width, _height);
 	unsigned int n;
@@ -587,16 +587,12 @@ BlockMatching<T>::get_color_quantized_image(ImgVector<T>* decreased_color_image,
 #endif
 	for (n = 0; n < connected_regions.size(); n++) {
 		T sum_color = T();
-		for (std::list<VECTOR_2D<int> >::const_iterator ite = connected_regions[n].begin();
-		    ite != connected_regions[n].end();
-		    ++ite) {
-			sum_color += image.get(ite->x, ite->y);
+		for (const VECTOR_2D<int>& r : connected_regions[n]) {
+			sum_color += image.get(r.x, r.y);
 		}
 		T mean_color = sum_color / double(connected_regions[n].size());
-		for (std::list<VECTOR_2D<int> >::const_iterator ite = connected_regions[n].begin();
-		    ite != connected_regions[n].end();
-		    ++ite) {
-			decreased_color_image->at(ite->x, ite->y) = mean_color;
+		for (const VECTOR_2D<int>& r : connected_regions[n]) {
+			decreased_color_image->at(r.x, r.y) = mean_color;
 		}
 	}
 }

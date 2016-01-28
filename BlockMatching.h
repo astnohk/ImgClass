@@ -41,9 +41,9 @@ class BlockMatching
 		ImgVector<VECTOR_2D<double> > _motion_vector_prev;
 		ImgVector<VECTOR_2D<double> > _motion_vector_next;
 		// For arbitrary shaped block matching
-		std::vector<std::list<VECTOR_2D<int> > > _connected_regions_prev;
-		std::vector<std::list<VECTOR_2D<int> > > _connected_regions_current;
-		std::vector<std::list<VECTOR_2D<int> > > _connected_regions_next;
+		std::vector<std::vector<VECTOR_2D<int> > > _connected_regions_prev;
+		std::vector<std::vector<VECTOR_2D<int> > > _connected_regions_current;
+		std::vector<std::vector<VECTOR_2D<int> > > _connected_regions_next;
 
 	public:
 		// Constructors
@@ -99,8 +99,8 @@ class BlockMatching
 	protected:
 		void image_normalizer(void);
 		// Extract connected region from region_map
-		void get_connected_region_list(std::vector<std::list<VECTOR_2D<int> > >* connected_regions, const ImgVector<size_t>& region_map);
-		void get_color_quantized_image(ImgVector<T>* decreased_color_image, const ImgVector<T>& image, const std::vector<std::list<VECTOR_2D<int> > >& connected_regions);
+		void get_connected_regions(std::vector<std::vector<VECTOR_2D<int> > >* connected_regions, const ImgVector<size_t>& region_map);
+		void get_color_quantized_image(ImgVector<T>* decreased_color_image, const ImgVector<T>& image, const std::vector<std::vector<VECTOR_2D<int> > >& connected_regions);
 
 		// Main method of block_matching
 		void block_matching_lattice(const int search_range, const double coeff_MAD, const double coeff_ZNCC);
@@ -113,12 +113,12 @@ class BlockMatching
 		double MAD_cubic(const ImgVector<T>& reference, const ImgVector<T>& interest, const double x_ref, const double y_ref, const double x_int, const double y_int);
 		double ZNCC(const ImgVector<T>& reference, const ImgVector<T>& interest, const int x_ref, const int y_ref, const int x_int, const int y_int);
 		// Arbitrary shaped correlation function
-		double MAD_region(const ImgVector<T>& reference, const ImgVector<T>& interest, const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_interest);
-		double MAD_region_cubic(const ImgVector<T>& reference, const ImgVector<T>& interest, const double x_diff, const double y_diff, const std::list<VECTOR_2D<int> >& region_interest);
-		double ZNCC_region(const ImgVector<T>& reference, const ImgVector<T>& interest, const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_interest);
+		double MAD_region(const ImgVector<T>& reference, const ImgVector<T>& interest, const int x_diff, const int y_diff, const std::vector<VECTOR_2D<int> >& region_interest);
+		double MAD_region_cubic(const ImgVector<T>& reference, const ImgVector<T>& interest, const double x_diff, const double y_diff, const std::vector<VECTOR_2D<int> >& region_interest);
+		double ZNCC_region(const ImgVector<T>& reference, const ImgVector<T>& interest, const int x_diff, const int y_diff, const std::vector<VECTOR_2D<int> >& region_interest);
 		// Arbitrary shaped correlation function with nearest intensity restricted
-		double MAD_region_nearest_intensity(const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_current);
-		double ZNCC_region_nearest_intensity(const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_current);
+		double MAD_region_nearest_intensity(const int x_diff, const int y_diff, const std::vector<VECTOR_2D<int> >& region_interest);
+		double ZNCC_region_nearest_intensity(const int x_diff, const int y_diff, const std::vector<VECTOR_2D<int> >& region_interest);
 };
 
 double norm_squared(const double& value);

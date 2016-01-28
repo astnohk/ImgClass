@@ -51,7 +51,7 @@ BlockMatching<T>::block_matching_lattice(const int search_range, const double co
 		_motion_vector_next.reset(_cells_width, _cells_height);
 	}
 	// Set reference_images
-	std::vector<ImgVector<T> *> reference_images;
+	std::vector<ImgVector<T>*> reference_images;
 	std::vector<ImgVector<VECTOR_2D<double> > *> motion_vectors;
 	reference_images.push_back(&_image_prev);
 	motion_vectors.push_back(&_motion_vector_prev);
@@ -188,10 +188,10 @@ template <class T>
 void
 BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range, const double coeff_MAD, const double coeff_ZNCC)
 {
-	double (BlockMatching<T>::*MAD_func)(const ImgVector<T>&, const ImgVector<T>&, const int, const int, const std::list<VECTOR_2D<int> >&) = &BlockMatching<T>::MAD_region;
-	double (BlockMatching<T>::*NCC_func)(const ImgVector<T>&, const ImgVector<T>&, const int, const int, const std::list<VECTOR_2D<int> >&) = &BlockMatching<T>::ZNCC_region;
-	//double (BlockMatching<T>::*MAD_func)(const ImgVector<T>&, const ImgVector<T>&, const int, const int, const std::list<VECTOR_2D<int> >&) = &BlockMatching<T>::MAD_region_nearest_intensity;
-	//double (BlockMatching<T>::*NCC_func)(const ImgVector<T>&, const ImgVector<T>&, const int, const int, const std::list<VECTOR_2D<int> >&) = &BlockMatching<T>::ZNCC_region_nearest_intensity;
+	double (BlockMatching<T>::*MAD_func)(const ImgVector<T>&, const ImgVector<T>&, const int, const int, const std::vector<VECTOR_2D<int> >&) = &BlockMatching<T>::MAD_region;
+	double (BlockMatching<T>::*NCC_func)(const ImgVector<T>&, const ImgVector<T>&, const int, const int, const std::vector<VECTOR_2D<int> >&) = &BlockMatching<T>::ZNCC_region;
+	//double (BlockMatching<T>::*MAD_func)(const ImgVector<T>&, const ImgVector<T>&, const int, const int, const std::vector<VECTOR_2D<int> >&) = &BlockMatching<T>::MAD_region_nearest_intensity;
+	//double (BlockMatching<T>::*NCC_func)(const ImgVector<T>&, const ImgVector<T>&, const int, const int, const std::vector<VECTOR_2D<int> >&) = &BlockMatching<T>::ZNCC_region_nearest_intensity;
 
 	if (this->isNULL()) {
 		std::cerr << "void BlockMatching<T>::block_matching_region(const ImgVector<int>*, const int) : this is NULL" << std::endl;
@@ -215,11 +215,11 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range, const 
 	// Compute Motion Vectors
 	for (size_t ref = 0; ref < reference_images.size(); ref++) {
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_BLOCKMATCHING)
-		unsigned int finished_regions = 0;
-		unsigned int progress = .0;
+		size_t finished_regions = 0;
+		size_t progress = .0;
 		printf(" Block Matching :   0.0%%\x1b[1A\n");
 #endif
-		for (unsigned int n = 0; n < _connected_regions_current.size(); n++) {
+		for (size_t n = 0; n < _connected_regions_current.size(); n++) {
 			VECTOR_2D<double> MV(.0, .0);
 			double E_min = DBL_MAX;
 			// Search minimum value
@@ -281,10 +281,8 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range, const 
 				}
 				MV += MV_subpel;
 			}
-			for (std::list<VECTOR_2D<int> >::iterator ite = _connected_regions_current[n].begin();
-			    ite != _connected_regions_current[n].end();
-			    ++ite) {
-				motion_vectors[ref]->at(ite->x, ite->y) = MV;
+			for (VECTOR_2D<int>& r : _connected_regions_current[n]) {
+				motion_vectors[ref]->at(r.x, r.y) = MV;
 			}
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_BLOCKMATCHING)
 			double ratio = double(++finished_regions) / _connected_regions_current.size();
@@ -298,27 +296,25 @@ BlockMatching<T>::block_matching_arbitrary_shaped(const int search_range, const 
 		printf("\n");
 #endif
 	}
-	for (unsigned int n = 0; n < _connected_regions_current.size(); n++) {
-		for (std::list<VECTOR_2D<int> >::const_iterator ite = _connected_regions_current[n].begin();
-		    ite != _connected_regions_current[n].end();
-		    ++ite) {
+	for (size_t n = 0; n < _connected_regions_current.size(); n++) {
+		for (VECTOR_2D<int>& r : _connected_regions_current[n]) {
 			if (_image_next.isNULL()) { // Use forward motion estimation
-				_motion_vector_time.at(ite->x, ite->y).x = _motion_vector_prev.get(ite->x, ite->y).x;
-				_motion_vector_time.at(ite->x, ite->y).y = _motion_vector_prev.get(ite->x, ite->y).y;
-				_motion_vector_time.at(ite->x, ite->y).t = -1;
+				_motion_vector_time.at(r.x, r.y).x = _motion_vector_prev.get(r.x, r.y).x;
+				_motion_vector_time.at(r.x, r.y).y = _motion_vector_prev.get(r.x, r.y).y;
+				_motion_vector_time.at(r.x, r.y).t = -1;
 			} else { // Use bi-directional motion estimation
-				VECTOR_2D<double> mv_p = _motion_vector_prev.get(ite->x, ite->y);
-				VECTOR_2D<double> mv_n = _motion_vector_next.get(ite->x, ite->y);
-				double diff_prev = norm(_image_prev.get_zeropad_cubic(ite->x + mv_p.x, ite->y + mv_p.y) - _image_current.get(ite->x, ite->y));
-				double diff_next = norm(_image_next.get_zeropad_cubic(ite->x + mv_n.x, ite->y + mv_n.y) - _image_current.get(ite->x, ite->y));
+				VECTOR_2D<double> mv_p = _motion_vector_prev.get(r.x, r.y);
+				VECTOR_2D<double> mv_n = _motion_vector_next.get(r.x, r.y);
+				double diff_prev = norm(_image_prev.get_zeropad_cubic(r.x + mv_p.x, r.y + mv_p.y) - _image_current.get(r.x, r.y));
+				double diff_next = norm(_image_next.get_zeropad_cubic(r.x + mv_n.x, r.y + mv_n.y) - _image_current.get(r.x, r.y));
 				if (diff_prev <= diff_next) { // Use forward motion vector
-					_motion_vector_time.at(ite->x, ite->y).x = _motion_vector_prev.get(ite->x, ite->y).x;
-					_motion_vector_time.at(ite->x, ite->y).y = _motion_vector_prev.get(ite->x, ite->y).y;
-					_motion_vector_time.at(ite->x, ite->y).t = -1;
+					_motion_vector_time.at(r.x, r.y).x = _motion_vector_prev.get(r.x, r.y).x;
+					_motion_vector_time.at(r.x, r.y).y = _motion_vector_prev.get(r.x, r.y).y;
+					_motion_vector_time.at(r.x, r.y).t = -1;
 				} else {
-					_motion_vector_time.at(ite->x, ite->y).x = _motion_vector_next.get(ite->x, ite->y).x;
-					_motion_vector_time.at(ite->x, ite->y).y = _motion_vector_next.get(ite->x, ite->y).y;
-					_motion_vector_time.at(ite->x, ite->y).t = 1;
+					_motion_vector_time.at(r.x, r.y).x = _motion_vector_next.get(r.x, r.y).x;
+					_motion_vector_time.at(r.x, r.y).y = _motion_vector_next.get(r.x, r.y).y;
+					_motion_vector_time.at(r.x, r.y).t = 1;
 				}
 			}
 		}
@@ -447,36 +443,32 @@ BlockMatching<T>::ZNCC(const ImgVector<T>& reference, const ImgVector<T>& intere
 
 template <class T>
 double
-BlockMatching<T>::MAD_region(const ImgVector<T>& reference, const ImgVector<T>& interest, const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_interest)
+BlockMatching<T>::MAD_region(const ImgVector<T>& reference, const ImgVector<T>& interest, const int x_diff, const int y_diff, const std::vector<VECTOR_2D<int> >& region_interest)
 {
 	double N = .0;
 	double sad = .0;
 
-	for (std::list<VECTOR_2D<int> >::const_iterator ite = region_interest.begin();
-	    ite != region_interest.end();
-	    ++ite) {
+	for (const VECTOR_2D<int>& r : region_interest) {
 		N += 1.0;
 		sad += norm(
-		    interest.get_zeropad(ite->x, ite->y)
-		    - reference.get_zeropad(ite->x + x_diff, ite->y + y_diff));
+		    interest.get_zeropad(r.x, r.y)
+		    - reference.get_zeropad(r.x + x_diff, r.y + y_diff));
 	}
 	return sad / N;
 }
 
 template <class T>
 double
-BlockMatching<T>::MAD_region_cubic(const ImgVector<T>& reference, const ImgVector<T>& interest, const double x_diff, const double y_diff, const std::list<VECTOR_2D<int> >& region_interest)
+BlockMatching<T>::MAD_region_cubic(const ImgVector<T>& reference, const ImgVector<T>& interest, const double x_diff, const double y_diff, const std::vector<VECTOR_2D<int> >& region_interest)
 {
 	double N = .0;
 	double sad = .0;
 
-	for (std::list<VECTOR_2D<int> >::const_iterator ite = region_interest.begin();
-	    ite != region_interest.end();
-	    ++ite) {
+	for (const VECTOR_2D<int>& r : region_interest) {
 		N += 1.0;
 		sad += norm(
-		    interest.get_zeropad(ite->x, ite->y)
-		    - reference.get_mirror_cubic(double(ite->x) + x_diff, double(ite->y) + y_diff));
+		    interest.get_zeropad(r.x, r.y)
+		    - reference.get_mirror_cubic(double(r.x) + x_diff, double(r.y) + y_diff));
 	}
 	return sad / N;
 }
@@ -486,7 +478,7 @@ BlockMatching<T>::MAD_region_cubic(const ImgVector<T>& reference, const ImgVecto
 
 template <class T>
 double
-BlockMatching<T>::ZNCC_region(const ImgVector<T>& reference, const ImgVector<T>& interest, const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_interest)
+BlockMatching<T>::ZNCC_region(const ImgVector<T>& reference, const ImgVector<T>& interest, const int x_diff, const int y_diff, const std::vector<VECTOR_2D<int> >& region_interest)
 {
 	double N = .0;
 	T sum_reference = T();
@@ -495,10 +487,8 @@ BlockMatching<T>::ZNCC_region(const ImgVector<T>& reference, const ImgVector<T>&
 	double sum_sq_interest = .0;
 	double sum_sq_reference_interest = .0;
 
-	for (std::list<VECTOR_2D<int> >::const_iterator ite = region_interest.begin();
-	    ite != region_interest.end();
-	    ++ite) {
-		VECTOR_2D<int> r(ite->x + x_diff, ite->y + y_diff);
+	for (const VECTOR_2D<int>& r_int : region_interest) {
+		VECTOR_2D<int> r(r_int.x + x_diff, r_int.y + y_diff);
 		N += 1.0;
 		// Previous frame
 		sum_reference += reference.get_zeropad(r.x, r.y);
@@ -506,14 +496,14 @@ BlockMatching<T>::ZNCC_region(const ImgVector<T>& reference, const ImgVector<T>&
 		    reference.get_zeropad(r.x, r.y)
 		    , reference.get_zeropad(r.x, r.y));
 		// Next frame
-		sum_interest += interest.get_zeropad(ite->x, ite->y);
+		sum_interest += interest.get_zeropad(r_int.x, r_int.y);
 		sum_sq_interest += inner_prod(
-		    interest.get_zeropad(ite->x, ite->y)
-		    , interest.get_zeropad(ite->x, ite->y));
+		    interest.get_zeropad(r_int.x, r_int.y)
+		    , interest.get_zeropad(r_int.x, r_int.y));
 		// Co-frame
 		sum_sq_reference_interest += inner_prod(
 		    reference.get_zeropad(r.x, r.y)
-		    , interest.get_zeropad(ite->x, ite->y));
+		    , interest.get_zeropad(r_int.x, r_int.y));
 	}
 	// Calculate Covariance
 	return (N * sum_sq_reference_interest - inner_prod(sum_reference, sum_interest))
@@ -531,22 +521,20 @@ BlockMatching<T>::ZNCC_region(const ImgVector<T>& reference, const ImgVector<T>&
  */
 template <class T>
 double
-BlockMatching<T>::MAD_region_nearest_intensity(const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_current)
+BlockMatching<T>::MAD_region_nearest_intensity(const int x_diff, const int y_diff, const std::vector<VECTOR_2D<int> >& region_interest)
 {
 	double N = .0;
 	double sad = .0;
 
-	for (std::list<VECTOR_2D<int> >::const_iterator ite = region_current.begin();
-	    ite != region_current.end();
-	    ++ite) {
-		VECTOR_2D<int> r(ite->x + x_diff, ite->y + y_diff);
+	for (const VECTOR_2D<int>& r_int : region_interest) {
+		VECTOR_2D<int> r(r_int.x + x_diff, r_int.y + y_diff);
 
 		double coeff = norm(
-		    _color_quantized_current.get(ite->x, ite->y)
+		    _color_quantized_current.get(r_int.x, r_int.y)
 		    - _color_quantized_prev.get_zeropad(r.x, r.y));
 		N += coeff;
 		sad += coeff * norm(
-		    _image_current.get(ite->x, ite->y
+		    _image_current.get(r_int.x, r_int.y
 		    - _image_prev.get_zeropad(r.x, r.y)));
 	}
 	return sad / N;
@@ -555,7 +543,7 @@ BlockMatching<T>::MAD_region_nearest_intensity(const int x_diff, const int y_dif
 
 template <class T>
 double
-BlockMatching<T>::ZNCC_region_nearest_intensity(const int x_diff, const int y_diff, const std::list<VECTOR_2D<int> >& region_current)
+BlockMatching<T>::ZNCC_region_nearest_intensity(const int x_diff, const int y_diff, const std::vector<VECTOR_2D<int> >& region_interest)
 {
 	double N = .0;
 	T sum_prev = T();
@@ -564,13 +552,11 @@ BlockMatching<T>::ZNCC_region_nearest_intensity(const int x_diff, const int y_di
 	double sum_sq_current = .0;
 	double sum_sq_prev_current = .0;
 
-	for (std::list<VECTOR_2D<int> >::const_iterator ite = region_current.begin();
-	    ite != region_current.end();
-	    ++ite) {
-		VECTOR_2D<int> r(ite->x + x_diff, ite->y + y_diff);
+	for (const VECTOR_2D<int>& r_int : region_interest) {
+		VECTOR_2D<int> r(r_int.x + x_diff, r_int.y + y_diff);
 
 		double coeff = 1.0 - norm(
-		    _color_quantized_current.get(ite->x, ite->y)
+		    _color_quantized_current.get(r_int.x, r_int.y)
 		    - _color_quantized_prev.get_zeropad(r.x, r.y));
 		N += coeff;
 		// Previous frame
@@ -579,14 +565,14 @@ BlockMatching<T>::ZNCC_region_nearest_intensity(const int x_diff, const int y_di
 		    * _image_prev.get_zeropad(r.x, r.y)
 		    * _image_prev.get_zeropad(r.x, r.y);
 		// Next frame
-		sum_current += coeff * _image_current.get_zeropad(ite->x, ite->y);
+		sum_current += coeff * _image_current.get_zeropad(r_int.x, r_int.y);
 		sum_sq_current += coeff
-		    * _image_current.get_zeropad(ite->x, ite->y)
-		    * _image_current.get_zeropad(ite->x, ite->y);
+		    * _image_current.get_zeropad(r_int.x, r_int.y)
+		    * _image_current.get_zeropad(r_int.x, r_int.y);
 		// Co-frame
 		sum_sq_prev_current += coeff
 		    * _image_prev.get_zeropad(r.x, r.y)
-		    * _image_current.get_zeropad(ite->x, ite->y);
+		    * _image_current.get_zeropad(r_int.x, r_int.y);
 	}
 	// Calculate Covariance
 	return (N * sum_sq_prev_current - sum_prev * sum_current) /

@@ -26,7 +26,7 @@ class ImgVector
 		ImgVector(void);
 		ImgVector(const int Width, const int Height, const T& value = T());
 		ImgVector(const int Width, const int Height, const T* array);
-		explicit ImgVector(const ImgVector<T>& copy); // Copy constructor
+		ImgVector(const ImgVector<T>& copy); // Copy constructor
 
 		virtual ~ImgVector(void);
 

@@ -182,7 +182,7 @@ Segmentation<T>::ref_shift_vector(void) const
 }
 
 template <class T>
-const std::vector<std::list<VECTOR_2D<int> > > &
+const std::vector<std::vector<VECTOR_2D<int> > > &
 Segmentation<T>::ref_regions(void) const
 {
 	return _regions;

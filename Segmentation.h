@@ -35,10 +35,10 @@ class Segmentation
 	public:
 		// Constructor
 		Segmentation(void);
-		Segmentation(const ImgVector<T>& image, const double kernel_spatial_radius = 8.0, const double kernel_intensity_radius = 8.0 / 255.0);
+		Segmentation(const ImgVector<T>& image, const double kernel_spatial_radius = 10.0, const double kernel_intensity_radius = 8.0 / 255.0);
 		explicit Segmentation(const Segmentation<T>& segmentation); // Copy constructor
 
-		Segmentation<T>& reset(const ImgVector<T>& image, const double kernel_spatial_radius = 8.0, const double kernel_intensity_radius = 8.0 / 255.0);
+		Segmentation<T>& reset(const ImgVector<T>& image, const double kernel_spatial_radius = 10.0, const double kernel_intensity_radius = 8.0 / 255.0);
 
 		Segmentation<T>& copy(const Segmentation<T>& segmentation);
 
@@ -59,7 +59,7 @@ class Segmentation
 		const ImgVector<size_t>& ref_vector_converge_map(void) const;
 		const ImgVector<size_t>& ref_segmentation_map(void) const;
 		const ImgVector<VECTOR_2D<double> >& ref_shift_vector(void) const;
-		const std::vector<std::list<VECTOR_2D<int> > >& ref_regions(void) const;
+		const std::vector<std::vector<VECTOR_2D<int> > >& ref_regions(void) const;
 
 		size_t& operator[](size_t n);
 		size_t& at(size_t n);

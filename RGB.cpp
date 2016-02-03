@@ -302,6 +302,8 @@ norm(const ImgClass::RGB& color)
 }
 
 
+
+
 // Saturation
 ImgClass::RGB
 saturate(const ImgClass::RGB& value, const double& min, const double& max)

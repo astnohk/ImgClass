@@ -41,7 +41,8 @@ Segmentation<T>::Segmentation(const ImgVector<T>& image, const double kernel_spa
 	}
 
 	_color_quantized_image.reset(_width, _height);
-	_shift_vector.reset(_width, _height);
+	_shift_vector_spatial.reset(_width, _height);
+	_shift_vector_color.reset(_width, _height);
 	_segmentation_map.reset(_width, _height);
 
 	// Initial Segmentation
@@ -59,7 +60,8 @@ Segmentation<T>::Segmentation(const Segmentation<T>& segmentation) // Copy const
 
 	_image.copy(segmentation._image);
 	_color_quantized_image.copy(segmentation._color_quantized_image);
-	_shift_vector.copy(segmentation._shift_vector);
+	_shift_vector_spatial.copy(segmentation._shift_vector_spatial);
+	_shift_vector_color.copy(segmentation._shift_vector_color);
 	_segmentation_map.copy(segmentation._segmentation_map);
 	_regions.assign(segmentation._regions.begin(), segmentation._regions.end());
 }
@@ -85,7 +87,8 @@ Segmentation<T>::reset(const ImgVector<T>& image, const double kernel_spatial_ra
 	_color_quantized_image.reset(_width, _height);
 	_segmentation_map.reset(_width, _height);
 	_regions.clear();
-	_shift_vector.reset(_width, _height);
+	_shift_vector_spatial.reset(_width, _height);
+	_shift_vector_color.reset(_width, _height);
 
 	// Initial Segmentation
 	Segmentation_MeanShift();
@@ -105,7 +108,8 @@ Segmentation<T>::copy(const Segmentation<T>& segmentation)
 
 	_image.copy(segmentation._image);
 	_color_quantized_image.copy(segmentation._color_quantized_image);
-	_shift_vector.copy(segmentation._shift_vector);
+	_shift_vector_spatial.copy(segmentation._shift_vector_spatial);
+	_shift_vector_color.copy(segmentation._shift_vector_color);
 	_segmentation_map.copy(segmentation._segmentation_map);
 	_regions.assign(segmentation._regions.begin(), segmentation._regions.end());
 	return *this;
@@ -143,7 +147,8 @@ Segmentation<T>::operator=(const Segmentation<T>& rvalue)
 
 	_image.copy(rvalue._image);
 	_color_quantized_image.copy(rvalue._color_quantized_image);
-	_shift_vector.copy(rvalue._shift_vector);
+	_shift_vector_spatial.copy(rvalue._shift_vector_spatial);
+	_shift_vector_color.copy(rvalue._shift_vector_color);
 	_segmentation_map.copy(rvalue._segmentation_map);
 	_regions.assign(rvalue._regions.begin(), rvalue._regions.end());
 	return *this;
@@ -162,13 +167,6 @@ Segmentation<T>::ref_color_quantized_image(void) const
 
 template <class T>
 const ImgVector<size_t> &
-Segmentation<T>::ref_vector_converge_map(void) const
-{
-	return _vector_converge_map;
-}
-
-template <class T>
-const ImgVector<size_t> &
 Segmentation<T>::ref_segmentation_map(void) const
 {
 	return _segmentation_map;
@@ -176,9 +174,16 @@ Segmentation<T>::ref_segmentation_map(void) const
 
 template <class T>
 const ImgVector<VECTOR_2D<double> > &
-Segmentation<T>::ref_shift_vector(void) const
+Segmentation<T>::ref_shift_vector_spatial(void) const
 {
-	return _shift_vector;
+	return _shift_vector_spatial;
+}
+
+template <class T>
+const ImgVector<T> &
+Segmentation<T>::ref_shift_vector_color(void) const
+{
+	return _shift_vector_color;
 }
 
 template <class T>
@@ -290,22 +295,20 @@ Segmentation<T>::get_mirror(int x, int y) const
 // ----- Mean Shift -----
 template <class T>
 void
-Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int Min_Number_of_Pixels, const int Search_Range)
+Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const size_t Min_Number_of_Pixels, const int Search_Range)
 {
-	const double Decreased_Gray_Max = 255.0;
 	const VECTOR_2D<int> adjacent[8] = {
 	    VECTOR_2D<int>(-1, -1), VECTOR_2D<int>(0, -1), VECTOR_2D<int>(1, -1),
 	    VECTOR_2D<int>(-1, 0), VECTOR_2D<int>(1, 0),
 	    VECTOR_2D<int>(-1, 1), VECTOR_2D<int>(0, 1), VECTOR_2D<int>(1, 1)};
+	const double Decreased_Gray_Max = 255.0;
 	std::vector<VECTOR_2D<int> > pel_list;
-	std::list<std::list<VECTOR_2D<int> > > regions_list(0);
-	std::vector<std::list<VECTOR_2D<int> > > regions_vector(0);
 
 	if (_width <= 0 || _height <= 0) {
 		return;
 	}
 	// Make pixel list
-	pel_list.reserve(SQUARE(static_cast<unsigned int>(ceil(2.0 * _kernel_spatial)) + 1));
+	pel_list.reserve(SQUARE(size_t(ceil(2.0 * _kernel_spatial)) + 1));
 	{
 		for (int m = -int(ceil(_kernel_spatial)); m <= int(ceil(_kernel_spatial)); m++) {
 			for (int n = -int(ceil(_kernel_spatial)); n <= int(ceil(_kernel_spatial)); n++) {
@@ -315,121 +318,134 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 			}
 		}
 	}
-	// Initialize vector converge map
-	ImgVector<bool> vector_converge_mask(_width, _height, false);
-	_vector_converge_map.reset(_width, _height);
 	// Compute Mean Shift vector
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_SEGMENTATION)
-	unsigned int finished = 0;
-	unsigned int progress = .0;
+	size_t finished = 0;
+	size_t progress = .0;
 	printf(" Mean-Shift method :   0.0%%\x1b[1A\n");
+
 #endif
+	// Compute Mean Shift
+	ImgVector<std::list<VECTOR_2D<int> > > vector_converge_list_map(_width, _height);
 #ifdef _OPENMP
 #pragma omp parallel for schedule(dynamic)
 #endif
 	for (int y = 0; y < _height; y++) {
 		for (int x = 0; x < _width; x++) {
-			_shift_vector.at(x, y) = MeanShift(x, y, pel_list, Iter_Max);
-			VECTOR_2D<int> r(
-			    static_cast<int>(round(_shift_vector.get(x, y).x)),
-			    static_cast<int>(round(_shift_vector.get(x, y).y)));
-			// Check if the shift vector do NOT point on out of bounds
-			if (r.x < 0) {
-				_shift_vector.at(x, y).x = 0;
-				r.x = 0;
-			} else if (_width <= r.x) {
-				_shift_vector.at(x, y).x = _width - 1;
-				r.x = _width - 1;
+			ImgClass::Segmentation::tuple<T> tmp = MeanShift(x, y, pel_list, Iter_Max);
+			auto lambda = [](double x, double max) -> double {
+				return x >= 0 ? x < max ? x : max - 1 : 0; };
+			// Saturation
+			tmp.spatial.x = lambda(tmp.spatial.x, _width);
+			tmp.spatial.y = lambda(tmp.spatial.y, _height);
+			// Set vector
+			_shift_vector_spatial.at(x, y) = tmp.spatial;
+			_shift_vector_color.at(x, y) = tmp.color;
+			// Assign start point to converge list
+			VECTOR_2D<int> shift(int(tmp.spatial.x), int(tmp.spatial.y));
+#pragma omp critical
+			{
+				vector_converge_list_map.at(shift.x, shift.y).push_back(VECTOR_2D<int>(x, y));
 			}
-			if (r.y < 0) {
-				_shift_vector.at(x, y).y = 0;
-				r.y = 0;
-			} else if (_height <= r.y) {
-				_shift_vector.at(x, y).y = _height - 1;
-				r.y = _height - 1;
-			}
-			// Check converge point
-			vector_converge_mask.at(r.x, r.y) = true;
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_SEGMENTATION)
 #ifdef _OPENMP
 #pragma omp critical
 #endif
-		{
-			double ratio = double(++finished) / _image.size();
-			if (round(ratio * 1000.0) > progress) {
-				progress = static_cast<unsigned int>(round(ratio * 1000.0)); // Take account of Over-Run
-				printf("\r Mean-Shift method : %5.1f%%\x1b[1A\n", progress * 0.1);
+			{
+				double ratio = double(++finished) / _image.size();
+				if (round(ratio * 1000.0) > progress) {
+					progress = size_t(round(ratio * 1000.0)); // Take account of Over-Run
+					printf("\r Mean-Shift method : %5.1f%%\x1b[1A\n", progress * 0.1);
+				}
+			}
+#endif
+		}
+	}
+	// Concatenate the list of connected regions
+	for (int y = 0; y < _height; y++) {
+		for (int x = 0; x < _width; x++) {
+			if (vector_converge_list_map.at(x, y).size() > 0) {
+				std::list<VECTOR_2D<int> > tmp_list;
+				tmp_list.push_back(VECTOR_2D<int>(x, y));
+				for (auto ite = tmp_list.begin(); ite != tmp_list.end(); ++ite) {
+					for (size_t i = 0; i < 8; i++) {
+						VECTOR_2D<int> r(ite->x + adjacent[i].x, ite->y + adjacent[i].y);
+						if (0 <= r.x && r.x < _width
+						    && 0 <= r.y && r.y < _height
+						    && vector_converge_list_map.at(r.x, r.y).size() > 0) {
+							tmp_list.push_back(r);
+							vector_converge_list_map.at(x, y).splice(
+							    vector_converge_list_map.at(x, y).end(),
+							    vector_converge_list_map.at(r.x, r.y));
+						}
+					}
+				}
 			}
 		}
-#endif
+	}
+	std::list<std::list<VECTOR_2D<int> > > regions_list; // start_point, shift_vector_spatial, shift_vector_color
+	for (int y = 0; y < _height; y++) {
+		for (int x = 0; x < _width; x++) {
+			// Search converge point
+			if (vector_converge_list_map.at(x, y).size() > 0) {
+				std::list<std::list<VECTOR_2D<int> > > tmp_list;
+				for (VECTOR_2D<int>& start : vector_converge_list_map.at(x, y)) {
+					bool found = false;
+					const T& color = _shift_vector_color.get(start.x, start.y);
+					for (std::list<VECTOR_2D<int> >& region : tmp_list) {
+						VECTOR_2D<int> r_tmp = region.front();
+						if (normalized_distance(color, _shift_vector_color.get(r_tmp.x, r_tmp.y)) < 0.2) {
+							region.push_back(start);
+							found = true;
+							break;
+						}
+					}
+					if (found == false) {
+						tmp_list.push_back(std::list<VECTOR_2D<int> >(1, start));
+					}
+				}
+				regions_list.splice(regions_list.end(), tmp_list);
+			}
 		}
 	}
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_SEGMENTATION)
 	printf("\n Mean-Shift method : Finished\n");
 #endif
-	// Collect converged points
+	// Make region map
+	_segmentation_map.resize(_width, _height);
 	{
 		size_t num = 1;
-		for (int y = 0; y < _height; y++) {
-			for (int x = 0; x < _width; x++) {
-				if (vector_converge_mask.get(x, y)) {
-					VECTOR_2D<int> r(x, y);
-					regions_list.push_back(std::list<VECTOR_2D<int> >(1, r));
-					for (std::list<VECTOR_2D<int> >::iterator ite = regions_list.back().begin();
-					    ite != regions_list.back().end();
-					    ++ite) {
-						for (int k = 0; k < 8; k++) { // Search 8-adjacent
-							r.x = ite->x + adjacent[k].x;
-							r.y = ite->y + adjacent[k].y;
-							if (vector_converge_mask.get_zeropad(r.x, r.y)) {
-								vector_converge_mask.at(r.x, r.y) = false; // eliminate collected point from map
-								regions_list.back().push_back(r);
-							}
-						}
-					}
-					for (std::list<VECTOR_2D<int> >::iterator ite = regions_list.back().begin();
-					    ite != regions_list.back().end();
-					    ++ite) {
-						_vector_converge_map.at(ite->x, ite->y) = num;
-					}
-					num++;
-				}
+		for (const std::list<VECTOR_2D<int> >& region : regions_list) {
+			for (const VECTOR_2D<int>& r : region) {
+				_segmentation_map.at(r.x, r.y) = num;
 			}
+			num++;
 		}
 	}
 	regions_list.clear();
-	// Pick all pixels related to limit points and Make the list of regions
-	for (int y = 0; y < _shift_vector.height(); y++) {
-		for (int x = 0; x < _shift_vector.width(); x++) {
-			VECTOR_2D<int> r(int(round(_shift_vector.get(x, y).x)), int(round(_shift_vector.get(x, y).y)));
-			size_t n_region = _vector_converge_map.get_zeropad(r.x, r.y);
-			_segmentation_map.at(x, y) = n_region;
-		}
-	}
 	// Collect connected regions from Mean-Shift filtered image
-	unsigned int num_region = collect_regions_in_segmentation_map(&regions_vector);
+	std::vector<std::list<VECTOR_2D<int> > > regions_vector;
+	size_t num_region = collect_regions_in_segmentation_map(&regions_vector);
 	// Set _segmentation_map by _regions No.
-	for (unsigned int n = 0; n < regions_vector.size(); n++) {
-		for (std::list<VECTOR_2D<int> >::iterator ite = regions_vector[n].begin();
-		    ite != regions_vector[n].end();
-		    ++ite) {
-			_segmentation_map.at(ite->x, ite->y) = n;
+	for (size_t n = 0; n < regions_vector.size(); n++) {
+		for (const VECTOR_2D<int>& r : regions_vector[n]) {
+			_segmentation_map.at(r.x, r.y) = n;
 		}
 	}
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_SEGMENTATION)
 	printf(" Mean-Shift method : Eliminate small regions\n");
 #endif
 	// Eliminate small connected regions
-	unsigned int num_small_region = small_region_eliminate(&regions_vector, Min_Number_of_Pixels, Search_Range);
+	size_t num_small_region = small_region_eliminate(&regions_vector, Min_Number_of_Pixels, Search_Range);
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_SEGMENTATION)
-	printf(" Mean-Shift method : The number of regions %u -> %u\n", num_region, num_region - num_small_region);
+	std::cout << " Mean-Shift method : The number of regions " << num_region << " -> " << num_region - num_small_region << "\n";
 #endif
 	// Copy connected regions list
 	num_region -= num_small_region;
 	_regions.resize(num_region);
 	{
 		std::vector<std::vector<VECTOR_2D<int> > >::iterator ite = _regions.begin();
-		for (unsigned int n = 0; n < regions_vector.size(); n++) {
+		for (size_t n = 0; n < regions_vector.size(); n++) {
 			if (regions_vector[n].size() > 0) {
 				ite->assign(regions_vector[n].begin(), regions_vector[n].end());
 				++ite;
@@ -437,36 +453,37 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const unsigned int M
 		}
 	}
 	// Reset _segmentation_map by _regions No.
-	for (unsigned int n = 0; n < _regions.size(); n++) {
-		for (unsigned int i = 0; i < _regions[n].size(); i++) {
+	for (size_t n = 0; n < _regions.size(); n++) {
+		for (size_t i = 0; i < _regions[n].size(); i++) {
 			_segmentation_map.at(_regions[n][i].x, _regions[n][i].y) = n;
 		}
 	}
 	// Make color-quantized image
-	for (unsigned int n = 0; n < _regions.size(); n++) {
+	for (size_t n = 0; n < _regions.size(); n++) {
 		T sum_color = T();
-		for (unsigned int k = 0; k < _regions[n].size(); k++) {
+		for (size_t k = 0; k < _regions[n].size(); k++) {
 			sum_color += _image.get(_regions[n][k].x, _regions[n][k].y);
 		}
 		T quantized_color = sum_color * Decreased_Gray_Max / double(_regions[n].size());
-		for (unsigned int k = 0; k < _regions[n].size(); k++) {
+		for (size_t k = 0; k < _regions[n].size(); k++) {
 			_color_quantized_image.at(_regions[n][k].x, _regions[n][k].y) += quantized_color;
 		}
 	}
 }
 
+
 template <class T>
-unsigned int
+size_t
 Segmentation<T>::collect_regions_in_segmentation_map(std::vector<std::list<VECTOR_2D<int> > >* vector)
 {
 	const VECTOR_2D<int> adjacent[8] = {
 	    VECTOR_2D<int>(-1, -1), VECTOR_2D<int>(0, -1), VECTOR_2D<int>(1, -1),
 	    VECTOR_2D<int>(-1, 0), VECTOR_2D<int>(1, 0),
 	    VECTOR_2D<int>(-1, 1), VECTOR_2D<int>(0, 1), VECTOR_2D<int>(1, 1)};
-	std::list<std::list<VECTOR_2D<int> > > list(0);
+	std::list<std::list<VECTOR_2D<int> > > regions(0);
 	ImgVector<bool> collected(_width, _height, false);
 
-	unsigned int num_region = 0;
+	size_t num_region = 0;
 	for (int y = 0; y < _height; y++) {
 		for (int x = 0; x < _width; x++) {
 			if (collected.get(x, y)) {
@@ -475,20 +492,18 @@ Segmentation<T>::collect_regions_in_segmentation_map(std::vector<std::list<VECTO
 			VECTOR_2D<int> r(x, y);
 			collected.at(x, y) = true;
 			size_t N = _segmentation_map.get(r.x, r.y);
-			list.push_back(std::list<VECTOR_2D<int> >(1, r));
+			regions.push_back(std::list<VECTOR_2D<int> >(1, r));
 			num_region++;
 			// Search connected regions with 8-adjacent
-			for (std::list<VECTOR_2D<int> >::iterator ite = list.back().begin();
-			    ite != list.back().end();
-			    ++ite) {
+			for (const VECTOR_2D<int>& element : regions.back()) {
 				for (int k = 0; k < 8; k++) {
-					r.x = ite->x + adjacent[k].x;
-					r.y = ite->y + adjacent[k].y;
+					r.x = element.x + adjacent[k].x;
+					r.y = element.y + adjacent[k].y;
 					if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height
 					    && collected.get(r.x, r.y) == false
 					    && _segmentation_map.get(r.x, r.y) == N) {
 						collected.at(r.x, r.y) = true;
-						list.back().push_back(r);
+						regions.back().push_back(r);
 					}
 				}
 			}
@@ -496,26 +511,25 @@ Segmentation<T>::collect_regions_in_segmentation_map(std::vector<std::list<VECTO
 	}
 	vector->resize(num_region);
 	{
-		unsigned int N = 0;
-		for (std::list<std::list<VECTOR_2D<int> > >::iterator ite = list.begin();
-		    ite != list.end();
-		    ++ite) {
-			vector->at(N).assign(ite->begin(), ite->end());
+		size_t N = 0;
+		for (const std::list<VECTOR_2D<int> >& region : regions) {
+			vector->at(N).assign(region.begin(), region.end());
 			N++;
 		}
 	}
 	return num_region;
 }
 
+
 template <class T>
-unsigned int
-Segmentation<T>::small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >* regions_vector, const unsigned int Min_Number_of_Pixels, const int search_range)
+size_t
+Segmentation<T>::small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >* regions_vector, const size_t Min_Number_of_Pixels, const int search_range)
 {
 	std::vector<bool> small_regions(regions_vector->size(), false);
-	unsigned int num_small_region = 0;
+	size_t num_small_region = 0;
 
 	// Check small regions
-	for (unsigned int n = 0; n < regions_vector->size(); n++) {
+	for (size_t n = 0; n < regions_vector->size(); n++) {
 		if (regions_vector->at(n).size() < Min_Number_of_Pixels
 		    && regions_vector->at(n).size() > 0) {
 			small_regions[n] = true;
@@ -532,16 +546,14 @@ Segmentation<T>::small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >
 		size_t concatenate_target = n;
 		double min = DBL_MAX;
 		bool check = false;
-		for (std::list<VECTOR_2D<int> >::iterator ite = regions_vector->at(n).begin();
-		    ite != regions_vector->at(n).end();
-		    ++ite) {
+		for (const VECTOR_2D<int>& element : regions_vector->at(n)) {
 			for (int y = -search_range; y <= search_range; y++) {
 				for (int x = -search_range; x <= search_range; x++) {
-					VECTOR_2D<int> r(ite->x + x, ite->y + y);
+					VECTOR_2D<int> r(element.x + x, element.y + y);
 					if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height
 					    && _segmentation_map.get(r.x, r.y) != n) {
 						double diff = this->distance(center_color, _image.get(r.x, r.y));
-						double dist = norm_squared(_shift_vector.get(r.x, r.y) - _shift_vector.get(ite->x, ite->y));
+						double dist = norm_squared(_shift_vector_spatial.get(r.x, r.y) - _shift_vector_spatial.get(element.x, element.y));
 						if (diff + dist < min) {
 							check = true;
 							min = diff + dist;
@@ -554,11 +566,9 @@ Segmentation<T>::small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >
 		if (check) { // Concatenate small region to the neighborhood region
 			// Update _segmentation_map
 			VECTOR_2D<int> r = regions_vector->at(concatenate_target).front();
-			for (std::list<VECTOR_2D<int> >::iterator ite = regions_vector->at(n).begin();
-			    ite != regions_vector->at(n).end();
-			    ++ite) {
-				_segmentation_map.at(ite->x, ite->y) = concatenate_target;
-				_color_quantized_image.at(ite->x, ite->y) = _color_quantized_image.get(r.x, r.y);
+			for (const VECTOR_2D<int>& element : regions_vector->at(n)) {
+				_segmentation_map.at(element.x, element.y) = concatenate_target;
+				_color_quantized_image.at(element.x, element.y) = _color_quantized_image.get(r.x, r.y);
 			}
 			// splice the list
 			regions_vector->at(concatenate_target).splice(regions_vector->at(concatenate_target).end(), regions_vector->at(n));
@@ -597,27 +607,28 @@ Segmentation<ImgClass::Lab>::distance(const ImgClass::Lab& lvalue, const ImgClas
  *	_kernel_intensity : the intensity threshold of mean shift kernel
  */
 template <class T>
-const VECTOR_2D<double>
+const ImgClass::Segmentation::tuple<T>
 Segmentation<T>::MeanShift(const int x, const int y, std::vector<VECTOR_2D<int> >& pel_list, int Iter_Max)
 {
 	const double radius_spatial_squared = SQUARE(_kernel_spatial);
 	const double radius_intensity_squared = SQUARE(_kernel_intensity);
 	const double displacement_min = SQUARE(0.01);
 	// Initialize
-	VECTOR_2D<double> u(static_cast<double>(x), static_cast<double>(y));
-	double intensity = _image.get(x, y);
+	ImgClass::Segmentation::tuple<T> tuple;
+	tuple.spatial = VECTOR_2D<double>(static_cast<double>(x), static_cast<double>(y));
+	tuple.color = _image.get(x, y);
 	// Iterate until it converge
 	for (int i = 0; i < Iter_Max; i++) {
 		double N = 0.0;
 		double sum_intensity_diff = 0.0;
 		VECTOR_2D<double> sum_d(0.0, 0.0);
-		for (unsigned int n = 0; n < pel_list.size(); n++) {
+		for (size_t n = 0; n < pel_list.size(); n++) {
 			VECTOR_2D<int> r(
-			    static_cast<int>(round(u.x) + pel_list[n].x),
-			    static_cast<int>(round(u.y) + pel_list[n].y));
+			    static_cast<int>(round(tuple.spatial.x) + pel_list[n].x),
+			    static_cast<int>(round(tuple.spatial.y) + pel_list[n].y));
 			if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height) {
-				double intensity_diff = _image.get(r.x, r.y) - intensity;
-				VECTOR_2D<double> d(r.x - u.x, r.y - u.y);
+				double intensity_diff = _image.get(r.x, r.y) - tuple.color;
+				VECTOR_2D<double> d(r.x - tuple.spatial.x, r.y - tuple.spatial.y);
 				double ratio_intensity = SQUARE(intensity_diff) / radius_intensity_squared;
 				double ratio_spatial = norm_squared(d) / radius_spatial_squared;
 				if (ratio_intensity <= 1.0 && ratio_spatial <= 1.0) {
@@ -628,14 +639,14 @@ Segmentation<T>::MeanShift(const int x, const int y, std::vector<VECTOR_2D<int> 
 				}
 			}
 		}
-		intensity += sum_intensity_diff / N;
+		tuple.color += sum_intensity_diff / N;
 		VECTOR_2D<double> displacement(sum_d.x / N, sum_d.y / N);
-		u += displacement;
-		if (norm_squared(displacement) < displacement_min) {
+		tuple.spatial += displacement;
+		if (norm_squared(sum_intensity_diff / N) * norm_squared(displacement) < displacement_min) {
 			break;
 		}
 	}
-	return u;
+	return tuple;
 }
 
 /*
@@ -645,7 +656,7 @@ Segmentation<T>::MeanShift(const int x, const int y, std::vector<VECTOR_2D<int> 
  *	_kernel_intensity : the norm threshold of mean shift kernel in L*a*b* space
  */
 template <> // Specialized for ImgClass::RGB<double>
-const VECTOR_2D<double>
+const ImgClass::Segmentation::tuple<ImgClass::RGB>
 Segmentation<ImgClass::RGB>::MeanShift(const int x, const int y, std::vector<VECTOR_2D<int> >& pel_list, int Iter_Max);
 
 /*
@@ -655,6 +666,6 @@ Segmentation<ImgClass::RGB>::MeanShift(const int x, const int y, std::vector<VEC
  *	_kernel_intensity : the norm threshold of mean shift kernel in L*a*b* space
  */
 template <> // Specialized for ImgClass::Lab
-const VECTOR_2D<double>
+const ImgClass::Segmentation::tuple<ImgClass::Lab>
 Segmentation<ImgClass::Lab>::MeanShift(const int x, const int y, std::vector<VECTOR_2D<int> >& pel_list, int Iter_Max);
 

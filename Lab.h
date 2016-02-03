@@ -73,13 +73,22 @@ ImgClass::Lab operator*(const double& lvalue, const ImgClass::Lab& rcolor);
 ImgClass::Lab operator/(const ImgClass::Lab& lcolor, const ImgClass::Lab& rcolor);
 ImgClass::Lab operator/(const ImgClass::Lab& lcolor, const double& rvalue);
 
-// Product
-double inner_prod(const ImgClass::Lab& lcolor, const ImgClass::Lab& rcolor);
-
 // Norm
 const ImgClass::Lab abs(const ImgClass::Lab& color);
 double norm_squared(const ImgClass::Lab& color);
 double norm(const ImgClass::Lab& color);
+#ifndef NORM_DOUBLE
+#define NORM_DOUBLE
+double norm(const double& value);
+double norm_squared(const double& value);
+#endif
+
+// Product
+double inner_prod(const ImgClass::Lab& lcolor, const ImgClass::Lab& rcolor);
+#ifndef INNER_PROD_DOUBLE
+#define INNER_PROD_DOUBLE
+double inner_prod(const double& lvalue, const double& rvalue);
+#endif
 
 // Saturation
 ImgClass::Lab saturate(const ImgClass::Lab& value, const double& min, const double& max);

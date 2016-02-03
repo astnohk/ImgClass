@@ -137,9 +137,7 @@ template <class T>
 void
 ImgVector<T>::clear(void)
 {
-	delete[] _data;
-	_data = nullptr;
-	_reserved_size = 0;
+	// delete allocated memory only when destructor is called
 	_width = 0;
 	_height = 0;
 }
@@ -392,7 +390,7 @@ template <class T>
 bool
 ImgVector<T>::isNULL(void) const
 {
-	if (_data == nullptr) {
+	if (_width == 0 || _height == 0) {
 		return true;
 	} else {
 		return false;
@@ -406,7 +404,11 @@ template <class T>
 T *
 ImgVector<T>::data(void) const
 {
-	return _data;
+	if (this->isNULL()) {
+		return nullptr;
+	} else {
+		return _data;
+	}
 }
 
 
@@ -465,6 +467,7 @@ ImgVector<T>::at_repeat(const int x, const int y)
 {
 	size_t x_repeat, y_repeat;
 
+	assert(_width > 0 && _height > 0);
 	if (x >= 0) {
 		x_repeat = static_cast<size_t>(x % _width);
 	} else {
@@ -484,6 +487,7 @@ ImgVector<T>::at_repeat(const int x, const int y) const
 {
 	size_t x_repeat, y_repeat;
 
+	assert(_width > 0 && _height > 0);
 	if (x >= 0) {
 		x_repeat = static_cast<size_t>(x % _width);
 	} else {
@@ -505,6 +509,7 @@ ImgVector<T>::at_mirror(const int x, const int y)
 	int x_mirror = x;
 	int y_mirror = y;
 
+	assert(_width > 0 && _height > 0);
 	if (x_mirror < 0) {
 		x_mirror = -x_mirror - 1; // should be set the offset when Mirroring over negative
 	}
@@ -523,6 +528,7 @@ ImgVector<T>::at_mirror(const int x, const int y) const
 	int x_mirror = x;
 	int y_mirror = y;
 
+	assert(_width > 0 && _height > 0);
 	if (x_mirror < 0) {
 		x_mirror = -x_mirror - 1; // should be set the offset when Mirroring over negative
 	}
@@ -557,6 +563,7 @@ ImgVector<T>::get_zeropad(const int x, const int y) const
 {
 	T zero = T();
 
+	assert(_width > 0 && _height > 0);
 	if (x < 0 || _width <= x || y < 0 || _height <= y) {
 		return zero;
 	} else {
@@ -570,6 +577,7 @@ ImgVector<T>::get_repeat(const int x, const int y) const
 {
 	size_t x_repeat, y_repeat;
 
+	assert(_width > 0 && _height > 0);
 	if (x >= 0) {
 		x_repeat = static_cast<size_t>(x % _width);
 	} else {
@@ -590,6 +598,7 @@ ImgVector<T>::get_mirror(const int x, const int y) const
 	int x_mirror = x;
 	int y_mirror = y;
 
+	assert(_width > 0 && _height > 0);
 	if (x_mirror < 0) {
 		x_mirror = -x_mirror - 1; // should be set the offset when Mirroring over negative
 	}
@@ -613,6 +622,7 @@ ImgVector<T>::get_zeropad_cubic(const double& x, const double& y, const double& 
 	double bicubic_y[4];
 	T value = T();
 
+	assert(_width > 0 && _height > 0);
 	if (fabs(x - floor(x)) < DBL_EPSILON
 	    && fabs(y - floor(y)) < DBL_EPSILON) {
 		value = this->get_zeropad(int(x), int(y));
@@ -639,6 +649,7 @@ ImgVector<T>::get_repeat_cubic(const double& x, const double& y, const double& B
 	double bicubic_y[4];
 	T value = T();
 
+	assert(_width > 0 && _height > 0);
 	if (fabs(x - floor(x)) < DBL_EPSILON
 	    && fabs(y - floor(y)) < DBL_EPSILON) {
 		value = this->get_zeropad(int(x), int(y));
@@ -665,6 +676,7 @@ ImgVector<T>::get_mirror_cubic(const double& x, const double& y, const double& B
 	double bicubic_y[4];
 	T value = T();
 
+	assert(_width > 0 && _height > 0);
 	if (fabs(x - floor(x)) < DBL_EPSILON
 	    && fabs(y - floor(y)) < DBL_EPSILON) {
 		value = this->get_zeropad(int(x), int(y));
@@ -820,10 +832,15 @@ ImgVector<T>::crop(const int top_left_x, const int top_left_y, const int crop_wi
 {
 	ImgVector<T>* tmp = nullptr;
 
+	assert(_width > 0 && _height > 0);
 	if (crop_width <= 0) {
 		throw std::invalid_argument("ImgVector<T>* ImgVector<T>::crop(int, int, int, int) : crop_width <= 0");
+	} else if (crop_width > _width) {
+		throw std::invalid_argument("ImgVector<T>* ImgVector<T>::crop(int, int, int, int) : crop_width > _width");
 	} else if (crop_height <= 0) {
 		throw std::invalid_argument("ImgVector<T>* ImgVector<T>::crop(int, int, int, int) : crop_height <= 0");
+	} else if (crop_height > _height) {
+		throw std::invalid_argument("ImgVector<T>* ImgVector<T>::crop(int, int, int, int) : crop_height > _height");
 	}
 	try {
 		tmp = new ImgVector<T>;

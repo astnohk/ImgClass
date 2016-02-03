@@ -5,28 +5,6 @@
 
 
 
-// ----- Global function -----
-double
-norm_squared(const double& value)
-{
-	return value * value;
-}
-
-double
-norm(const double& value)
-{
-	return fabs(value);
-}
-
-double
-inner_prod(const double& lvalue, const double& rvalue)
-{
-	return lvalue * rvalue;
-}
-
-
-
-
 // ----- Specialize -----
 template <>
 void

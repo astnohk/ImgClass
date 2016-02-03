@@ -10,6 +10,7 @@
 #include <list>
 #include <vector>
 
+#include "Color.h"
 #include "Vector.h"
 #include "ImgClass.h"
 
@@ -120,10 +121,6 @@ class BlockMatching
 		double MAD_region_nearest_intensity(const int x_diff, const int y_diff, const std::vector<VECTOR_2D<int> >& region_interest);
 		double ZNCC_region_nearest_intensity(const int x_diff, const int y_diff, const std::vector<VECTOR_2D<int> >& region_interest);
 };
-
-double norm_squared(const double& value);
-double norm(const double& value);
-double inner_prod(const double& lvalue, const double& rvalue);
 
 #include "BlockMatching_private_initializer.h"
 #include "BlockMatching_private_accessor.h"

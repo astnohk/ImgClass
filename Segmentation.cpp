@@ -127,7 +127,7 @@ Segmentation<ImgClass::Lab>::MeanShift(const int x, const int y, std::vector<VEC
 			    static_cast<int>(round(tuple.spatial.y) + pel_list[n].y));
 			if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height) {
 				ImgClass::Lab diff(_image.get(r.x, r.y) - tuple.color);
-				//diff.L /= 2.0; // Difference of Lighting is not so important in segmentation
+				diff.L *= 0.8; // Difference of Lighting is not so important in segmentation
 				VECTOR_2D<double> d(r.x - tuple.spatial.x, r.y - tuple.spatial.y);
 				double ratio_intensity = norm_squared(diff) / radius_intensity_squared;
 				double ratio_spatial = norm_squared(d) / radius_spatial_squared;

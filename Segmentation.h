@@ -83,12 +83,12 @@ class Segmentation
 		size_t get_mirror(int x, int y) const;
 
 		// Mean Shift segmentation
-		void Segmentation_MeanShift(const int Iter_Max = 128, const size_t Min_Number_of_Pixels = 16, const int Search_Range = 1);
+		void Segmentation_MeanShift(const int Iter_Max = 128, const size_t Min_Number_of_Pixels = 10);
 
 	protected:
 		const ImgClass::Segmentation::tuple<T> MeanShift(const int x, const int y, std::vector<VECTOR_2D<int> >& pel_list, int Iter_Max);
-		size_t collect_regions_in_segmentation_map(std::vector<std::list<VECTOR_2D<int> > >* regions_vector);
-		size_t small_region_eliminate(std::vector<std::list<VECTOR_2D<int> > >* regions_vector, const size_t Min_Number_of_Pixels, const int search_range);
+		size_t collect_regions_in_segmentation_map(std::list<std::list<VECTOR_2D<int> > >* regions_list);
+		size_t small_region_eliminate(std::list<std::list<VECTOR_2D<int> > >* regions_list, const size_t Min_Number_of_Pixels);
 
 		double distance(const T& lcolor, const T& rcolor); // Calculate distance depends on each color space
 		double normalized_distance(const T& lcolor, const T& rcolor); // Calculate distance depends on each color space

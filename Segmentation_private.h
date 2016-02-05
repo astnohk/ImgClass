@@ -518,42 +518,67 @@ Segmentation<T>::collect_regions_in_segmentation_map(std::list<std::list<VECTOR_
 
 template <class T>
 size_t
-Segmentation<T>::small_region_eliminate(std::list<std::list<VECTOR_2D<int> > >* regions_list, const size_t Min_Number_of_Pixels)
+Segmentation<T>::small_region_eliminate(std::list<std::list<VECTOR_2D<int> > >* region_list, const size_t Min_Number_of_Pixels)
 {
 	const VECTOR_2D<int> adjacent[8] = {
 	    VECTOR_2D<int>(-1, -1), VECTOR_2D<int>(0, -1), VECTOR_2D<int>(1, -1),
 	    VECTOR_2D<int>(-1, 0), VECTOR_2D<int>(1, 0),
 	    VECTOR_2D<int>(-1, 1), VECTOR_2D<int>(0, 1), VECTOR_2D<int>(1, 1)};
+	std::list<std::list<VECTOR_2D<int> > > small_region_list;
 	ImgVector<bool> small_region_map(_width, _height, false);
-	ImgVector<std::list<VECTOR_2D<int> >*> region_list_map(_width, _height);
+	ImgVector<bool> dense_small_region_map(_width, _height, false);
+	ImgVector<std::list<VECTOR_2D<int> >::iterator> region_list_map(_width, _height);
 	size_t num_small_region = 0;
 
+	// Make region_list_map
+	for (std::list<VECTOR_2D<int> >::iterator ite = region_list->begin();
+	    ite != region_list->end();
+	    ++ite) {
+		for (const VECTOR_2D<int>& r : *ite) {
+			region_list_map.at(r.x, r.y) = ite;
+		}
+	}
 	// Search small regions
 	{
-		std::list<std::list<VECTOR_2D<int> > >::iterator ite = regions_list->begin();
-		while (ite != regions_list->end()) {
+		std::list<std::list<VECTOR_2D<int> > >::iterator ite = region_list->begin();
+		while (ite != region_list->end()) {
 			if (ite->size() < Min_Number_of_Pixels) {
 				// Count the number of small regions here because some regions may become larger on this routine
 				num_small_region++;
 				for (const VECTOR_2D<int>& r : *ite) {
 					small_region_map.at(r.x, r.y) = true;
 				}
-				ite = regions_list->erase(ite);
+				small_region_list.push_back(*ite);
+				ite = region_list->erase(ite);
 			} else {
 				++ite;
 			}
 		}
 	}
-	// Make region_list_map
-	for (std::list<VECTOR_2D<int> >& region : *regions_list) {
+	// Search densely small regions
+	for (const std::list<VECTOR_2D<int> >& region : small_region_list) {
+		bool dense = true;
 		for (const VECTOR_2D<int>& r : region) {
-			region_list_map.at(r.x, r.y) = &region;
+			for (size_t i = 0; i < 8; i++) {
+				if (small_region_map.get_zeropad(r.x + adjacent[i].x, r.y + adjacent[i].y) == false) {
+					dense = false;
+					break;
+				}
+			}
+			if (dense == false) {
+				break;
+			}
+		}
+		if (dense) {
+			for (const VECTOR_2D<int>& r : region) {
+				dense_small_region_map(r.x, r.y) = true;
+			}
 		}
 	}
-	// Concatenate small regions
+	// Concatenate dense small regions and small regions connecting to dense small regions
 	for (int y = 0; y < _height; y++) {
 		for (int x = 0; x < _width; x++) {
-			if (small_region_map.at(x, y) == false) {
+			if (dense_small_region_map.at(x, y) == false) {
 				continue;
 			}
 			// Search nearest neighbor of the small region
@@ -562,24 +587,32 @@ Segmentation<T>::small_region_eliminate(std::list<std::list<VECTOR_2D<int> > >* 
 			for (std::list<VECTOR_2D<int> >::iterator ite = tmp_list.begin();
 			    ite != tmp_list.end();
 			    ++ite) {
-				T color = _image.get(ite->x, ite->y);
-				double min = DBL_MAX;
-				VECTOR_2D<int> new_r(ite->x, ite->y);
+				if (dense_small_region_map.get(x, y) == false) {
+					continue;
+				}
 				for (size_t i = 0; i < 8; i++) {
 					VECTOR_2D<int> r(ite->x + adjacent[i].x, ite->y + adjacent[i].y);
 					if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height
-					    && region_list_map.get(r.x, r.y) != nullptr
-					    && norm_squared(color - _image.get(r.x, r.y)) < min) {
-						min = norm_squared(color - _image.get(r.x, r.y));
-						new_r = r;
+					    && small_region_map.get(r.x, r.y)) {
+						std::list<VECTOR_2D<int> >::iterator ite_target = region_list_map.at(r.x, r.y);
+						for (const VECTOR_2D<int>& r_tmp : *ite_target) {
+							small_region_map.at(r_tmp.x, r_tmp.y) = false;
+							region_list_map.at(r_tmp.x, r_tmp.y) = nullptr;
+						}
+						if (dense_small_region_map.get(r.x, r.y)) {
+							for (const VECTOR_2D<int>& r_tmp : *ite_target) {
+								dense_small_region_map.at(r_tmp.x, r_tmp.y) = false;
+							}
+							tmp_list.splice(tmp_list.end(), *(ite_target->at(r.x, r.y)));
+						} else {
+							tmp_list.splice(tmp_list.begin(), *(ite_target->at(r.x, r.y)));
+						}
+						region_list->erase(ite_target);
+						ite_target = region_list->end();
 					}
 				}
-				if (min < DBL_MAX) {
-					// Add pixel to nearest region
-					region_list_map.at(new_r.x, new_r.y)->push_back(*ite);
-					region_list_map.at(ite->x, ite->y) = region_list_map.at(new_r.x, new_r.y);
-				}
 			}
+			region_list->push_back(tmp_list);
 		}
 	}
 	return num_small_region;

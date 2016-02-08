@@ -461,7 +461,7 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const size_t Min_Num
 	// Reset _segmentation_map by _regions No.
 	for (size_t n = 0; n < _regions.size(); n++) {
 		for (size_t i = 0; i < _regions[n].size(); i++) {
-			_segmentation_map.at(_regions[n][i].x, _regions[n][i].y) = n;
+			_segmentation_map.at(_regions[n][i].x, _regions[n][i].y) = n + 1;
 		}
 	}
 	// Make color-quantized image

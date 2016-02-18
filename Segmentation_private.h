@@ -333,8 +333,9 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const size_t Min_Num
 	for (int y = 0; y < _height; y++) {
 		for (int x = 0; x < _width; x++) {
 			ImgClass::Segmentation::tuple<T> tmp = MeanShift(x, y, pel_list, Iter_Max);
-			auto lambda = [](double x, double max) -> double {
-				return x >= 0 ? x < max ? x : max - 1 : 0; };
+			auto lambda = [](double value, double max) -> double {
+				return value >= 0 ? value < max ? value : max - 1 : 0;
+			};
 			// Saturation
 			tmp.spatial.x = lambda(tmp.spatial.x, _width);
 			tmp.spatial.y = lambda(tmp.spatial.y, _height);
@@ -343,7 +344,9 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const size_t Min_Num
 			_shift_vector_color.at(x, y) = tmp.color;
 			// Assign start point to converge list
 			VECTOR_2D<int> shift(int(tmp.spatial.x), int(tmp.spatial.y));
+#ifdef _OPENMP
 #pragma omp critical
+#endif
 			{
 				vector_converge_list_map.at(shift.x, shift.y).push_back(VECTOR_2D<int>(x, y));
 			}

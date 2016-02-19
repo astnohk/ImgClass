@@ -176,18 +176,19 @@ VECTOR_2D<T>::operator!=(const VECTOR_2D<T>& vector)
 //
 template <class Type>
 VECTOR_2D<Type>
-operator+(const VECTOR_2D<Type> vector)
+operator+(const VECTOR_2D<Type>& vector)
 {
 	return vector;
 }
 
 template <class Type>
 VECTOR_2D<Type>
-operator-(VECTOR_2D<Type> vector)
+operator-(const VECTOR_2D<Type>& vector)
 {
-	vector.x = -vector.x;
-	vector.y = -vector.y;
-	return vector;
+	VECTOR_2D<Type> v;
+	v.x = -vector.x;
+	v.y = -vector.y;
+	return v;
 }
 
 

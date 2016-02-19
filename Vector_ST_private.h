@@ -143,18 +143,19 @@ Vector_ST<T>::operator!=(const Vector_ST<T>& vector)
 //
 template <class Type>
 Vector_ST<Type>
-operator+(const Vector_ST<Type> vector)
+operator+(const Vector_ST<Type>& vector)
 {
 	return vector;
 }
 
 template <class Type>
 Vector_ST<Type>
-operator-(Vector_ST<Type> vector)
+operator-(const Vector_ST<Type>& vector)
 {
-	vector.x = -vector.x;
-	vector.y = -vector.y;
-	return vector;
+	Vector_ST<Type> v;
+	v.x = -vector.x;
+	v.y = -vector.y;
+	return v;
 }
 
 

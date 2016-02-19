@@ -251,6 +251,10 @@ BlockMatching<T>::BlockMatching(const BlockMatching& copy)
 	_region_map_prev.copy(copy._region_map_prev);
 	_region_map_current.copy(copy._region_map_current);
 	_region_map_next.copy(copy._region_map_next);
+	_color_quantized_prev.copy(copy._color_quantized_prev);
+	_color_quantized_current.copy(copy._color_quantized_current);
+	_color_quantized_next.copy(copy._color_quantized_next);
+
 	_connected_regions_prev.assign(copy._connected_regions_prev.begin(), copy._connected_regions_prev.end());
 	_connected_regions_current.assign(copy._connected_regions_current.begin(), copy._connected_regions_current.end());
 	_connected_regions_next.assign(copy._connected_regions_next.begin(), copy._connected_regions_next.end());

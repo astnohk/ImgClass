@@ -441,12 +441,10 @@ Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const size_t Min_Num
 	printf(" Mean-Shift method: Eliminate small regions\n");
 #endif
 	// Eliminate small regions
-	size_t num_small_region = small_region_concatenator(&regions_list, Min_Number_of_Pixels);
+	small_region_concatenator(&regions_list, Min_Number_of_Pixels);
 	small_region_eliminator(&regions_list, Min_Number_of_Pixels);
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_SEGMENTATION)
-	std::cout
-	    << " Mean-Shift method: There were " << num_small_region << " small regions" << std::endl
-	    << " Mean-Shift method: The number of regions reduced " << num_region << " -> " << regions_list.size() << std::endl;
+	std::cout << " Mean-Shift method: The number of regions reduced " << num_region << " -> " << regions_list.size() << std::endl;
 #endif
 	// Copy regions_list to _regions
 	num_region = regions_list.size();

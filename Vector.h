@@ -42,8 +42,8 @@ class VECTOR_2D
 };
 
 // Global operator overloading
-template<class Type> VECTOR_2D<Type> operator+(VECTOR_2D<Type> vector);
-template<class Type> VECTOR_2D<Type> operator-(VECTOR_2D<Type> vector);
+template<class Type> VECTOR_2D<Type> operator+(const VECTOR_2D<Type>& vector);
+template<class Type> VECTOR_2D<Type> operator-(const VECTOR_2D<Type>& vector);
 
 template<class Type> VECTOR_2D<Type> operator+(VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
 template<class Type> VECTOR_2D<Type> operator-(VECTOR_2D<Type> lvector, const VECTOR_2D<Type>& rvector);
@@ -125,8 +125,8 @@ class Vector_ST
 
 
 // Global operator overloading
-template<class Type> Vector_ST<Type> operator+(Vector_ST<Type> vector);
-template<class Type> Vector_ST<Type> operator-(Vector_ST<Type> vector);
+template<class Type> Vector_ST<Type> operator+(const Vector_ST<Type>& vector);
+template<class Type> Vector_ST<Type> operator-(const Vector_ST<Type>& vector);
 
 template<class Type> Vector_ST<Type> operator+(Vector_ST<Type> lvector, const Vector_ST<Type>& rvector);
 template<class Type> Vector_ST<Type> operator-(Vector_ST<Type> lvector, const Vector_ST<Type>& rvector);

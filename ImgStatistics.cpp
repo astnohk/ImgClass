@@ -220,16 +220,15 @@ ImgStatistics::variance(int center_x, int center_y, int window_width, int window
 {
 	double sum = 0.0;
 	double mu;
-	int x_tmp, y_tmp;
 
 	mu = this->mean(center_x, center_y, window_width, window_height);
 	for (int y = 0; y < window_height; y++) {
-		y_tmp = center_y + y - (window_height - 1) / 2;
+		int y_tmp = center_y + y - (window_height - 1) / 2;
 		if (y_tmp < 0 || _height <= y_tmp) {
 			continue;
 		}
 		for (int x = 0; x < window_width; x++) {
-			x_tmp = center_x + x - (window_width - 1) / 2;
+			int x_tmp = center_x + x - (window_width - 1) / 2;
 			if (x_tmp < 0 || _width <= x_tmp) {
 				continue;
 			}

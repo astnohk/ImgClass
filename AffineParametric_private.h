@@ -9,37 +9,12 @@
 
 template <class T>
 std::vector<ImgVector<Vector_ST<double> > >
-AffineParametric<T>::AffineParametric(const ImgVector<ImgClass::RGB>& It_color, const ImgVector<ImgClass::RGB>& Itp1_color, double MaxInt, MULTIPLE_MOTION_PARAM MotionParam, const std::string ofilename, int IterMax)
+AffineParametric<T>::AffineParametric(const ImgVector<ImgClass::RGB>& current, const ImgVector<ImgClass::RGB>& reference, const double MaxInt, const double sigma, const int IterMax)
 {
-	const bool Bidirectional_with_Time = true; // on almost all cases it is true
-	const size_t History_Max = 4;
-	static std::deque<ImgVector<ImgClass::RGB> > sequence_sRGB;
-	static std::deque<ImgVector<double> > sequence_Grayscale;
-	static std::deque<ImgVector<ImgClass::Lab> > sequence_Lab;
-	static std::deque<Segmentation<ImgClass::Lab> > segmentations;
-
-	std::bad_alloc except_bad_alloc;
-
 	std::vector<ImgVector<Vector_ST<double> > > u; // For RETURN value
-
-	ImgVector<size_t> domain_map;
-	const double coeff_MAD = 1.0;
-	const double coeff_ZNCC = 0.0;
-	BlockMatching<ImgClass::Lab> block_matching;
-	int BM_Search_Range = 61; // Block Matching search range
-	int Subpixel_Scale = 1;
-
-	ImgVector<double> It;
-	ImgVector<double> Itp1;
-	ImgVector<ImgClass::RGB> It_sRGB_normalize;
-	ImgVector<ImgClass::RGB> Itp1_sRGB_normalize;
 	ImgVector<ImgClass::Lab> It_Lab_normalize;
 	ImgVector<ImgClass::Lab> Itp1_Lab_normalize;
-	ImgVector<double> It_normalize;
-	ImgVector<double> Itp1_normalize;
-
 	// M-estimator parameter
-	const double sigma = 0.2 / sqrt(2.0); //4.0 / sqrt(2.0);
 
 	if (It_color.isNULL()) {
 		throw std::invalid_argument("OpticalFlow_BlockMatching(const ImgVector<double>*, const ImgVector<double>* double, MULTIPLE_MOTION_PARAM, int) : const ImgVector<double>* It");
@@ -224,7 +199,7 @@ AffineParametric<T>::AffineParametric(const ImgVector<ImgClass::RGB>& It_color, 
 		// Initialize affine coefficient vector
 		u_affine.resize(regions->size());
 		for (size_t n = 0; n < regions->size(); n++) {
-			u_affine[n].resize(NUM_AFFINE_PARAMETER);
+			u_affine[n].resize(Num_Affine_Parameter);
 		}
 		// Gradient-based estimation
 		for (size_t ref = 0; ref < references.size(); ref++) {
@@ -289,22 +264,22 @@ AffineParametric<T>::AffineParametric(const ImgVector<ImgClass::RGB>& It_color, 
 
 template <class T>
 void
-AffineParametric<T>::IRLS_AffineParametric_region(std::vector<double>* u_affine, const std::vector<VECTOR_2D<int> >& region, const ImgVector<VECTOR_2D<double> >* grad, const ImgVector<double>* dt, const double& sigma, const int IterMax, const double& ErrorMinThreshold)
+AffineParametric<T>::IRLS_AffineParametric_region(void)
 {
 	const double omega = 1.0E-3;
 
 	// Initialize
-	for (int i = 0; i < NUM_AFFINE_PARAMETER; i++) {
+	for (int i = 0; i < Num_Affine_Parameter; i++) {
 		u_affine->at(i) = .0;
 	}
 	// Start IRLS
 	for (int n = 0; n < IterMax; n++) {
-		std::vector<double> u_np1(NUM_AFFINE_PARAMETER);
+		std::vector<double> u_np1(Num_Affine_Parameter);
 		std::vector<double> dE = Error_a_region(u_affine, region, grad, dt, sigma);
 		std::vector<double> sup = sup_Error_aa_region(region, grad, sigma);
 		double E = 0.0;
 
-		for (int i = 0; i < NUM_AFFINE_PARAMETER; i++) {
+		for (int i = 0; i < Num_Affine_Parameter; i++) {
 			if (fabs(sup[i]) < 1.0E-10) {
 				u_np1[i] = u_affine->at(i) - omega * 1.0E+10 * SIGN_NOZERO(sup[i]) * dE[i];
 			} else {
@@ -324,11 +299,11 @@ template <class T>
 std::vector<double>
 AffineParametric<T>::Error_a_region(const std::vector<double>* u_affine, const std::vector<VECTOR_2D<int> >& region, const ImgVector<VECTOR_2D<double> >* grad, const ImgVector<double>* dt, double sigma)
 {
-	double (*psiD)(const double&, const double&) = Geman_McClure_psi;
-	std::vector<double> E_a(NUM_AFFINE_PARAMETER);
+	double (*psiD)(const double&, const double&) = LIB_ImgClass_AffineParametric::Geman_McClure_psi;
+	std::vector<double> E_a(Num_Affine_Parameter);
 	VECTOR_2D<double> u_a;
 
-	for (size_t i = 0; i < NUM_AFFINE_PARAMETER; i++) {
+	for (size_t i = 0; i < Num_Affine_Parameter; i++) {
 		E_a[i] = .0;
 	}
 	for (const VECTOR_2D<int>& element : region) {
@@ -353,10 +328,10 @@ AffineParametric<T>::sup_Error_aa_region(const std::vector<VECTOR_2D<int> >& reg
 {
 	ERROR Error("sup_Error_aa_region");
 
-	std::vector<double> sup(NUM_AFFINE_PARAMETER);
-	std::vector<double> u_aa_max(NUM_AFFINE_PARAMETER);
+	std::vector<double> sup(Num_Affine_Parameter);
+	std::vector<double> u_aa_max(Num_Affine_Parameter);
 
-	for (size_t i = 0; i < NUM_AFFINE_PARAMETER; i++) {
+	for (size_t i = 0; i < Num_Affine_Parameter; i++) {
 		u_aa_max[i] = .0;
 	}
 	if (grad == nullptr) {
@@ -402,7 +377,7 @@ template <class T>
 double
 AffineParametric<T>::Error_region(const std::vector<double>* u_affine, const std::vector<VECTOR_2D<int> >& region, const ImgVector<VECTOR_2D<double> >* grad, const ImgVector<double>* dt, double sigma)
 {
-	double (*rhoD)(const double&, const double&) = Geman_McClure_rho;
+	double (*rhoD)(const double&, const double&) = LIB_ImgClass_AffineParametric::Geman_McClure_rho;
 	double E = 0.0;
 	VECTOR_2D<double> u_a;
 

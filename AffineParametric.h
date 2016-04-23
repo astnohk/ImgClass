@@ -13,6 +13,8 @@
 #include "BlockMatching.h"
 
 
+	const double sigma = 0.2 / sqrt(2.0); //4.0 / sqrt(2.0);
+
 template <class T>
 class AffineParametric {
 	private:
@@ -35,43 +37,44 @@ class AffineParametric {
 
 	protected:
 		void IRLS_AffineParametric_region(std::vector<double>* u_affine, const std::vector<VECTOR_2D<int> >& region);
-
 		std::vector<double> Error_a_region(const std::vector<double>* u_affine, const std::vector<VECTOR_2D<int> >& region);
 		std::vector<double> sup_Error_aa_region(const std::vector<VECTOR_2D<int> >& region);
 		double Error_region(const std::vector<double>* u_affine, const std::vector<VECTOR_2D<int> >& region);
 }
 
 
-template <class T>
-inline
-double
-Geman_McClure_rho(const T& x, const T& sigma)
-{
-	return POW2(x) / (sigma + POW2(x));
-}
+namespace LIB_ImgClass_AffineParametric {
+	template <class T>
+	inline
+	double
+	Geman_McClure_rho(const T& x, const T& sigma)
+	{
+		return POW2(x) / (sigma + POW2(x));
+	}
 
-template <class T>
-inline
-double
-Geman_McClure_psi(const T& x, const T& sigma)
-{
-	return 2.0 * x * sigma / POW2(sigma + POW2(x));
-}
+	template <class T>
+	inline
+	double
+	Geman_McClure_psi(const T& x, const T& sigma)
+	{
+		return 2.0 * x * sigma / POW2(sigma + POW2(x));
+	}
 
-template <class T>
-inline
-double
-Lorentzian_rho(const T& x, const T& sigma)
-{
-	return log1p(0.5 * POW2(x / sigma));
-}
+	template <class T>
+	inline
+	double
+	Lorentzian_rho(const T& x, const T& sigma)
+	{
+		return log1p(0.5 * POW2(x / sigma));
+	}
 
-template <class T>
-inline
-double
-Lorentzian_psi(const T& x, const T& sigma)
-{
-	return 2.0 * x / (2.0 * POW2(sigma) + POW2(x));
+	template <class T>
+	inline
+	double
+	Lorentzian_psi(const T& x, const T& sigma)
+	{
+		return 2.0 * x / (2.0 * POW2(sigma) + POW2(x));
+	}
 }
 
 #include "AffineParametric_private.h"

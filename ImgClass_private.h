@@ -550,6 +550,7 @@ ImgVector<T>::get(const size_t n) const
 }
 
 template <class T>
+inline
 const T
 ImgVector<T>::get(const int x, const int y) const
 {

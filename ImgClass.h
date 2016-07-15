@@ -64,7 +64,7 @@ class ImgVector
 
 		// Get image intencity
 		const T get(const size_t n) const; // return const to avoid to mistake get() for at()
-		const T get(const int x, const int y) const;
+		inline const T get(const int x, const int y) const;
 		// Get intencity with boundary treatment
 		const T get_zeropad(const int x, const int y) const;
 		const T get_repeat(const int x, const int y) const;

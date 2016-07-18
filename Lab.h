@@ -93,6 +93,9 @@ double inner_prod(const double& lvalue, const double& rvalue);
 // Saturation
 ImgClass::Lab saturate(const ImgClass::Lab& value, const double& min, const double& max);
 
+// Quantization
+ImgClass::Lab color_quantize(const ImgClass::Lab& value);
+
 // Stream
 std::ostream& operator<<(std::ostream& os, const ImgClass::Lab& rcolor);
 

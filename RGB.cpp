@@ -325,6 +325,18 @@ saturate(const ImgClass::RGB& value, const double& min, const double& max)
 }
 
 
+// Quantization
+ImgClass::RGB
+color_quantize(const ImgClass::RGB &value, const double &max)
+{
+	ImgClass::RGB ret;
+	ret.R = round(max * value.R);
+	ret.G = round(max * value.G);
+	ret.B = round(max * value.B);
+	return ret;
+}
+
+
 // Stream
 std::ostream &
 operator<<(std::ostream& os, const ImgClass::RGB& rcolor)

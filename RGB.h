@@ -67,6 +67,9 @@ double norm(const ImgClass::RGB& color);
 // Saturation
 ImgClass::RGB saturate(const ImgClass::RGB& value, const double& min, const double& max);
 
+// Quantization
+ImgClass::RGB color_quantize(const ImgClass::RGB &value, const double &max = 255.0);
+
 // Stream
 std::ostream& operator<<(std::ostream& os, const ImgClass::RGB& rcolor);
 

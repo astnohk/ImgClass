@@ -399,6 +399,18 @@ saturate(const ImgClass::Lab& value, const double& min, const double& max)
 }
 
 
+// Quantization
+ImgClass::Lab
+color_quantize(const ImgClass::Lab& value)
+{
+	ImgClass::Lab ret;
+	ret.L = round(value.L);
+	ret.a = round(value.a);
+	ret.b = round(value.b);
+	return ret;
+}
+
+
 // Stream
 std::ostream &
 operator<<(std::ostream& os, const ImgClass::Lab& rcolor)

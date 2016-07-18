@@ -9,6 +9,8 @@
 #include <string>
 #include <iostream>
 
+#include "../PNM/pnm.h"
+
 #define SQUARE(a) ((a) * (a))
 
 
@@ -26,12 +28,13 @@ namespace ImgClass {
 	}
 
 	template <class T>
-	Segmentation<T>::Segmentation(const ImgVector<T>& image, const double kernel_spatial_radius, const double kernel_intensity_radius)
+	Segmentation<T>::Segmentation(const ImgVector<T>& image, const double &kernel_spatial_radius, const double &kernel_intensity_radius, const size_t &min_number_of_pixels)
 	{
 		_image.copy(image);
 		_size = _image.size();
 		_width = _image.width();
 		_height = _image.height();
+		_min_pixels = min_number_of_pixels;
 		_kernel_spatial = kernel_spatial_radius;
 		_kernel_intensity = kernel_intensity_radius;
 		if (_kernel_spatial <= 0.0) {
@@ -56,6 +59,7 @@ namespace ImgClass {
 		_size = segmentation._size;
 		_width = segmentation._width;
 		_height = segmentation._height;
+		_min_pixels = segmentation._min_pixels;
 		_kernel_spatial = segmentation._kernel_spatial;
 		_kernel_intensity = segmentation._kernel_intensity;
 
@@ -70,12 +74,13 @@ namespace ImgClass {
 
 	template <class T>
 	Segmentation<T> &
-	Segmentation<T>::reset(const ImgVector<T>& image, const double kernel_spatial_radius, const double kernel_intensity_radius)
+	Segmentation<T>::reset(const ImgVector<T>& image, const double &kernel_spatial_radius, const double &kernel_intensity_radius, const size_t &min_number_of_pixels)
 	{
 		_image.copy(image);
 		_size = _image.size();
 		_width = _image.width();
 		_height = _image.height();
+		_min_pixels = min_number_of_pixels;
 		_kernel_spatial = kernel_spatial_radius;
 		_kernel_intensity = kernel_intensity_radius;
 		if (_kernel_spatial <= 0.0) {
@@ -104,6 +109,7 @@ namespace ImgClass {
 		_size = segmentation._size;
 		_width = segmentation._width;
 		_height = segmentation._height;
+		_min_pixels = segmentation._min_pixels;
 		_kernel_spatial = segmentation._kernel_spatial;
 		_kernel_intensity = segmentation._kernel_intensity;
 
@@ -129,10 +135,17 @@ namespace ImgClass {
 	// ----- Setter ------
 	template <class T>
 	void
-	Segmentation<T>::set_kernel(const double kernel_spatial_radius, const double kernel_intensity_radius)
+	Segmentation<T>::set_kernel(const double &kernel_spatial_radius, const double &kernel_intensity_radius)
 	{
 		_kernel_spatial = kernel_spatial_radius;
 		_kernel_intensity = kernel_intensity_radius;
+	}
+
+	template <class T>
+	void
+	Segmentation<T>::set_min_pixels(const size_t &min_number_of_pixels)
+	{
+		_min_pixels = min_number_of_pixels;
 	}
 
 
@@ -143,6 +156,7 @@ namespace ImgClass {
 		_size = rvalue._size;
 		_width = rvalue._width;
 		_height = rvalue._height;
+		_min_pixels = rvalue._min_pixels;
 		_kernel_spatial = rvalue._kernel_spatial;
 		_kernel_intensity = rvalue._kernel_intensity;
 
@@ -296,7 +310,7 @@ namespace ImgClass {
 	// ----- Mean Shift -----
 	template <class T>
 	void
-	Segmentation<T>::Segmentation_MeanShift(const int Iter_Max, const size_t Min_Number_of_Pixels)
+	Segmentation<T>::Segmentation_MeanShift(const int Iter_Max)
 	{
 		const VECTOR_2D<int> adjacent[8] = {
 		    VECTOR_2D<int>(-1, -1), VECTOR_2D<int>(0, -1), VECTOR_2D<int>(1, -1),
@@ -376,6 +390,7 @@ namespace ImgClass {
 							VECTOR_2D<int> r(ite->x + adjacent[i].x, ite->y + adjacent[i].y);
 							if (0 <= r.x && r.x < _width
 							    && 0 <= r.y && r.y < _height
+							    && r.x != x && r.y != y
 							    && vector_converge_list_map.at(r.x, r.y).size() > 0) {
 								tmp_list.push_back(r);
 								vector_converge_list_map.at(x, y).splice(
@@ -395,9 +410,9 @@ namespace ImgClass {
 					std::list<Segmentation<T>::Region> tmp_regions_list;
 					for (VECTOR_2D<int>& candidate : vector_converge_list_map.at(x, y)) {
 						bool found = false;
-						const T& color_cand = _shift_vector_color.get(candidate.x, candidate.y);
+						const T& color_cand = color_quantize(_shift_vector_color.get(candidate.x, candidate.y));
 						for (Segmentation<T>::Region& region : tmp_regions_list) {
-							if (normalized_distance(color_cand, region.color) < 0.2) {
+							if (normalized_distance(color_cand, region.color) < 0.5) {
 								region.points.push_back(candidate);
 								found = true;
 								break;
@@ -446,8 +461,8 @@ namespace ImgClass {
 		printf(" Mean-Shift method: Eliminate small regions\n");
 #endif
 		// Eliminate small regions
-		small_region_concatenator(&regions_list, Min_Number_of_Pixels);
-		small_region_eliminator(&regions_list, Min_Number_of_Pixels);
+		small_region_concatenator(&regions_list);
+		small_region_eliminator(&regions_list);
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_SEGMENTATION)
 		std::cout << " Mean-Shift method: The number of regions reduced " << num_region << " -> " << regions_list.size() << std::endl;
 #endif
@@ -527,7 +542,7 @@ namespace ImgClass {
 
 	template <class T>
 	size_t
-	Segmentation<T>::small_region_concatenator(std::list<std::list<VECTOR_2D<int> > >* region_list, const size_t Min_Number_of_Pixels)
+	Segmentation<T>::small_region_concatenator(std::list<std::list<VECTOR_2D<int> > >* region_list)
 	{
 		const VECTOR_2D<int> adjacent[8] = {
 		    VECTOR_2D<int>(-1, -1), VECTOR_2D<int>(0, -1), VECTOR_2D<int>(1, -1),
@@ -551,7 +566,7 @@ namespace ImgClass {
 		{
 			std::list<std::list<VECTOR_2D<int> > >::iterator ite = region_list->begin();
 			while (ite != region_list->end()) {
-				if (ite->size() < Min_Number_of_Pixels) {
+				if (ite->size() < _min_pixels) {
 					// Count the number of small regions here because some regions may become larger on this routine
 					num_small_region++;
 					small_region_list.emplace_back();
@@ -646,7 +661,7 @@ namespace ImgClass {
 
 	template <class T>
 	void
-	Segmentation<T>::small_region_eliminator(std::list<std::list<VECTOR_2D<int> > >* region_list, const size_t Min_Number_of_Pixels)
+	Segmentation<T>::small_region_eliminator(std::list<std::list<VECTOR_2D<int> > >* region_list)
 	{
 		const VECTOR_2D<int> adjacent[8] = {
 		    VECTOR_2D<int>(-1, -1), VECTOR_2D<int>(0, -1), VECTOR_2D<int>(1, -1),
@@ -659,7 +674,7 @@ namespace ImgClass {
 		{
 			std::list<std::list<VECTOR_2D<int> > >::iterator ite = region_list->begin();
 			while (ite != region_list->end()) {
-				if (ite->size() < Min_Number_of_Pixels) {
+				if (ite->size() < _min_pixels) {
 					// Count the number of small regions here because some regions may become larger on this routine
 					small_region.splice(small_region.end(), *ite);
 					ite = region_list->erase(ite);

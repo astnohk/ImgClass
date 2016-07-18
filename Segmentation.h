@@ -34,6 +34,7 @@ namespace ImgClass {
 			int _width;
 			int _height;
 			size_t _size;
+			size_t _min_pixels;
 			double _kernel_spatial;
 			double _kernel_intensity;
 			ImgVector<T> _image;
@@ -46,18 +47,19 @@ namespace ImgClass {
 		public:
 			// Constructor
 			Segmentation(void);
-			Segmentation(const ImgVector<T>& image, const double kernel_spatial_radius = 16.0, const double kernel_intensity_radius = 10.0 / 255.0);
+			Segmentation(const ImgVector<T>& image, const double &kernel_spatial_radius = 16.0, const double &kernel_intensity_radius = 10.0 / 255.0, const size_t &min_number_of_pixels = 4);
 			explicit Segmentation(const Segmentation<T>& segmentation); // Copy constructor
 
-			Segmentation<T>& reset(const ImgVector<T>& image, const double kernel_spatial_radius = 16.0, const double kernel_intensity_radius = 10.0 / 255.0);
+			Segmentation<T>& reset(const ImgVector<T> &image, const double &kernel_spatial_radius = 16.0, const double &kernel_intensity_radius = 10.0 / 255.0, const size_t &min_number_of_pixels = 4);
 
-			Segmentation<T>& copy(const Segmentation<T>& segmentation);
+			Segmentation<T>& copy(const Segmentation<T> &segmentation);
 
 			// Destructor
 			~Segmentation(void);
 
 			// Setter
-			void set_kernel(const double kernel_spatial_radius, const double kernel_intensity_radius);
+			void set_kernel(const double &kernel_spatial_radius, const double &kernel_intensity_radius);
+			void set_min_pixels(const size_t &min_number_of_pixels);
 
 			Segmentation<T>& operator=(const Segmentation<T>& rvalue);
 
@@ -85,13 +87,13 @@ namespace ImgClass {
 			size_t get_mirror(int x, int y) const;
 
 			// Mean Shift segmentation
-			void Segmentation_MeanShift(const int Iter_Max = 128, const size_t Min_Number_of_Pixels = 16);
+			void Segmentation_MeanShift(const int Iter_Max = 128);
 
 		protected:
 			const ImgClass::Segmentation<T>::tuple MeanShift(const int x, const int y, std::vector<VECTOR_2D<int> >& pel_list, int Iter_Max);
 			size_t collect_regions_in_segmentation_map(std::list<std::list<VECTOR_2D<int> > >* regions_list);
-			size_t small_region_concatenator(std::list<std::list<VECTOR_2D<int> > >* regions_list, const size_t Min_Number_of_Pixels);
-			void small_region_eliminator(std::list<std::list<VECTOR_2D<int> > >* regions_list, const size_t Min_Number_of_Pixels);
+			size_t small_region_concatenator(std::list<std::list<VECTOR_2D<int> > >* regions_list);
+			void small_region_eliminator(std::list<std::list<VECTOR_2D<int> > >* regions_list);
 
 			double distance(const T& lcolor, const T& rcolor); // Calculate distance depends on each color space
 			double normalized_distance(const T& lcolor, const T& rcolor); // Calculate distance depends on each color space

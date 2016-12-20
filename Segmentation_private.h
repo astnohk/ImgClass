@@ -9,8 +9,6 @@
 #include <string>
 #include <iostream>
 
-#include "../PNM/pnm.h"
-
 #define SQUARE(a) ((a) * (a))
 
 

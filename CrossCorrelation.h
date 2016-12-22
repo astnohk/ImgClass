@@ -12,7 +12,7 @@ class CrossCorrelation
 		ImgStatistics _img1;
 	public:
 		CrossCorrelation(void);
-		explicit CrossCorrelation(const CrossCorrelation& copy);
+		CrossCorrelation(const CrossCorrelation& copy);
 		CrossCorrelation(const ImgStatistics& img0, const ImgStatistics& img1);
 		~CrossCorrelation(void);
 		CrossCorrelation& copy(const CrossCorrelation& copy);

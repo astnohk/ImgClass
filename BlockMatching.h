@@ -54,7 +54,7 @@ class BlockMatching
 		BlockMatching(const ImgVector<T>& image_prev, const ImgVector<size_t>& region_prev, const ImgVector<T>& image_current, const ImgVector<size_t>& region_current, const int Subpixel_Scale = 1);
 		BlockMatching(const ImgVector<T>& image_prev, const ImgVector<size_t>& region_prev, const ImgVector<T>& image_current, const ImgVector<size_t>& region_current, const ImgVector<T>& image_next, const ImgVector<size_t>& region_next, const int Subpixel_Scale = 1);
 		// Copy constructor
-		explicit BlockMatching(const BlockMatching& copy);
+		BlockMatching(const BlockMatching& copy);
 		// Destructor
 		virtual ~BlockMatching(void);
 

@@ -22,7 +22,7 @@ class MotionCompensation
 
 	public:
 		MotionCompensation(void);
-		explicit MotionCompensation(const MotionCompensation& copy); // copy constructor
+		MotionCompensation(const MotionCompensation& copy); // copy constructor
 		MotionCompensation(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const ImgVector<VECTOR_2D<double> >& vector_prev);
 		MotionCompensation(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const ImgVector<Vector_ST<double> >& vector_prev);
 		MotionCompensation(const ImgVector<T>& image_prev, const ImgVector<T>& image_current, const ImgVector<T>& image_next, const std::vector<ImgVector<Vector_ST<double> > >& vectors);

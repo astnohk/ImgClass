@@ -16,7 +16,7 @@ class ImgStatistics
 		double *_data;
 	public:
 		ImgStatistics(void);
-		explicit ImgStatistics(const ImgStatistics &copy);
+		ImgStatistics(const ImgStatistics &copy);
 		ImgStatistics(int W, int H, double *Img);
 
 		virtual ~ImgStatistics(void);

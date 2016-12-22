@@ -48,7 +48,7 @@ namespace ImgClass {
 			// Constructor
 			Segmentation(void);
 			Segmentation(const ImgVector<T>& image, const double &kernel_spatial_radius = 16.0, const double &kernel_intensity_radius = 10.0 / 255.0, const size_t &min_number_of_pixels = 4);
-			explicit Segmentation(const Segmentation<T>& segmentation); // Copy constructor
+			Segmentation(const Segmentation<T>& segmentation); // Copy constructor
 
 			Segmentation<T>& reset(const ImgVector<T> &image, const double &kernel_spatial_radius = 16.0, const double &kernel_intensity_radius = 10.0 / 255.0, const size_t &min_number_of_pixels = 4);
 

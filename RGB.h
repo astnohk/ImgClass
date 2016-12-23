@@ -7,35 +7,36 @@ namespace ImgClass {
 	class RGB
 	{
 		public:
-			double R;
-			double G;
-			double B;
 
-			// Constructor
-			RGB(void);
-			RGB(const double& red, const double& green, const double& blue);
-			RGB(const RGB& color); // Copy constructor
+		double R;
+		double G;
+		double B;
 
-			RGB& set(const double& red, const double& green, const double& blue);
-			RGB& gamma(const double& gamma_val);
+		// Constructor
+		RGB(void);
+		RGB(const double& red, const double& green, const double& blue);
+		RGB(const RGB& color); // Copy constructor
 
-			// Operators
-			explicit operator double() const; // return intensity
+		RGB& set(const double& red, const double& green, const double& blue);
+		RGB& gamma(const double& gamma_val);
 
-			RGB& operator=(const RGB& rvalue);
-			RGB& operator=(const double& rvalue);
+		// Operators
+		explicit operator double() const; // return intensity
 
-			RGB& operator+=(const RGB& rcolor);
-			RGB& operator+=(const double& rvalue);
+		RGB& operator=(const RGB& rvalue);
+		RGB& operator=(const double& rvalue);
 
-			RGB& operator-=(const RGB& rcolor);
-			RGB& operator-=(const double& rvalue);
+		RGB& operator+=(const RGB& rcolor);
+		RGB& operator+=(const double& rvalue);
 
-			RGB& operator*=(const RGB& rcolor);
-			RGB& operator*=(const double& rvalue);
+		RGB& operator-=(const RGB& rcolor);
+		RGB& operator-=(const double& rvalue);
 
-			RGB& operator/=(const RGB& rcolor);
-			RGB& operator/=(const double& rvalue);
+		RGB& operator*=(const RGB& rcolor);
+		RGB& operator*=(const double& rvalue);
+
+		RGB& operator/=(const RGB& rcolor);
+		RGB& operator/=(const double& rvalue);
 	};
 }
 

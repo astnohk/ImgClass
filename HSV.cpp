@@ -43,7 +43,11 @@ namespace ImgClass {
 		if (min > rgb.B) {
 			min = rgb.B;
 		}
-		H = fmod((rgb.G - rgb.R) / (max - min) + 1.0 / 6.0, 1.0);
+		if (fabs(max - min) < DBL_EPSILON) {
+			H = 0;
+		} else {
+			H = fmod((rgb.G - rgb.R) / (max - min) + 1.0 / 6.0, 1.0);
+		}
 		if (H < 0) {
 			H += 1.0;
 		}

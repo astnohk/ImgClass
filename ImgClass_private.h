@@ -954,7 +954,7 @@ ImgVector<T>::resample_zerohold(const int Width, const int Height)
 */
 template <class T>
 void
-ImgVector<T>::resample_bicubic(const int Width, const int Height, const bool saturate, const double min, const double max, T (*Nearest_Integer_Method)(double &d), const double B, const double C)
+ImgVector<T>::resample_bicubic(const int Width, const int Height, T (*Nearest_Integer_Method)(T& intensity), T (*Saturater)(T& intensity), const double B, const double C)
 {
 	T *resized = nullptr;
 	double *conv = nullptr;
@@ -963,7 +963,7 @@ ImgVector<T>::resample_bicubic(const int Width, const int Height, const bool sat
 	double scale_conv;
 	int L, L_center;
 	double dx, dy;
-	double sum;
+	T sum;
 
 	if (Width <= 0) {
 		throw std::out_of_range("ImgVector<T>::resample_bicubic(const int, const int, const double, const double, T (*)(double &d), const double, const double) :int Width");
@@ -1012,7 +1012,7 @@ ImgVector<T>::resample_bicubic(const int Width, const int Height, const bool sat
 			}
 		}
 		for (int y = 0; y < _height; y++) {
-			sum = 0.0;
+			sum = 0;
 			for (int n = 0; n < L; n++) {
 				sum += conv[n] * this->get_mirror(int(floor(dx)) + n - L_center, y);
 			}
@@ -1042,18 +1042,17 @@ ImgVector<T>::resample_bicubic(const int Width, const int Height, const bool sat
 			}
 		}
 		for (int x = 0; x < Width; x++) {
-			sum = 0.0;
+			sum = 0;
 			for (int m = 0; m < L; m++) {
 				sum += conv[m] * Tmp.get_mirror(x, int(floor(dy)) + m - L_center);
 			}
-			if (saturate) {
-				sum = sum >= min ? sum <= max ? sum : max : min;
+			if (Saturater != nullptr) {
+				sum = Saturater(sum);
 			}
 			if (Nearest_Integer_Method != nullptr) {
-				resized[size_t(Width) * size_t(y) + size_t(x)] = Nearest_Integer_Method(sum);
-			} else {
-				resized[size_t(Width) * size_t(y) + size_t(x)] = sum;
+				sum = Nearest_Integer_Method(sum);
 			}
+			resized[size_t(Width) * size_t(y) + size_t(x)] = sum;
 		}
 	}
 	delete[] conv;

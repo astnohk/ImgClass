@@ -81,7 +81,11 @@ namespace ImgClass {
 		if (min > rgb.B) {
 			min = rgb.B;
 		}
-		H = fmod((rgb.G - rgb.R) / (max - min) + 1.0 / 6.0, 1.0);
+		if (fabs(max - min) < DBL_EPSILON) {
+			H = 0;
+		} else {
+			H = fmod((rgb.G - rgb.R) / (max - min) + 1.0 / 6.0, 1.0);
+		}
 		if (H < 0) {
 			H += 1.0;
 		}
@@ -90,32 +94,6 @@ namespace ImgClass {
 		return *this;
 	}
 
-
-	HSV &
-	HSV::operator=(const RGB& rgb)
-	{
-		double max = rgb.R;
-		double min = rgb.R;
-		if (max < rgb.G) {
-			max = rgb.G;
-		}
-		if (max < rgb.B) {
-			max = rgb.B;
-		}
-		if (min > rgb.G) {
-			min = rgb.G;
-		}
-		if (min > rgb.B) {
-			min = rgb.B;
-		}
-		H = fmod((rgb.G - rgb.R) / (max - min) + 1.0 / 6.0, 1.0);
-		if (H < 0) {
-			H += 1.0;
-		}
-		S = max - min;
-		V = max;
-		return *this;
-	}
 
 	HSV &
 	HSV::operator=(const HSV& rval)
@@ -142,6 +120,25 @@ namespace ImgClass {
 		S -= rval.S;
 		V -= rval.V;
 		return *this;
+	}
+
+	RGB
+	HSV::get_RGB(void)
+	{
+		RGB rgb(1.0, 1.0, 1.0);
+		double C = V * S;
+		double X = C * (1.0 - fabs(fmod(H * 6.0, 2.0) - 1.0));
+
+		rgb *= V - C;
+		switch (static_cast<int>(floor(H * 6.0))) {
+			case 0: rgb += RGB(C, X, 0); break;
+			case 1: rgb += RGB(X, C, 0); break;
+			case 2: rgb += RGB(0, C, X); break;
+			case 3: rgb += RGB(0, X, C); break;
+			case 4: rgb += RGB(X, 0, C); break;
+			case 5: rgb += RGB(C, 0, X);
+		}
+		return rgb;
 	}
 }
 

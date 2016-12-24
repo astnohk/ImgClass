@@ -51,9 +51,9 @@ namespace ImgClass {
 		b = color.b;
 	}
 
-	Lab::Lab(const RGB& color)
+	Lab::Lab(const RGB& rgb)
 	{
-		RGB linear_sRGB(color);
+		RGB linear_sRGB(rgb);
 		linear_sRGB.gamma(2.2); // Convert sRGB to linear sRGB
 		double X = 0.4124564 * linear_sRGB.R + 0.3575761 * linear_sRGB.G + 0.1804375 * linear_sRGB.B;
 		double Y = 0.2126729 * linear_sRGB.R + 0.7151522 * linear_sRGB.G + 0.0721750 * linear_sRGB.B;

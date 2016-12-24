@@ -23,10 +23,12 @@ namespace ImgClass {
 		HSV& set(const RGB& rgb);
 
 		// Operators
-		HSV& operator=(const RGB& rgb);
 		HSV& operator=(const HSV& rval);
 		HSV& operator+=(const HSV& rval);
 		HSV& operator-=(const HSV& rval);
+
+		// Converters
+		RGB get_RGB(void);
 	};
 }
 

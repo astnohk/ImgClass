@@ -336,7 +336,6 @@ namespace ImgClass {
 		size_t finished = 0;
 		size_t progress = .0;
 		printf(" Mean-Shift method:   0.0%%\x1b[1A\n");
-
 #endif
 		// Compute Mean Shift
 		ImgVector<std::list<VECTOR_2D<int> > > vector_converge_list_map(_width, _height);

@@ -15,7 +15,10 @@ namespace ImgClass {
 
 	HSV::HSV(const double& hue, const double& saturation, const double& value)
 	{
-		H = hue;
+		H = fmod(hue, 1.0);
+		if (H < 0) {
+			H += 1.0;
+		}
 		S = saturation;
 		V = value;
 	}
@@ -58,7 +61,10 @@ namespace ImgClass {
 	HSV &
 	HSV::set(const double& hue, const double& saturation, const double& value)
 	{
-		H = hue;
+		H = fmod(hue, 1.0);
+		if (H < 0) {
+			H += 1.0;
+		}
 		S = saturation;
 		V = value;
 		return *this;
@@ -91,6 +97,42 @@ namespace ImgClass {
 		}
 		S = max - min;
 		V = max;
+		return *this;
+	}
+
+	HSV &
+	HSV::set_H(const double val)
+	{
+		H = fmod(val, 1.0);
+		if (H < 0) {
+			H += 1.0;
+		}
+		return *this;
+	}
+
+	HSV &
+	HSV::set_S(const double val)
+	{
+		if (val < 0) {
+			S = 0.0;
+		} else if (val > 1.0) {
+			S = 1.0;
+		} else {
+			S = val;
+		}
+		return *this;
+	}
+
+	HSV &
+	HSV::set_V(const double val)
+	{
+		if (val < 0) {
+			V = 0.0;
+		} else if (val > 1.0) {
+			V = 1.0;
+		} else {
+			V = val;
+		}
 		return *this;
 	}
 

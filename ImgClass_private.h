@@ -1012,7 +1012,7 @@ ImgVector<T>::resample_bicubic(const int Width, const int Height, T (*Nearest_In
 			}
 		}
 		for (int y = 0; y < _height; y++) {
-			sum = 0;
+			sum = T();
 			for (int n = 0; n < L; n++) {
 				sum += conv[n] * this->get_mirror(int(floor(dx)) + n - L_center, y);
 			}
@@ -1042,7 +1042,7 @@ ImgVector<T>::resample_bicubic(const int Width, const int Height, T (*Nearest_In
 			}
 		}
 		for (int x = 0; x < Width; x++) {
-			sum = 0;
+			sum = T();
 			for (int m = 0; m < L; m++) {
 				sum += conv[m] * Tmp.get_mirror(x, int(floor(dy)) + m - L_center);
 			}

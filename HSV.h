@@ -21,6 +21,9 @@ namespace ImgClass {
 
 		HSV& set(const double& hue, const double& saturation, const double& value);
 		HSV& set(const RGB& rgb);
+		HSV& set_H(const double val);
+		HSV& set_S(const double val);
+		HSV& set_V(const double val);
 
 		// Operators
 		HSV& operator=(const HSV& rval);

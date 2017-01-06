@@ -20,11 +20,36 @@ namespace ImgClass {
 		B = blue;
 	}
 
-	RGB::RGB(const RGB& color)
+	RGB::RGB(const RGB& rgb)
 	{
-		R = color.R;
-		G = color.G;
-		B = color.B;
+		R = rgb.R;
+		G = rgb.G;
+		B = rgb.B;
+	}
+
+	RGB::RGB(const HSV& hsv)
+	{
+		double C = hsv.V * hsv.S;
+		double X = C * (1.0 - fabs(fmod(hsv.H * 6.0, 2.0) - 1.0));
+
+		R = hsv.V - C;
+		G = hsv.V - C;
+		B = hsv.V - C;
+		switch (static_cast<int>(floor(hsv.H * 6.0))) {
+			case 0: *this += RGB(C, X, 0); break;
+			case 1: *this += RGB(X, C, 0); break;
+			case 2: *this += RGB(0, C, X); break;
+			case 3: *this += RGB(0, X, C); break;
+			case 4: *this += RGB(X, 0, C); break;
+			case 5: *this += RGB(C, 0, X);
+		}
+	}
+
+	RGB::RGB(const Lab& lab)
+	{
+		R = 0;
+		G = 0;
+		B = 0;
 	}
 
 

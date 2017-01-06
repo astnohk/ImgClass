@@ -4,6 +4,14 @@
 #include <ostream>
 
 namespace ImgClass {
+	class RGB;
+	class HSV;
+	class Lab;
+}
+// --------------------------------
+
+
+namespace ImgClass {
 	class RGB
 	{
 		public:
@@ -15,7 +23,9 @@ namespace ImgClass {
 		// Constructor
 		RGB(void);
 		RGB(const double& red, const double& green, const double& blue);
-		RGB(const RGB& color); // Copy constructor
+		RGB(const RGB& rgb); // Copy constructor
+		RGB(const HSV& hsv); // Conversion
+		RGB(const Lab& lab); // Conversion
 
 		RGB& set(const double& red, const double& green, const double& blue);
 		RGB& gamma(const double& gamma_val);
@@ -103,9 +113,6 @@ namespace ImgClass {
 		HSV& operator=(const HSV& rval);
 		HSV& operator+=(const HSV& rval);
 		HSV& operator-=(const HSV& rval);
-
-		// Converters
-		RGB get_RGB(void);
 	};
 }
 
@@ -130,40 +137,41 @@ namespace ImgClass {
 	class Lab
 	{
 		public:
-			double L;
-			double a;
-			double b;
 
-			// Constructor
-			Lab(void);
-			Lab(const double& _L, const double& _a, const double& _b);
-			Lab(const Lab& color); // Copy constructor
-			Lab(const RGB& color);
+		double L;
+		double a;
+		double b;
 
-			Lab& set(const RGB& color);
-			// Operators
-			explicit operator double() const;
+		// Constructor
+		Lab(void);
+		Lab(const double& _L, const double& _a, const double& _b);
+		Lab(const Lab& color); // Copy constructor
+		Lab(const RGB& color);
 
-			Lab& operator=(const Lab& value);
-			Lab& operator=(const double& value);
+		Lab& set(const RGB& color);
+		// Operators
+		explicit operator double() const;
 
-			Lab& operator+=(const Lab& color);
-			Lab& operator+=(const double& value);
+		Lab& operator=(const Lab& value);
+		Lab& operator=(const double& value);
 
-			Lab& operator-=(const Lab& color);
-			Lab& operator-=(const double& value);
+		Lab& operator+=(const Lab& color);
+		Lab& operator+=(const double& value);
 
-			Lab& operator*=(const Lab& color);
-			Lab& operator*=(const double& value);
+		Lab& operator-=(const Lab& color);
+		Lab& operator-=(const double& value);
 
-			Lab& operator/=(const Lab& color);
-			Lab& operator/=(const double& value);
+		Lab& operator*=(const Lab& color);
+		Lab& operator*=(const double& value);
 
-			RGB& get_RGB(void);
+		Lab& operator/=(const Lab& color);
+		Lab& operator/=(const double& value);
+
 
 		protected:
-			// Converter
-			double f(const double t);
+
+		// Converter
+		double f(const double t);
 	};
 }
 

@@ -163,25 +163,6 @@ namespace ImgClass {
 		V -= rval.V;
 		return *this;
 	}
-
-	RGB
-	HSV::get_RGB(void)
-	{
-		RGB rgb(1.0, 1.0, 1.0);
-		double C = V * S;
-		double X = C * (1.0 - fabs(fmod(H * 6.0, 2.0) - 1.0));
-
-		rgb *= V - C;
-		switch (static_cast<int>(floor(H * 6.0))) {
-			case 0: rgb += RGB(C, X, 0); break;
-			case 1: rgb += RGB(X, C, 0); break;
-			case 2: rgb += RGB(0, C, X); break;
-			case 3: rgb += RGB(0, X, C); break;
-			case 4: rgb += RGB(X, 0, C); break;
-			case 5: rgb += RGB(C, 0, X);
-		}
-		return rgb;
-	}
 }
 
 const ImgClass::HSV

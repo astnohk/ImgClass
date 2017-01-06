@@ -42,6 +42,7 @@ namespace ImgClass {
 			_kernel_intensity = 1.0;
 		}
 
+		_vector_converge_list_map.reset(_width, _height);
 		_color_quantized_image.reset(_width, _height);
 		_shift_vector_spatial.reset(_width, _height);
 		_shift_vector_color.reset(_width, _height);
@@ -63,6 +64,7 @@ namespace ImgClass {
 
 		_image.copy(segmentation._image);
 		_color_quantized_image.copy(segmentation._color_quantized_image);
+		_vector_converge_list_map.copy(segmentation._vector_converge_list_map);
 		_shift_vector_spatial.copy(segmentation._shift_vector_spatial);
 		_shift_vector_color.copy(segmentation._shift_vector_color);
 		_segmentation_map.copy(segmentation._segmentation_map);
@@ -91,6 +93,7 @@ namespace ImgClass {
 		_color_quantized_image.reset(_width, _height);
 		_segmentation_map.reset(_width, _height);
 		_regions.clear();
+		_vector_converge_list_map.reset(_width, _height);
 		_shift_vector_spatial.reset(_width, _height);
 		_shift_vector_color.reset(_width, _height);
 
@@ -113,6 +116,7 @@ namespace ImgClass {
 
 		_image.copy(segmentation._image);
 		_color_quantized_image.copy(segmentation._color_quantized_image);
+		_vector_converge_list_map.copy(segmentation._vector_converge_list_map);
 		_shift_vector_spatial.copy(segmentation._shift_vector_spatial);
 		_shift_vector_color.copy(segmentation._shift_vector_color);
 		_segmentation_map.copy(segmentation._segmentation_map);
@@ -183,6 +187,13 @@ namespace ImgClass {
 	Segmentation<T>::ref_segmentation_map(void) const
 	{
 		return _segmentation_map;
+	}
+
+	template <class T>
+	const ImgVector<std::list<VECTOR_2D<int> > > &
+	Segmentation<T>::ref_vector_converge_list_map(void) const
+	{
+		return _vector_converge_list_map;
 	}
 
 	template <class T>
@@ -338,7 +349,6 @@ namespace ImgClass {
 		printf(" Mean-Shift method:   0.0%%\x1b[1A\n");
 #endif
 		// Compute Mean Shift
-		ImgVector<std::list<VECTOR_2D<int> > > vector_converge_list_map(_width, _height);
 #ifdef _OPENMP
 #pragma omp parallel for schedule(dynamic)
 #endif
@@ -346,7 +356,7 @@ namespace ImgClass {
 			for (int x = 0; x < _width; x++) {
 				Segmentation<T>::tuple tmp = MeanShift(x, y, pel_list, Iter_Max);
 				auto lambda = [](double value, double max) -> double {
-					return value >= 0 ? value < max ? value : max - 1 : 0;
+					return value >= 0 ? value < max ? value : max - 1.0 : 0;
 				};
 				// Saturation
 				tmp.spatial.x = lambda(tmp.spatial.x, _width);
@@ -360,7 +370,7 @@ namespace ImgClass {
 #pragma omp critical
 #endif
 				{
-					vector_converge_list_map.at(shift.x, shift.y).push_back(VECTOR_2D<int>(x, y));
+					_vector_converge_list_map.at(shift.x, shift.y).push_back(VECTOR_2D<int>(x, y));
 				}
 #if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_SEGMENTATION)
 #ifdef _OPENMP
@@ -379,7 +389,7 @@ namespace ImgClass {
 		// Concatenate the list of connected regions
 		for (int y = 0; y < _height; y++) {
 			for (int x = 0; x < _width; x++) {
-				if (vector_converge_list_map.at(x, y).size() > 0) {
+				if (_vector_converge_list_map.at(x, y).size() > 0) {
 					std::list<VECTOR_2D<int> > tmp_list;
 					tmp_list.push_back(VECTOR_2D<int>(x, y));
 					for (auto ite = tmp_list.begin(); ite != tmp_list.end(); ++ite) {
@@ -388,11 +398,11 @@ namespace ImgClass {
 							if (0 <= r.x && r.x < _width
 							    && 0 <= r.y && r.y < _height
 							    && r.x != x && r.y != y
-							    && vector_converge_list_map.at(r.x, r.y).size() > 0) {
+							    && _vector_converge_list_map.at(r.x, r.y).size() > 0) {
 								tmp_list.push_back(r);
-								vector_converge_list_map.at(x, y).splice(
-								    vector_converge_list_map.at(x, y).end(),
-								    vector_converge_list_map.at(r.x, r.y));
+								_vector_converge_list_map.at(x, y).splice(
+								    _vector_converge_list_map.at(x, y).end(),
+								    _vector_converge_list_map.at(r.x, r.y));
 							}
 						}
 					}
@@ -403,9 +413,9 @@ namespace ImgClass {
 		for (int y = 0; y < _height; y++) {
 			for (int x = 0; x < _width; x++) {
 				// Search converge point
-				if (vector_converge_list_map.at(x, y).size() > 0) {
+				if (_vector_converge_list_map.at(x, y).size() > 0) {
 					std::list<Segmentation<T>::Region> tmp_regions_list;
-					for (VECTOR_2D<int>& candidate : vector_converge_list_map.at(x, y)) {
+					for (VECTOR_2D<int>& candidate : _vector_converge_list_map.at(x, y)) {
 						bool found = false;
 						const T& color_cand = color_quantize(_shift_vector_color.get(candidate.x, candidate.y));
 						for (Segmentation<T>::Region& region : tmp_regions_list) {

@@ -2,7 +2,7 @@
 #include <cmath>
 #include <stdexcept>
 
-#include "HSV.h"
+#include "Color.h"
 
 
 namespace ImgClass {

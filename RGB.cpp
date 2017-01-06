@@ -2,7 +2,7 @@
 #include <cmath>
 #include <stdexcept>
 
-#include "RGB.h"
+#include "Color.h"
 
 
 namespace ImgClass {

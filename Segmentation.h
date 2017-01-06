@@ -4,7 +4,6 @@
 #include <list>
 #include <vector>
 
-#include "Color.h"
 #include "Vector.h"
 #include "ImgClass.h"
 
@@ -40,6 +39,7 @@ namespace ImgClass {
 		double _kernel_intensity;
 		ImgVector<T> _image;
 		ImgVector<T> _color_quantized_image;
+		ImgVector<std::list<VECTOR_2D<int> > > _vector_converge_list_map;
 		ImgVector<VECTOR_2D<double> > _shift_vector_spatial;
 		ImgVector<T> _shift_vector_color;
 		ImgVector<size_t> _segmentation_map;
@@ -73,6 +73,7 @@ namespace ImgClass {
 
 		const ImgVector<T>& ref_color_quantized_image(void) const;
 		const ImgVector<size_t>& ref_segmentation_map(void) const;
+		const ImgVector<std::list<VECTOR_2D<int> > >& ref_vector_converge_list_map(void) const;
 		const ImgVector<VECTOR_2D<double> >& ref_shift_vector_spatial(void) const;
 		const ImgVector<T>& ref_shift_vector_color(void) const;
 		const std::vector<std::vector<VECTOR_2D<int> > >& ref_regions(void) const;
@@ -104,6 +105,13 @@ namespace ImgClass {
 		double normalized_distance(const T& lcolor, const T& rcolor); // Calculate distance depends on each color space
 	};
 }
+
+
+double inner_prod(const double& lvalue, const double& rvalue);
+
+double norm(const double& value);
+double norm_squared(const double& value);
+
 
 #include "Segmentation_private.h"
 

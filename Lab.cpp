@@ -6,7 +6,7 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "Lab.h"
+#include "Color.h"
 
 
 

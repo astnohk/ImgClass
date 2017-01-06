@@ -1,6 +1,4 @@
 #include "BlockMatching.h"
-#include "Lab.h"
-#include "RGB.h"
 
 
 

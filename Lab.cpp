@@ -55,17 +55,22 @@ namespace ImgClass {
 
 	Lab::Lab(const RGB& rgb)
 	{
+		auto f = [](double t) -> double {
+			if (t > 216.0 / 24389.0) {
+				return pow(t, 1.0 / 3.0);
+			} else {
+				return (24389.0 / 27.0 * t + 16.0) / 116.0;
+			}
+		};
 		RGB linear_sRGB(rgb);
 		linear_sRGB.gamma(2.2); // Convert sRGB to linear sRGB
 		double X = 0.4124564 * linear_sRGB.R + 0.3575761 * linear_sRGB.G + 0.1804375 * linear_sRGB.B;
 		double Y = 0.2126729 * linear_sRGB.R + 0.7151522 * linear_sRGB.G + 0.0721750 * linear_sRGB.B;
 		double Z = 0.0193339 * linear_sRGB.R + 0.1191920 * linear_sRGB.G + 0.9503041 * linear_sRGB.B;
-		L = 116.0 * ImgClass::Lab_f(Y / Y_n) - 16.0;
-		a = 500.0 * (ImgClass::Lab_f(X / X_n) - ImgClass::Lab_f(Y / Y_n));
-		b = 200.0 * (ImgClass::Lab_f(Y / Y_n) - ImgClass::Lab_f(Z / Z_n));
+		L = 116.0 * f(Y / Y_n) - 16.0;
+		a = 500.0 * (f(X / X_n) - f(Y / Y_n));
+		b = 200.0 * (f(Y / Y_n) - f(Z / Z_n));
 	}
-
-
 
 
 	Lab &
@@ -155,29 +160,6 @@ namespace ImgClass {
 		a /= value;
 		b /= value;
 		return *this;
-	}
-}
-
-
-namespace ImgClass {
-	double
-	Lab_f(const double t)
-	{
-		if (t > pow(6.0 / 29.0, 3.0)) {
-			return pow(t, 1.0 / 3.0);
-		} else {
-			return pow(29.0 / 6.0, 2.0) / 3.0 * t + 4.0 / 29.0;
-		}
-	}
-
-	double
-	Lab_f_inv(const double t_inv)
-	{
-		if (t_inv > 6.0 / 29.0) {
-			return pow(t_inv, 3.0);
-		} else {
-			return (t_inv - 4.0 / 29.0) * 108.0 / 841.0;
-		}
 	}
 }
 

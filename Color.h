@@ -173,11 +173,6 @@ namespace ImgClass {
 	};
 }
 
-// Sub functions
-namespace ImgClass {
-	double Lab_f(const double t);
-	double Lab_f_inv(const double t_inv);
-}
 
 // Global Operators
 // Arithmetic

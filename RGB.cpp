@@ -1,6 +1,7 @@
 #include <cfloat>
 #include <cmath>
 #include <stdexcept>
+#include <iostream>
 
 #include "Color.h"
 
@@ -47,15 +48,28 @@ namespace ImgClass {
 
 	RGB::RGB(const Lab& lab)
 	{
+		auto f_inv = [](double t_inv) -> double {
+			if (t_inv > 6.0 / 29.0) {
+				return pow(t_inv, 3.0);
+			} else {
+				return (116.0 * t_inv - 16.0) * 27.0 / 24389.0;
+			}
+		};
 		double f_y = (lab.L + 16.0) / 116.0;
 		double f_x = f_y + lab.a / 500.0;
 		double f_z = f_y - lab.b / 200.0;
-		double Y = Y_n * ImgClass::Lab_f_inv(f_y);
-		double X = X_n * ImgClass::Lab_f_inv(f_x);
-		double Z = Z_n * ImgClass::Lab_f_inv(f_z);
+		double Y;
+		if (lab.L > 216.0 / 27.0) {
+			Y = Y_n * pow(f_y, 3.0);
+		} else {
+			Y = Y_n * lab.L * 27.0 / 24389.0;
+		}
+		double X = X_n * f_inv(f_x);
+		double Z = Z_n * f_inv(f_z);
 		R = 3.2404542 * X - 1.5371385 * Y - 0.4985314 * Z;
 		G = -0.969266 * X + 1.8760108 * Y + 0.0415560 * Z;
 		B = 0.0556434 * X - 0.2040259 * Y + 1.0572252 * Z;
+		this->gamma(1.0 / 2.2); // Convert linear sRGB to sRGB
 	}
 
 

@@ -35,7 +35,7 @@ namespace ImgClass {
 		R = hsv.V - C;
 		G = hsv.V - C;
 		B = hsv.V - C;
-		switch (static_cast<int>(floor(hsv.H * 6.0))) {
+		switch (int(floor(hsv.H * 6.0))) {
 			case 0: *this += RGB(C, X, 0); break;
 			case 1: *this += RGB(X, C, 0); break;
 			case 2: *this += RGB(0, C, X); break;
@@ -47,9 +47,15 @@ namespace ImgClass {
 
 	RGB::RGB(const Lab& lab)
 	{
-		R = 0;
-		G = 0;
-		B = 0;
+		double f_y = (lab.L + 16.0) / 116.0;
+		double f_x = f_y + lab.a / 500.0;
+		double f_z = f_y - lab.b / 200.0;
+		double Y = Y_n * ImgClass::Lab_f_inv(f_y);
+		double X = X_n * ImgClass::Lab_f_inv(f_x);
+		double Z = Z_n * ImgClass::Lab_f_inv(f_z);
+		R = 3.2404542 * X - 1.5371385 * Y - 0.4985314 * Z;
+		G = -0.969266 * X + 1.8760108 * Y + 0.0415560 * Z;
+		B = 0.0556434 * X - 0.2040259 * Y + 1.0572252 * Z;
 	}
 
 

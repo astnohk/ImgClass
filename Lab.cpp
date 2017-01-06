@@ -11,20 +11,22 @@
 
 
 
-// d65
-static const double X_n = 0.95045;
-static const double Y_n = 1.0;
-static const double Z_n = 1.088917;
+namespace ImgClass {
+	// d65
+	const double X_n = 0.95045;
+	const double Y_n = 1.0;
+	const double Z_n = 1.088917;
 
-// d50
-//static const double X_n = 0.9642;
-//static const double Y_n = 1.0;
-//static const double Z_n = 0.8249;
+	// d50
+	//const double X_n = 0.9642;
+	//const double Y_n = 1.0;
+	//const double Z_n = 0.8249;
 
-// flat
-//static const double X_n = 1.0;
-//static const double Y_n = 1.0;
-//static const double Z_n = 1.0;
+	// flat
+	//const double X_n = 1.0;
+	//const double Y_n = 1.0;
+	//const double Z_n = 1.0;
+}
 
 
 
@@ -58,19 +60,9 @@ namespace ImgClass {
 		double X = 0.4124564 * linear_sRGB.R + 0.3575761 * linear_sRGB.G + 0.1804375 * linear_sRGB.B;
 		double Y = 0.2126729 * linear_sRGB.R + 0.7151522 * linear_sRGB.G + 0.0721750 * linear_sRGB.B;
 		double Z = 0.0193339 * linear_sRGB.R + 0.1191920 * linear_sRGB.G + 0.9503041 * linear_sRGB.B;
-		L = 116.0 * this->f(Y / Y_n) - 16.0;
-		a = 500.0 * (this->f(X / X_n) - this->f(Y / Y_n));
-		b = 200.0 * (this->f(Y / Y_n) - this->f(Z / Z_n));
-	}
-
-	double
-	Lab::f(const double t)
-	{
-		if (t > pow(6.0 / 29.0, 3.0)) {
-			return pow(t, 1.0 / 3.0);
-		} else {
-			return pow(29.0 / 6.0, 2.0) / 3.0 * t + 4.0 / 29.0;
-		}
+		L = 116.0 * ImgClass::Lab_f(Y / Y_n) - 16.0;
+		a = 500.0 * (ImgClass::Lab_f(X / X_n) - ImgClass::Lab_f(Y / Y_n));
+		b = 200.0 * (ImgClass::Lab_f(Y / Y_n) - ImgClass::Lab_f(Z / Z_n));
 	}
 
 
@@ -163,6 +155,29 @@ namespace ImgClass {
 		a /= value;
 		b /= value;
 		return *this;
+	}
+}
+
+
+namespace ImgClass {
+	double
+	Lab_f(const double t)
+	{
+		if (t > pow(6.0 / 29.0, 3.0)) {
+			return pow(t, 1.0 / 3.0);
+		} else {
+			return pow(29.0 / 6.0, 2.0) / 3.0 * t + 4.0 / 29.0;
+		}
+	}
+
+	double
+	Lab_f_inv(const double t_inv)
+	{
+		if (t_inv > 6.0 / 29.0) {
+			return pow(t_inv, 3.0);
+		} else {
+			return (t_inv - 4.0 / 29.0) * 108.0 / 841.0;
+		}
 	}
 }
 

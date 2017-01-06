@@ -7,6 +7,10 @@ namespace ImgClass {
 	class RGB;
 	class HSV;
 	class Lab;
+
+	extern const double X_n;
+	extern const double Y_n;
+	extern const double Z_n;
 }
 // --------------------------------
 
@@ -166,13 +170,13 @@ namespace ImgClass {
 
 		Lab& operator/=(const Lab& color);
 		Lab& operator/=(const double& value);
-
-
-		protected:
-
-		// Converter
-		double f(const double t);
 	};
+}
+
+// Sub functions
+namespace ImgClass {
+	double Lab_f(const double t);
+	double Lab_f_inv(const double t_inv);
 }
 
 // Global Operators

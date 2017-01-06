@@ -54,6 +54,9 @@ namespace ImgClass {
 		if (H < 0) {
 			H += 1.0;
 		}
+		if (H >= 1.0) {
+			H -= 1.0;
+		}
 		S = max - min;
 		V = max;
 	}

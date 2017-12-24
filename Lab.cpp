@@ -8,24 +8,32 @@
 
 #include "Color.h"
 
-
+#ifndef IMG_CLASS_LAB_WHITE_D65
+#define IMG_CLASS_LAB_WHITE_D65
+#endif
 
 
 namespace ImgClass {
 	// d65
+#ifdef IMG_CLASS_LAB_WHITE_D65
 	const double X_n = 0.95045;
 	const double Y_n = 1.0;
 	const double Z_n = 1.088917;
+#endif
 
 	// d50
-	//const double X_n = 0.9642;
-	//const double Y_n = 1.0;
-	//const double Z_n = 0.8249;
+#ifdef IMG_CLASS_LAB_WHITE_D50
+	const double X_n = 0.9642;
+	const double Y_n = 1.0;
+	const double Z_n = 0.8249;
+#endif
 
 	// flat
-	//const double X_n = 1.0;
-	//const double Y_n = 1.0;
-	//const double Z_n = 1.0;
+#ifdef IMG_CLASS_LAB_WHITE_FLAT
+	const double X_n = 1.0;
+	const double Y_n = 1.0;
+	const double Z_n = 1.0;
+#endif
 }
 
 
@@ -340,9 +348,9 @@ abs(const ImgClass::Lab& color)
 {
 	ImgClass::Lab ret;
 
-	ret.L = color.L;
-	ret.a = color.a;
-	ret.b = color.b;
+	ret.L = fabs(color.L);
+	ret.a = fabs(color.a);
+	ret.b = fabs(color.b);
 	return ret;
 }
 

@@ -543,6 +543,59 @@ ImgVector<T>::at_mirror(const int x, const int y) const
 
 template <class T>
 const T
+ImgVector<T>::set_zeropad(const int x, const int y, const T& value)
+{
+	if (0 <= x && x < _width && 0 <= y && y < _height) {
+		_data[size_t(_width) * size_t(y) + size_t(x)] = value;
+		return _data[size_t(_width) * size_t(y) + size_t(x)];
+	} else {
+		return T();
+	}
+}
+
+template <class T>
+const T
+ImgVector<T>::set_repeat(const int x, const int y, const T& value)
+{
+	size_t x_repeat, y_repeat;
+
+	if (x >= 0) {
+		x_repeat = static_cast<size_t>(x % _width);
+	} else {
+		x_repeat = static_cast<size_t>(_width - (int(std::abs(double(x) + 1.0)) % _width));
+	}
+	if (y >= 0) {
+		y_repeat = static_cast<size_t>(y % _height);
+	} else {
+		y_repeat = static_cast<size_t>(_height - (int(std::abs(double(y) + 1.0)) % _height));
+	}
+	_data[size_t(_width) * y_repeat + x_repeat] = value;
+	return _data[size_t(_width) * y_repeat + x_repeat];
+}
+
+template <class T>
+const T
+ImgVector<T>::set_mirror(const int x, const int y, const T& value)
+{
+	int x_mirror = x;
+	int y_mirror = y;
+
+	assert(_width > 0 && _height > 0);
+	if (x_mirror < 0) {
+		x_mirror = -x_mirror - 1; // should be set the offset when Mirroring over negative
+	}
+	if (y_mirror < 0) {
+		y_mirror = -y_mirror - 1;
+	}
+	x_mirror = int(round(_width - 0.5 - std::fabs(_width - 0.5 - (x_mirror % (2 * _width)))));
+	y_mirror = int(round(_height - 0.5 - std::fabs(_height - 0.5 - (y_mirror % (2 * _height)))));
+	_data[size_t(_width) * size_t(y_mirror) + size_t(x_mirror)] = value;
+	return _data[size_t(_width) * size_t(y_mirror) + size_t(x_mirror)];
+}
+
+
+template <class T>
+const T
 ImgVector<T>::get(const size_t n) const
 {
 	assert(0 <= n && n < size_t(_width) * size_t(_height));
@@ -550,7 +603,6 @@ ImgVector<T>::get(const size_t n) const
 }
 
 template <class T>
-inline
 const T
 ImgVector<T>::get(const int x, const int y) const
 {
@@ -567,6 +619,18 @@ ImgVector<T>::get_zeropad(const int x, const int y) const
 	assert(_width > 0 && _height > 0);
 	if (x < 0 || _width <= x || y < 0 || _height <= y) {
 		return zero;
+	} else {
+		return _data[size_t(_width) * size_t(y) + size_t(x)];
+	}
+}
+
+template <class T>
+const T
+ImgVector<T>::get_valpad(const int x, const int y, const T& value) const
+{
+	assert(_width > 0 && _height > 0);
+	if (x < 0 || _width <= x || y < 0 || _height <= y) {
+		return value;
 	} else {
 		return _data[size_t(_width) * size_t(y) + size_t(x)];
 	}

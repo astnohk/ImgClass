@@ -62,11 +62,16 @@ class ImgVector
 		const T& at_repeat(const int x, const int y) const;
 		const T& at_mirror(const int x, const int y) const;
 
+		// Set image intencity
+		const T set_zeropad(const int x, const int y, const T& value);
+		const T set_repeat(const int x, const int y, const T& value);
+		const T set_mirror(const int x, const int y, const T& value);
 		// Get image intencity
 		const T get(const size_t n) const; // return const to avoid to mistake get() for at()
-		inline const T get(const int x, const int y) const;
+		const T get(const int x, const int y) const;
 		// Get intencity with boundary treatment
 		const T get_zeropad(const int x, const int y) const;
+		const T get_valpad(const int x, const int y, const T& value = T()) const;
 		const T get_repeat(const int x, const int y) const;
 		const T get_mirror(const int x, const int y) const;
 		// Get intensity interpolated by bicubic

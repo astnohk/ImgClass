@@ -53,7 +53,7 @@ namespace ImgClass {
 		Segmentation(const ImgVector<T>& image, const double &kernel_spatial_radius = 16.0, const double &kernel_intensity_radius = 10.0 / 255.0, const size_t &min_number_of_pixels = 4);
 		Segmentation(const Segmentation<T>& segmentation); // Copy constructor
 
-		Segmentation<T>& reset(const ImgVector<T> &image, const double &kernel_spatial_radius = 16.0, const double &kernel_intensity_radius = 10.0 / 255.0, const size_t &min_number_of_pixels = 4);
+		Segmentation<T>& reset(const ImgVector<T> &image, const int IterMax, const double &kernel_spatial_radius = 16.0, const double &kernel_intensity_radius = 10.0 / 255.0, const size_t &min_number_of_pixels = 4);
 
 		Segmentation<T>& copy(const Segmentation<T> &segmentation);
 
@@ -91,7 +91,7 @@ namespace ImgClass {
 		size_t get_mirror(int x, int y) const;
 
 		// Mean Shift segmentation
-		void Segmentation_MeanShift(const int Iter_Max = 128);
+		void Segmentation_MeanShift(const int Iter_Max = 32);
 
 
 		protected:

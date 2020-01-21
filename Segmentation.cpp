@@ -61,23 +61,28 @@ namespace ImgClass {
 	{
 		const double radius_spatial_squared = SQUARE(_kernel_spatial);
 		const double radius_intensity_squared = SQUARE(_kernel_intensity);
-		const double displacement_min = SQUARE(0.01);
+		const double displacement_color_min = SQUARE(0.0001);
+		const double displacement_spatial_min = SQUARE(0.01);
 		Segmentation<ImgClass::RGB>::tuple tuple;
 		// Initialize
 		tuple.spatial = VECTOR_2D<double>(static_cast<double>(x), static_cast<double>(y));
 		tuple.color = _image.get(x, y);
 		// Iterate until it converge
+		ImgClass::RGB sum_diff(0.0, 0.0, 0.0);
+		VECTOR_2D<double> sum_d(0.0, 0.0);
+		VECTOR_2D<int> r(0, 0);
+		VECTOR_2D<double> d(0.0, 0.0);
 		for (int i = 0; i < Iter_Max; i++) {
 			double N = 0.0;
-			ImgClass::RGB sum_diff(0.0, 0.0, 0.0);
-			VECTOR_2D<double> sum_d(0.0, 0.0);
+			sum_diff.R = 0; sum_diff.G = 0; sum_diff.B = 0;
+			sum_d.x = 0.0; sum_d.y = 0.0;
 			for (size_t n = 0; n < pel_list.size(); n++) {
-				VECTOR_2D<int> r(
-				    static_cast<int>(round(tuple.spatial.x) + pel_list[n].x),
-				    static_cast<int>(round(tuple.spatial.y) + pel_list[n].y));
+				r.x = static_cast<int>(round(tuple.spatial.x) + pel_list[n].x);
+				r.x = static_cast<int>(round(tuple.spatial.y) + pel_list[n].y);
 				if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height) {
 					ImgClass::RGB diff(_image.get(r.x, r.y) - tuple.color);
-					VECTOR_2D<double> d(r.x - tuple.spatial.x, r.y - tuple.spatial.y);
+					d.x = r.x - tuple.spatial.x;
+					d.y = r.y - tuple.spatial.y;
 					double ratio_intensity = norm_squared(diff) / radius_intensity_squared;
 					double ratio_spatial = norm_squared(d) / radius_spatial_squared;
 					if (ratio_intensity <= 1.0 && ratio_spatial <= 1.0) {
@@ -91,7 +96,7 @@ namespace ImgClass {
 			tuple.color += sum_diff / N;
 			VECTOR_2D<double> displacement(sum_d.x / N, sum_d.y / N);
 			tuple.spatial += displacement;
-			if (norm_squared(sum_diff /N) * norm_squared(displacement) < displacement_min) {
+			if (norm_squared(sum_diff / N) < displacement_color_min && norm_squared(displacement) < displacement_spatial_min) {
 				break;
 			}
 		}
@@ -110,25 +115,30 @@ namespace ImgClass {
 	{
 		const double radius_spatial_squared = SQUARE(_kernel_spatial);
 		const double radius_intensity_squared = SQUARE(100.0 * _kernel_intensity);
-		const double displacement_min = SQUARE(0.001);
+		const double displacement_color_min = SQUARE(0.0001);
+		const double displacement_spatial_min = SQUARE(0.01);
 		Segmentation<ImgClass::Lab>::tuple tuple;
 
 		// Initialize
 		tuple.spatial = VECTOR_2D<double>(static_cast<double>(x), static_cast<double>(y));
 		tuple.color = _image.get(x, y);
 		// Iterate until it converge
+		ImgClass::Lab sum_diff(0.0, 0.0, 0.0);
+		VECTOR_2D<double> sum_d(0.0, 0.0);
+		VECTOR_2D<int> r(0, 0);
+		VECTOR_2D<double> d(0.0, 0.0);
 		for (int i = 0; i < Iter_Max; i++) {
 			double N = 0.0;
-			ImgClass::Lab sum_diff(0.0, 0.0, 0.0);
-			VECTOR_2D<double> sum_d(0.0, 0.0);
+			sum_diff.L = 0.0; sum_diff.a = 0.0; sum_diff.b = 0.0;
+			sum_d.x = 0.0; sum_d.y = 0.0;
 			for (size_t n = 0; n < pel_list.size(); n++) {
-				VECTOR_2D<int> r(
-				    static_cast<int>(round(tuple.spatial.x) + pel_list[n].x),
-				    static_cast<int>(round(tuple.spatial.y) + pel_list[n].y));
+				r.x = static_cast<int>(round(tuple.spatial.x) + pel_list[n].x);
+				r.y = static_cast<int>(round(tuple.spatial.y) + pel_list[n].y);
 				if (0 <= r.x && r.x < _width && 0 <= r.y && r.y < _height) {
 					ImgClass::Lab diff(_image.get(r.x, r.y) - tuple.color);
 					//diff.L *= 0.8; // Difference of Lighting is not so important in segmentation
-					VECTOR_2D<double> d(r.x - tuple.spatial.x, r.y - tuple.spatial.y);
+					d.x = r.x - tuple.spatial.x;
+					d.y = r.y - tuple.spatial.y;
 					double ratio_intensity = norm_squared(diff) / radius_intensity_squared;
 					double ratio_spatial = norm_squared(d) / radius_spatial_squared;
 					if (ratio_intensity <= 1.0 && ratio_spatial <= 1.0) {
@@ -142,7 +152,7 @@ namespace ImgClass {
 			tuple.color += sum_diff / N;
 			VECTOR_2D<double> displacement(sum_d.x / N, sum_d.y / N);
 			tuple.spatial += displacement;
-			if (norm_squared(sum_diff / N) * norm_squared(displacement) < displacement_min) {
+			if (norm_squared(sum_diff / N) < displacement_color_min && norm_squared(displacement) < displacement_spatial_min) {
 				break;
 			}
 		}

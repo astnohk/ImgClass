@@ -74,7 +74,7 @@ namespace ImgClass {
 
 	template <class T>
 	Segmentation<T> &
-	Segmentation<T>::reset(const ImgVector<T>& image, const double &kernel_spatial_radius, const double &kernel_intensity_radius, const size_t &min_number_of_pixels)
+	Segmentation<T>::reset(const ImgVector<T>& image, const int IterMax, const double &kernel_spatial_radius, const double &kernel_intensity_radius, const size_t &min_number_of_pixels)
 	{
 		_image.copy(image);
 		_size = _image.size();
@@ -98,7 +98,14 @@ namespace ImgClass {
 		_shift_vector_color.reset(_width, _height);
 
 		// Initial Segmentation
-		Segmentation_MeanShift();
+#if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_SEGMENTATION)
+		printf("IterMax = %d\n", IterMax);
+#endif
+		if (IterMax > 0) {
+			Segmentation_MeanShift(IterMax);
+		} else {
+			Segmentation_MeanShift();
+		}
 		return *this;
 	}
 
@@ -387,6 +394,9 @@ namespace ImgClass {
 			}
 		}
 		// Concatenate the list of connected regions
+#if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_SEGMENTATION)
+		printf(" Mean-Shift method: Concatenation\n");
+#endif
 		for (int y = 0; y < _height; y++) {
 			for (int x = 0; x < _width; x++) {
 				if (_vector_converge_list_map.at(x, y).size() > 0) {
@@ -410,6 +420,9 @@ namespace ImgClass {
 			}
 		}
 		std::list<std::list<VECTOR_2D<int> > > regions_list; // start_point, shift_vector_spatial, shift_vector_color
+#if defined(OUTPUT_IMG_CLASS) || defined(OUTPUT_IMG_CLASS_SEGMENTATION)
+		printf(" Mean-Shift method: Concatenate pixels which converge into same connected region");
+#endif
 		for (int y = 0; y < _height; y++) {
 			for (int x = 0; x < _width; x++) {
 				// Search converge point
